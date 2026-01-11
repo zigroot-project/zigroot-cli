@@ -128,8 +128,8 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - _Requirements: 18.28, 20.4, 2.9_
   - [x] 3.7 Checkpoint - Core business logic complete
 
-- [ ] 4. Phase 4: Infrastructure Layer (TDD)
-  - [ ] 4.1 Write failing tests for HTTP download
+- [x] 4. Phase 4: Infrastructure Layer (TDD)
+  - [x] 4.1 Write failing tests for HTTP download
     - Test: Files download successfully with progress callback
     - Test: Parallel downloads work correctly
     - Test: SHA256 checksum verification passes for valid files
@@ -139,37 +139,37 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 4: Checksum Verification**
     - **Property 25: Download Retry Behavior**
     - **Validates: Requirements 3.1-3.8**
-  - [ ] 4.2 Implement download manager to pass tests
+  - [x] 4.2 Implement download manager to pass tests
     - Implement HTTP download with progress in infra/download.rs
     - Implement SHA256 checksum verification
     - Implement retry with exponential backoff
     - Run tests until GREEN
     - _Requirements: 3.1-3.8_
-  - [ ] 4.3 Write failing tests for git operations
+  - [x] 4.3 Write failing tests for git operations
     - Test: Repository clones successfully
     - Test: Specified ref (tag/branch/rev) checks out correctly
     - Test: Branch resolves to commit SHA
     - **Property 22: Lock File Git SHA Recording**
     - **Validates: Requirements 18.12, 18.13**
-  - [ ] 4.4 Implement git operations to pass tests
+  - [x] 4.4 Implement git operations to pass tests
     - Implement git clone in infra/git.rs
     - Implement ref checkout
     - Implement branch to SHA resolution
     - Run tests until GREEN
     - _Requirements: 18.12, 18.13_
-  - [ ] 4.5 Write failing tests for registry client
+  - [x] 4.5 Write failing tests for registry client
     - Test: Index fetches from GitHub raw URLs
     - Test: Index caches locally with TTL
     - Test: Conditional requests use ETag/Last-Modified
     - Test: Package metadata.toml + version.toml fetch and merge
     - Test: Board.toml fetches correctly
     - **Validates: Requirements 2.1, 2.2, 2.12, 9.1**
-  - [ ] 4.6 Implement registry client to pass tests
+  - [x] 4.6 Implement registry client to pass tests
     - Implement registry client in registry/client.rs
     - Implement local caching in registry/cache.rs
     - Run tests until GREEN
     - _Requirements: 2.1, 2.2, 2.12, 9.1_
-  - [ ] 4.7 Write failing tests for lock file
+  - [x] 4.7 Write failing tests for lock file
     - Test: Lock file generates with exact versions and checksums
     - Test: Lock file records Zig compiler version
     - Test: Lock file records source URIs correctly
@@ -180,13 +180,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 12: Lock File Reproducibility**
     - **Property 26: Zig Version Recording**
     - **Validates: Requirements 13.1-13.7**
-  - [ ] 4.8 Implement lock file to pass tests
+  - [x] 4.8 Implement lock file to pass tests
     - Implement lock file generation in core/lock.rs
     - Implement lock file reading and --locked mode
     - Implement Zig version warning
     - Run tests until GREEN
     - _Requirements: 13.1-13.7_
-  - [ ] 4.9 Checkpoint - Infrastructure layer complete
+  - [x] 4.9 Checkpoint - Infrastructure layer complete
 
 
 - [ ] 5. Phase 5: CLI Commands - Vertical Slices (TDD)
