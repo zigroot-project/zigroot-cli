@@ -1,0 +1,18 @@
+# Valid package definition for testing
+[package]
+name = "test-package"
+version = "1.0.0"
+description = "A test package"
+license = "MIT"
+homepage = "https://example.com"
+keywords = ["test", "example"]
+depends = []
+requires = []
+
+[source]
+url = "https://example.com/test-1.0.0.tar.gz"
+sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+[build]
+type = "make"
+make_args = ["CROSS_COMPILE=${TARGET}-"]

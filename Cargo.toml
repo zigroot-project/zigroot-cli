@@ -1,0 +1,72 @@
+[package]
+name = "zigroot"
+version = "0.1.0"
+edition = "2021"
+description = "Modern embedded Linux rootfs builder - npm for embedded systems"
+license = "MIT"
+repository = "https://github.com/zigroot-project/zigroot-cli"
+keywords = ["embedded", "linux", "rootfs", "cross-compilation", "zig"]
+categories = ["command-line-utilities", "development-tools"]
+
+[dependencies]
+# CLI
+clap = { version = "4.5", features = ["derive", "env"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Async runtime
+tokio = { version = "1.43", features = ["full"] }
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "stream"] }
+
+# Cryptography
+sha2 = "0.10"
+hex = "0.4"
+
+# Regex
+regex = "1.11"
+
+# Directories
+dirs = "5.0"
+
+# Progress indicators
+indicatif = "0.17"
+
+# Logging/tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Semver
+semver = "1.0"
+
+[dev-dependencies]
+# Property-based testing
+proptest = "1.5"
+
+# Test utilities
+tempfile = "3.14"
+assert_fs = "1.1"
+predicates = "3.1"
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Allow some pedantic lints that are too strict
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"

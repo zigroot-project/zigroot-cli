@@ -17,36 +17,36 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
 
 ## Tasks
 
-- [ ] 1. Phase 1: Project Setup
-  - [ ] 1.1 Initialize Rust project structure
+- [x] 1. Phase 1: Project Setup
+  - [x] 1.1 Initialize Rust project structure
     - Create Cargo.toml with dependencies: clap, serde, toml, thiserror, anyhow, tokio, reqwest, sha2, indicatif, tracing, proptest
     - Create module structure: cli/, core/, registry/, infra/, config/, error.rs
     - Configure clippy (pedantic) and rustfmt
     - Create empty lib.rs with module declarations
     - _Requirements: 33 (TDD workflow)_
-  - [ ] 1.2 Set up test infrastructure
+  - [x] 1.2 Set up test infrastructure
     - Configure proptest with 100 iterations minimum
     - Create tests/ directory for integration tests
     - Create test fixtures directory
     - Add test helper utilities
     - _Requirements: 33 (TDD workflow)_
 
-- [ ] 2. Phase 2: Core Data Models (TDD)
-  - [ ] 2.1 Write failing tests for Manifest
+- [x] 2. Phase 2: Core Data Models (TDD)
+  - [x] 2.1 Write failing tests for Manifest
     - Test: Manifest serializes to valid TOML
     - Test: Manifest deserializes from valid TOML
     - Test: Round-trip produces equivalent Manifest
     - Test: Missing required fields produce specific errors
     - **Property 1: TOML Serialization Round-Trip (Manifest)**
     - **Validates: Requirements 16.1, 16.2, 16.3**
-  - [ ] 2.2 Implement Manifest to pass tests
+  - [x] 2.2 Implement Manifest to pass tests
     - Define Manifest, ProjectConfig, BoardConfig, BuildConfig, PackageRef structs in core/manifest.rs
     - Implement serde Serialize/Deserialize
     - Implement Manifest::load() and Manifest::save()
     - Run tests until GREEN
     - _Requirements: 11.1, 16.1, 16.2, 16.3_
-  - [ ] 2.3 Checkpoint - Manifest tests pass
-  - [ ] 2.4 Write failing tests for PackageDefinition
+  - [x] 2.3 Checkpoint - Manifest tests pass
+  - [x] 2.4 Write failing tests for PackageDefinition
     - Test: Local package.toml parses correctly
     - Test: Registry metadata.toml + version.toml merge correctly
     - Test: Round-trip produces equivalent PackageDefinition
@@ -61,14 +61,14 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 19: Git Ref Requirement**
     - **Property 20: URL Checksum Requirement**
     - **Validates: Requirements 17.1-17.5, 18.1-18.11**
-  - [ ] 2.5 Implement PackageDefinition to pass tests
+  - [x] 2.5 Implement PackageDefinition to pass tests
     - Define PackageDefinition, PackageMetadata, SourceConfig, BuildConfig in core/package.rs
     - Implement parsing for local and registry formats
     - Implement source type validation
     - Run tests until GREEN
     - _Requirements: 17.1-17.5, 18.1-18.11_
-  - [ ] 2.6 Checkpoint - PackageDefinition tests pass
-  - [ ] 2.7 Write failing tests for BoardDefinition
+  - [x] 2.6 Checkpoint - PackageDefinition tests pass
+  - [x] 2.7 Write failing tests for BoardDefinition
     - Test: board.toml parses correctly
     - Test: Round-trip produces equivalent BoardDefinition
     - Test: Missing required fields produce specific errors
@@ -77,12 +77,12 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 1: TOML Serialization Round-Trip (BoardDefinition)**
     - **Property 27: Missing Field Error Specificity**
     - **Validates: Requirements 19.1-19.13**
-  - [ ] 2.8 Implement BoardDefinition to pass tests
+  - [x] 2.8 Implement BoardDefinition to pass tests
     - Define BoardDefinition, FlashProfile, BoardOption in core/board.rs
     - Implement parsing for board.toml format
     - Run tests until GREEN
     - _Requirements: 19.1-19.13_
-  - [ ] 2.9 Checkpoint - All data models complete
+  - [x] 2.9 Checkpoint - All data models complete
 
 - [ ] 3. Phase 3: Core Business Logic (TDD)
   - [ ] 3.1 Write failing tests for option validation

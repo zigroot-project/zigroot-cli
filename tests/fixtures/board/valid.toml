@@ -1,0 +1,17 @@
+# Valid board definition for testing
+[board]
+name = "test-board"
+description = "A test board for integration testing"
+target = "arm-linux-musleabihf"
+cpu = "cortex-a7"
+features = ["neon", "vfpv4"]
+
+[defaults]
+image_format = "ext4"
+rootfs_size = "256M"
+hostname = "test-board"
+
+[[flash]]
+name = "sd-card"
+description = "Flash to SD card"
+tool = "dd"

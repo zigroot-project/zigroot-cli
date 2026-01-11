@@ -1,0 +1,2 @@
+# Clippy configuration for zigroot
+msrv = "1.75"

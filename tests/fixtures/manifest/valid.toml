@@ -1,0 +1,20 @@
+# Valid manifest for testing
+[project]
+name = "test-project"
+version = "1.0.0"
+description = "A test project for integration testing"
+
+[board]
+name = "luckfox-pico"
+
+[build]
+compress = false
+image_format = "ext4"
+rootfs_size = "256M"
+hostname = "zigroot-test"
+
+[packages.busybox]
+version = "^1.36"
+
+[packages.dropbear]
+version = ">=2024.85"

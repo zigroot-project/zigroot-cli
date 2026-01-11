@@ -1,0 +1,18 @@
+# Proptest configuration for zigroot
+# Minimum 100 iterations per property test as per design requirements
+
+[default]
+# Number of test cases to generate
+cases = 100
+
+# Maximum number of shrink iterations
+max_shrink_iters = 10000
+
+# Timeout for each test case (in milliseconds)
+timeout = 60000
+
+# Fork mode for isolation
+fork = false
+
+# Verbose output on failure
+verbose = 1
