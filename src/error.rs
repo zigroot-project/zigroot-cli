@@ -5,6 +5,34 @@
 use std::path::PathBuf;
 use thiserror::Error;
 
+/// Project initialization errors
+#[derive(Error, Debug)]
+pub enum InitError {
+    /// Directory not found
+    #[error("Directory not found: {path}")]
+    DirectoryNotFound { path: PathBuf },
+
+    /// Directory is not empty
+    #[error("Directory is not empty: {path}. Use --force to initialize anyway")]
+    DirectoryNotEmpty { path: PathBuf },
+
+    /// IO error during initialization
+    #[error("IO error for '{path}': {error}")]
+    IoError { path: PathBuf, error: String },
+
+    /// Manifest generation/parsing error
+    #[error("Failed to create manifest: {error}")]
+    ManifestError { error: String },
+
+    /// Board not found in registry
+    #[error("Board '{name}' not found in registry")]
+    BoardNotFound { name: String },
+
+    /// Registry error
+    #[error("Registry error: {error}")]
+    RegistryError { error: String },
+}
+
 /// Package-related errors
 #[derive(Error, Debug)]
 pub enum PackageError {

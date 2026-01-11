@@ -11,9 +11,11 @@
 //! - [`resolver`] - Dependency resolution
 //! - [`builder`] - Build orchestration logic
 //! - [`lock`] - Lock file handling
+//! - [`init`] - Project initialization logic
 
 pub mod board;
 pub mod builder;
+pub mod init;
 pub mod lock;
 pub mod manifest;
 pub mod options;

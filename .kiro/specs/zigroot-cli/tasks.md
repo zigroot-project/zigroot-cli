@@ -189,8 +189,8 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
   - [x] 4.9 Checkpoint - Infrastructure layer complete
 
 
-- [ ] 5. Phase 5: CLI Commands - Vertical Slices (TDD)
-  - [ ] 5.1 Write failing integration test for zigroot init
+- [-] 5. Phase 5: CLI Commands - Vertical Slices (TDD)
+  - [x] 5.1 Write failing integration test for zigroot init
     - Test: Creates zigroot.toml in empty directory
     - Test: Creates packages/, boards/, user/files/, user/scripts/ directories
     - Test: Creates .gitignore with zigroot entries
@@ -200,14 +200,14 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: Appending to existing .gitignore is idempotent
     - **Property 24: Gitignore Append Idempotence**
     - **Validates: Requirements 1.1-1.7**
-  - [ ] 5.2 Implement zigroot init to pass tests
+  - [x] 5.2 Implement zigroot init to pass tests
     - Implement CLI parsing in cli/commands/init.rs
     - Implement init logic in core/init.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 1.1-1.7_
-  - [ ] 5.3 Checkpoint - zigroot init works end-to-end
-  - [ ] 5.4 Write failing integration test for zigroot add
+  - [x] 5.3 Checkpoint - zigroot init works end-to-end
+  - [-] 5.4 Write failing integration test for zigroot add
     - Test: Adds package from registry to manifest
     - Test: Adds specific version with @version syntax
     - Test: Adds package from git with --git flag

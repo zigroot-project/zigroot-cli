@@ -2,6 +2,8 @@
 //!
 //! Each command is implemented in its own submodule.
 
+pub mod init;
+
 use anyhow::Result;
 use clap::Subcommand;
 
@@ -318,14 +320,16 @@ pub enum KernelCommands {
 
 impl Commands {
     /// Execute the command
-    #[allow(clippy::unused_async)]
     pub async fn run(self) -> Result<()> {
-        // Commands will be implemented in later phases
-        if let Self::Init { .. } = self {
-            tracing::info!("Init command - to be implemented");
-        } else {
-            tracing::info!("Command not yet implemented");
+        match self {
+            Self::Init { board, force } => {
+                let current_dir = std::env::current_dir()?;
+                init::execute(&current_dir, board, force).await
+            }
+            _ => {
+                tracing::info!("Command not yet implemented");
+                Ok(())
+            }
         }
-        Ok(())
     }
 }
