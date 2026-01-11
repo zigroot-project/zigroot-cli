@@ -84,8 +84,8 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - _Requirements: 19.1-19.13_
   - [x] 2.9 Checkpoint - All data models complete
 
-- [ ] 3. Phase 3: Core Business Logic (TDD)
-  - [ ] 3.1 Write failing tests for option validation
+- [x] 3. Phase 3: Core Business Logic (TDD)
+  - [x] 3.1 Write failing tests for option validation
     - Test: Bool options validate correctly
     - Test: String options with pattern validate correctly
     - Test: Choice options reject invalid values
@@ -94,13 +94,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: Invalid values produce specific error messages
     - **Property 13: Option Validation**
     - **Validates: Requirements 18.34-18.42**
-  - [ ] 3.2 Implement option validation to pass tests
+  - [x] 3.2 Implement option validation to pass tests
     - Define OptionDefinition with types: bool, string, choice, number in core/options.rs
     - Implement validation for pattern, min, max, allow_empty
     - Implement option value resolution (CLI > Package > Global)
     - Run tests until GREEN
     - _Requirements: 18.34-18.42, 19.9-19.12_
-  - [ ] 3.3 Write failing tests for dependency graph
+  - [x] 3.3 Write failing tests for dependency graph
     - Test: Dependency graph builds from package definitions
     - Test: Topological sort produces valid build order
     - Test: Every package built after its dependencies
@@ -108,25 +108,25 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 2: Dependency Build Order**
     - **Property 3: Circular Dependency Detection**
     - **Validates: Requirements 20.1-20.3**
-  - [ ] 3.4 Implement dependency graph to pass tests
+  - [x] 3.4 Implement dependency graph to pass tests
     - Implement dependency graph construction in core/resolver.rs
     - Implement topological sort algorithm
     - Implement cycle detection with path reporting
     - Run tests until GREEN
     - _Requirements: 18.15, 18.16, 20.1-20.3_
-  - [ ] 3.5 Write failing tests for version constraints
+  - [x] 3.5 Write failing tests for version constraints
     - Test: Semver constraints parse correctly (>=, ^, ~, etc.)
     - Test: Compatible versions resolved across constraints
     - Test: Conflicts detected and reported with clear message
     - **Property 21: Dependency Conflict Detection**
     - **Validates: Requirements 18.28, 20.4, 2.9**
-  - [ ] 3.6 Implement version constraints to pass tests
+  - [x] 3.6 Implement version constraints to pass tests
     - Implement semver constraint parsing
     - Implement version resolution algorithm
     - Implement conflict detection and reporting
     - Run tests until GREEN
     - _Requirements: 18.28, 20.4, 2.9_
-  - [ ] 3.7 Checkpoint - Core business logic complete
+  - [x] 3.7 Checkpoint - Core business logic complete
 
 - [ ] 4. Phase 4: Infrastructure Layer (TDD)
   - [ ] 4.1 Write failing tests for HTTP download
