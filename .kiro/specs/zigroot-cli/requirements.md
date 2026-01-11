@@ -30,8 +30,8 @@ Packages that cannot be statically linked (e.g., those requiring dlopen) are exp
 - **Zigroot_CLI**: The main Rust command-line application that orchestrates all build operations
 - **Package**: A software component with build instructions, metadata, and optional patches stored in a standardized format
 - **Board**: A hardware target definition containing architecture, CPU features, and board-specific configurations
-- **Package_Registry**: The GitHub-hosted repository (zigroot/zigroot-packages) containing community packages
-- **Board_Registry**: The GitHub-hosted repository (zigroot/zigroot-boards) containing board definitions
+- **Package_Registry**: The GitHub-hosted repository (zigroot-project/zigroot-packages) containing community packages
+- **Board_Registry**: The GitHub-hosted repository (zigroot-project/zigroot-boards) containing board definitions
 - **Project**: A user's zigroot workspace created by `zigroot init`, containing configuration and customizations
 - **Rootfs**: The root filesystem image containing all compiled packages and system files
 - **Target_Triple**: The Zig cross-compilation target specification (e.g., `arm-linux-musleabihf`)
@@ -561,7 +561,7 @@ Packages that cannot be statically linked (e.g., those requiring dlopen) are exp
 2. IF a newer version is available, THEN THE Zigroot_CLI SHALL display the current version, latest version, and installation instructions
 3. THE Zigroot_CLI MAY periodically check for updates in the background (at most once per day)
 4. WHEN a background update check finds a newer version, THE Zigroot_CLI SHALL display a non-intrusive notification on the next command
-5. THE update check SHALL query the GitHub releases API for `zigroot/zigroot-cli`
+5. THE update check SHALL query the GitHub releases API for `zigroot-project/zigroot-cli`
 6. THE Zigroot_CLI SHALL cache the update check result to avoid repeated network requests
 7. WHEN a user runs `zigroot update --self --install`, THE Zigroot_CLI SHALL attempt to download and install the latest version
 8. THE self-update SHALL detect the installation method (cargo, homebrew, AUR, binary) and use the appropriate update mechanism

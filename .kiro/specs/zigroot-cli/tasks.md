@@ -1,13 +1,5 @@
 # Implementation Plan: Zigroot CLI
 
-## Implementation Status
-
-**Current State:** No code implemented yet. All tasks are pending.
-
-**Last Updated:** January 11, 2026
-
----
-
 ## Overview
 
 This implementation plan follows **strict TDD** (Test-Driven Development) with **command-by-command vertical slices**. Each command is implemented as a complete feature from test to working CLI.
@@ -23,1030 +15,725 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
 - `registry/` - Package/board registry client
 - `infra/` - I/O operations (network, filesystem, processes)
 
----
-
-## Phase 1: Project Setup
-
-- [ ] 1.1 Initialize Rust project structure
-  - Create Cargo.toml with dependencies: clap, serde, toml, thiserror, anyhow, tokio, reqwest, sha2, indicatif, tracing, proptest
-  - Create module structure: cli/, core/, registry/, infra/, config/, error.rs
-  - Configure clippy (pedantic) and rustfmt
-  - Create empty lib.rs with module declarations
-  - _Requirements: 33 (TDD workflow)_
-
-- [ ] 1.2 Set up test infrastructure
-  - Configure proptest with 100 iterations minimum
-  - Create tests/ directory for integration tests
-  - Create test fixtures directory
-  - Add test helper utilities
-  - _Requirements: 33 (TDD workflow)_
-
-
----
-
-## Phase 2: Core Data Models (TDD)
-
-### Manifest Data Model
-
-- [ ] 2.1 Write failing tests for Manifest
-  - Test: Manifest serializes to valid TOML
-  - Test: Manifest deserializes from valid TOML
-  - Test: Round-trip produces equivalent Manifest
-  - Test: Missing required fields produce specific errors
-  - **Property 1: TOML Serialization Round-Trip (Manifest)**
-  - **Validates: Requirements 16.1, 16.2, 16.3**
-
-- [ ] 2.2 Implement Manifest to pass tests
-  - Define Manifest, ProjectConfig, BoardConfig, BuildConfig, PackageRef structs in core/manifest.rs
-  - Implement serde Serialize/Deserialize
-  - Implement Manifest::load() and Manifest::save()
-  - Run tests until GREEN
-  - _Requirements: 11.1, 16.1, 16.2, 16.3_
-
-- [ ] 2.3 Checkpoint - Manifest tests pass
-  - All Manifest unit tests pass
-  - Property test passes with 100+ iterations
-
-### PackageDefinition Data Model
-
-- [ ] 2.4 Write failing tests for PackageDefinition
-  - Test: Local package.toml parses correctly
-  - Test: Registry metadata.toml + version.toml merge correctly
-  - Test: Round-trip produces equivalent PackageDefinition
-  - Test: Missing required fields produce specific errors
-  - Test: Multiple source types produce error
-  - Test: No source type produces error
-  - Test: Git without ref produces error
-  - Test: URL without sha256 produces error
-  - **Property 1: TOML Serialization Round-Trip (PackageDefinition)**
-  - **Property 17: Source Type Exclusivity**
-  - **Property 18: Source Type Requirement**
-  - **Property 19: Git Ref Requirement**
-  - **Property 20: URL Checksum Requirement**
-  - **Validates: Requirements 17.1-17.5, 18.1-18.11**
-
-- [ ] 2.5 Implement PackageDefinition to pass tests
-  - Define PackageDefinition, PackageMetadata, SourceConfig, BuildConfig in core/package.rs
-  - Implement parsing for local and registry formats
-  - Implement source type validation
-  - Run tests until GREEN
-  - _Requirements: 17.1-17.5, 18.1-18.11_
-
-- [ ] 2.6 Checkpoint - PackageDefinition tests pass
-  - All PackageDefinition unit tests pass
-  - All property tests pass
-
-### BoardDefinition Data Model
-
-- [ ] 2.7 Write failing tests for BoardDefinition
-  - Test: board.toml parses correctly
-  - Test: Round-trip produces equivalent BoardDefinition
-  - Test: Missing required fields produce specific errors
-  - Test: Flash profiles parse correctly
-  - Test: Board options parse correctly
-  - **Property 1: TOML Serialization Round-Trip (BoardDefinition)**
-  - **Property 27: Missing Field Error Specificity**
-  - **Validates: Requirements 19.1-19.13**
-
-- [ ] 2.8 Implement BoardDefinition to pass tests
-  - Define BoardDefinition, FlashProfile, BoardOption in core/board.rs
-  - Implement parsing for board.toml format
-  - Run tests until GREEN
-  - _Requirements: 19.1-19.13_
-
-- [ ] 2.9 Checkpoint - All data models complete
-  - All data model tests pass
-  - Refactor for clean code
-
-
----
-
-## Phase 3: Core Business Logic (TDD)
-
-### Option Validation
-
-- [ ] 3.1 Write failing tests for option validation
-  - Test: Bool options validate correctly
-  - Test: String options with pattern validate correctly
-  - Test: Choice options reject invalid values
-  - Test: Number options respect min/max bounds
-  - Test: allow_empty = false rejects empty strings
-  - Test: Invalid values produce specific error messages
-  - **Property 13: Option Validation**
-  - **Validates: Requirements 18.34-18.42**
-
-- [ ] 3.2 Implement option validation to pass tests
-  - Define OptionDefinition with types: bool, string, choice, number in core/options.rs
-  - Implement validation for pattern, min, max, allow_empty
-  - Implement option value resolution (CLI > Package > Global)
-  - Run tests until GREEN
-  - _Requirements: 18.34-18.42, 19.9-19.12_
-
-### Dependency Resolution
-
-- [ ] 3.3 Write failing tests for dependency graph
-  - Test: Dependency graph builds from package definitions
-  - Test: Topological sort produces valid build order
-  - Test: Every package built after its dependencies
-  - Test: Circular dependencies detected and reported
-  - **Property 2: Dependency Build Order**
-  - **Property 3: Circular Dependency Detection**
-  - **Validates: Requirements 20.1-20.3**
-
-- [ ] 3.4 Implement dependency graph to pass tests
-  - Implement dependency graph construction in core/resolver.rs
-  - Implement topological sort algorithm
-  - Implement cycle detection with path reporting
-  - Run tests until GREEN
-  - _Requirements: 18.15, 18.16, 20.1-20.3_
-
-- [ ] 3.5 Write failing tests for version constraints
-  - Test: Semver constraints parse correctly (>=, ^, ~, etc.)
-  - Test: Compatible versions resolved across constraints
-  - Test: Conflicts detected and reported with clear message
-  - **Property 21: Dependency Conflict Detection**
-  - **Validates: Requirements 18.28, 20.4, 2.9**
-
-- [ ] 3.6 Implement version constraints to pass tests
-  - Implement semver constraint parsing
-  - Implement version resolution algorithm
-  - Implement conflict detection and reporting
-  - Run tests until GREEN
-  - _Requirements: 18.28, 20.4, 2.9_
-
-- [ ] 3.7 Checkpoint - Core business logic complete
-  - All option validation tests pass
-  - All dependency resolution tests pass
-  - Refactor for clean code
-
-
----
-
-## Phase 4: Infrastructure Layer (TDD)
-
-### Download Manager
-
-- [ ] 4.1 Write failing tests for HTTP download
-  - Test: Files download successfully with progress callback
-  - Test: Parallel downloads work correctly
-  - Test: SHA256 checksum verification passes for valid files
-  - Test: SHA256 checksum verification fails for corrupted files
-  - Test: Corrupted downloads are deleted
-  - Test: Failed downloads retry up to 3 times with exponential backoff
-  - **Property 4: Checksum Verification**
-  - **Property 25: Download Retry Behavior**
-  - **Validates: Requirements 3.1-3.8**
-
-- [ ] 4.2 Implement download manager to pass tests
-  - Implement HTTP download with progress in infra/download.rs
-  - Implement SHA256 checksum verification
-  - Implement retry with exponential backoff
-  - Run tests until GREEN
-  - _Requirements: 3.1-3.8_
-
-### Git Operations
-
-- [ ] 4.3 Write failing tests for git operations
-  - Test: Repository clones successfully
-  - Test: Specified ref (tag/branch/rev) checks out correctly
-  - Test: Branch resolves to commit SHA
-  - **Property 22: Lock File Git SHA Recording**
-  - **Validates: Requirements 18.12, 18.13**
-
-- [ ] 4.4 Implement git operations to pass tests
-  - Implement git clone in infra/git.rs
-  - Implement ref checkout
-  - Implement branch to SHA resolution
-  - Run tests until GREEN
-  - _Requirements: 18.12, 18.13_
-
-### Registry Client
-
-- [ ] 4.5 Write failing tests for registry client
-  - Test: Index fetches from GitHub raw URLs
-  - Test: Index caches locally with TTL
-  - Test: Conditional requests use ETag/Last-Modified
-  - Test: Package metadata.toml + version.toml fetch and merge
-  - Test: Board.toml fetches correctly
-  - **Validates: Requirements 2.1, 2.2, 2.12, 9.1**
-
-- [ ] 4.6 Implement registry client to pass tests
-  - Implement registry client in registry/client.rs
-  - Implement local caching in registry/cache.rs
-  - Run tests until GREEN
-  - _Requirements: 2.1, 2.2, 2.12, 9.1_
-
-### Lock File
-
-- [ ] 4.7 Write failing tests for lock file
-  - Test: Lock file generates with exact versions and checksums
-  - Test: Lock file records Zig compiler version
-  - Test: Lock file records source URIs correctly
-  - Test: --locked mode uses locked versions
-  - Test: --locked mode fails if package differs
-  - Test: Git branch SHA recorded for reproducibility
-  - Test: Zig version mismatch produces warning
-  - **Property 12: Lock File Reproducibility**
-  - **Property 26: Zig Version Recording**
-  - **Validates: Requirements 13.1-13.7**
-
-- [ ] 4.8 Implement lock file to pass tests
-  - Implement lock file generation in core/lock.rs
-  - Implement lock file reading and --locked mode
-  - Implement Zig version warning
-  - Run tests until GREEN
-  - _Requirements: 13.1-13.7_
-
-- [ ] 4.9 Checkpoint - Infrastructure layer complete
-  - All download tests pass
-  - All git tests pass
-  - All registry tests pass
-  - All lock file tests pass
-  - Refactor for clean code
-
-
----
-
-## Phase 5: CLI Commands - Vertical Slices (TDD)
-
-Each command is a complete vertical slice: integration test → CLI → core → infra → working command.
-
-### Command: zigroot init
-
-- [ ] 5.1 Write failing integration test for `zigroot init`
-  - Test: Creates zigroot.toml in empty directory
-  - Test: Creates packages/, boards/, user/files/, user/scripts/ directories
-  - Test: Creates .gitignore with zigroot entries
-  - Test: Fails in non-empty directory without --force
-  - Test: Succeeds with --force in non-empty directory
-  - Test: --board fetches board from registry
-  - Test: Appending to existing .gitignore is idempotent
-  - **Property 24: Gitignore Append Idempotence**
-  - **Validates: Requirements 1.1-1.7**
-
-- [ ] 5.2 Implement `zigroot init` to pass tests
-  - [ ] 5.2.1 Implement CLI parsing in cli/commands/init.rs
-    - Parse --board, --force flags
-  - [ ] 5.2.2 Implement init logic in core/init.rs
-    - Create project structure
-    - Generate default zigroot.toml
-    - Handle .gitignore (create or append)
-  - [ ] 5.2.3 Wire CLI to core
-  - [ ] 5.2.4 Run integration test until GREEN
-  - _Requirements: 1.1-1.7_
-
-- [ ] 5.3 Checkpoint - `zigroot init` works end-to-end
-  - Integration test passes
-  - Manual test: `zigroot init` creates valid project
-
-### Command: zigroot add
-
-- [ ] 5.4 Write failing integration test for `zigroot add`
-  - Test: Adds package from registry to manifest
-  - Test: Adds specific version with @version syntax
-  - Test: Adds package from git with --git flag
-  - Test: Adds package from custom registry with --registry flag
-  - Test: Resolves and adds transitive dependencies
-  - Test: Updates lock file
-  - Test: Detects and reports dependency conflicts
-  - **Property 5: Package Addition Preserves Manifest Validity**
-  - **Property 7: Transitive Dependency Inclusion**
-  - **Validates: Requirements 2.1-2.4, 2.8, 2.9**
-
-- [ ] 5.5 Implement `zigroot add` to pass tests
-  - [ ] 5.5.1 Implement CLI parsing in cli/commands/add.rs
-    - Parse package spec, --git, --registry, --path flags
-  - [ ] 5.5.2 Implement add logic in core/add.rs
-    - Fetch package from appropriate source
-    - Resolve dependencies
-    - Update manifest and lock file
-  - [ ] 5.5.3 Wire CLI to core
-  - [ ] 5.5.4 Run integration test until GREEN
-  - _Requirements: 2.1-2.4, 2.8, 2.9_
-
-- [ ] 5.6 Checkpoint - `zigroot add` works end-to-end
-  - Integration test passes
-  - Manual test: `zigroot add busybox` adds package
-
-### Command: zigroot remove
-
-- [ ] 5.7 Write failing integration test for `zigroot remove`
-  - Test: Removes package from manifest
-  - Test: Updates lock file
-  - Test: Manifest remains valid after removal
-  - **Property 6: Package Removal Preserves Manifest Validity**
-  - **Validates: Requirements 2.5**
-
-- [ ] 5.8 Implement `zigroot remove` to pass tests
-  - [ ] 5.8.1 Implement CLI parsing in cli/commands/remove.rs
-  - [ ] 5.8.2 Implement remove logic in core/remove.rs
-  - [ ] 5.8.3 Wire CLI to core
-  - [ ] 5.8.4 Run integration test until GREEN
-  - _Requirements: 2.5_
-
-- [ ] 5.9 Checkpoint - `zigroot remove` works end-to-end
-
-### Command: zigroot update
-
-- [ ] 5.10 Write failing integration test for `zigroot update`
-  - Test: Checks for newer versions of all packages
-  - Test: Updates lock file with new versions
-  - Test: Updates single package when name specified
-  - **Validates: Requirements 2.6, 2.7**
-
-- [ ] 5.11 Implement `zigroot update` to pass tests
-  - [ ] 5.11.1 Implement CLI parsing in cli/commands/update.rs
-  - [ ] 5.11.2 Implement update logic in core/update.rs
-  - [ ] 5.11.3 Wire CLI to core
-  - [ ] 5.11.4 Run integration test until GREEN
-  - _Requirements: 2.6, 2.7_
-
-- [ ] 5.12 Checkpoint - `zigroot update` works end-to-end
-
-
-### Command: zigroot fetch
-
-- [ ] 5.13 Write failing integration test for `zigroot fetch`
-  - Test: Downloads source archives for all packages
-  - Test: Verifies SHA256 checksums
-  - Test: Skips already downloaded valid files
-  - Test: --parallel downloads concurrently
-  - Test: --force re-downloads all
-  - Test: Downloads external artifacts
-  - **Validates: Requirements 3.1-3.8, 8.3-8.7**
-
-- [ ] 5.14 Implement `zigroot fetch` to pass tests
-  - [ ] 5.14.1 Implement CLI parsing in cli/commands/fetch.rs
-  - [ ] 5.14.2 Implement fetch logic in core/fetch.rs
-  - [ ] 5.14.3 Wire CLI to core (uses infra/download.rs)
-  - [ ] 5.14.4 Run integration test until GREEN
-  - _Requirements: 3.1-3.8, 8.3-8.7_
-
-- [ ] 5.15 Checkpoint - `zigroot fetch` works end-to-end
-
-### Command: zigroot build
-
-- [ ] 5.16 Write failing integration test for `zigroot build`
-  - Test: Compiles all packages in dependency order
-  - Test: Uses Zig cross-compilation with target triple
-  - Test: Builds statically linked binaries
-  - Test: Skips unchanged packages (incremental build)
-  - Test: --package rebuilds only specified package
-  - Test: --jobs limits parallel compilation
-  - Test: --locked fails if package differs from lock
-  - Test: Creates rootfs image
-  - Test: Displays build summary
-  - **Property 8: Incremental Build Correctness**
-  - **Property 11: Local Package Priority**
-  - **Validates: Requirements 4.1-4.13, 5.1-5.7**
-
-- [ ] 5.17 Implement `zigroot build` to pass tests
-  - [ ] 5.17.1 Implement CLI parsing in cli/commands/build.rs
-  - [ ] 5.17.2 Implement build environment setup in core/build_env.rs
-    - Set CC, TARGET, JOBS, SRCDIR, DESTDIR, PREFIX
-    - Set dependency paths ($ZIGROOT_PKG_<NAME>_DIR)
+## Tasks
+
+- [ ] 1. Phase 1: Project Setup
+  - [ ] 1.1 Initialize Rust project structure
+    - Create Cargo.toml with dependencies: clap, serde, toml, thiserror, anyhow, tokio, reqwest, sha2, indicatif, tracing, proptest
+    - Create module structure: cli/, core/, registry/, infra/, config/, error.rs
+    - Configure clippy (pedantic) and rustfmt
+    - Create empty lib.rs with module declarations
+    - _Requirements: 33 (TDD workflow)_
+  - [ ] 1.2 Set up test infrastructure
+    - Configure proptest with 100 iterations minimum
+    - Create tests/ directory for integration tests
+    - Create test fixtures directory
+    - Add test helper utilities
+    - _Requirements: 33 (TDD workflow)_
+
+- [ ] 2. Phase 2: Core Data Models (TDD)
+  - [ ] 2.1 Write failing tests for Manifest
+    - Test: Manifest serializes to valid TOML
+    - Test: Manifest deserializes from valid TOML
+    - Test: Round-trip produces equivalent Manifest
+    - Test: Missing required fields produce specific errors
+    - **Property 1: TOML Serialization Round-Trip (Manifest)**
+    - **Validates: Requirements 16.1, 16.2, 16.3**
+  - [ ] 2.2 Implement Manifest to pass tests
+    - Define Manifest, ProjectConfig, BoardConfig, BuildConfig, PackageRef structs in core/manifest.rs
+    - Implement serde Serialize/Deserialize
+    - Implement Manifest::load() and Manifest::save()
+    - Run tests until GREEN
+    - _Requirements: 11.1, 16.1, 16.2, 16.3_
+  - [ ] 2.3 Checkpoint - Manifest tests pass
+  - [ ] 2.4 Write failing tests for PackageDefinition
+    - Test: Local package.toml parses correctly
+    - Test: Registry metadata.toml + version.toml merge correctly
+    - Test: Round-trip produces equivalent PackageDefinition
+    - Test: Missing required fields produce specific errors
+    - Test: Multiple source types produce error
+    - Test: No source type produces error
+    - Test: Git without ref produces error
+    - Test: URL without sha256 produces error
+    - **Property 1: TOML Serialization Round-Trip (PackageDefinition)**
+    - **Property 17: Source Type Exclusivity**
+    - **Property 18: Source Type Requirement**
+    - **Property 19: Git Ref Requirement**
+    - **Property 20: URL Checksum Requirement**
+    - **Validates: Requirements 17.1-17.5, 18.1-18.11**
+  - [ ] 2.5 Implement PackageDefinition to pass tests
+    - Define PackageDefinition, PackageMetadata, SourceConfig, BuildConfig in core/package.rs
+    - Implement parsing for local and registry formats
+    - Implement source type validation
+    - Run tests until GREEN
+    - _Requirements: 17.1-17.5, 18.1-18.11_
+  - [ ] 2.6 Checkpoint - PackageDefinition tests pass
+  - [ ] 2.7 Write failing tests for BoardDefinition
+    - Test: board.toml parses correctly
+    - Test: Round-trip produces equivalent BoardDefinition
+    - Test: Missing required fields produce specific errors
+    - Test: Flash profiles parse correctly
+    - Test: Board options parse correctly
+    - **Property 1: TOML Serialization Round-Trip (BoardDefinition)**
+    - **Property 27: Missing Field Error Specificity**
+    - **Validates: Requirements 19.1-19.13**
+  - [ ] 2.8 Implement BoardDefinition to pass tests
+    - Define BoardDefinition, FlashProfile, BoardOption in core/board.rs
+    - Implement parsing for board.toml format
+    - Run tests until GREEN
+    - _Requirements: 19.1-19.13_
+  - [ ] 2.9 Checkpoint - All data models complete
+
+- [ ] 3. Phase 3: Core Business Logic (TDD)
+  - [ ] 3.1 Write failing tests for option validation
+    - Test: Bool options validate correctly
+    - Test: String options with pattern validate correctly
+    - Test: Choice options reject invalid values
+    - Test: Number options respect min/max bounds
+    - Test: allow_empty = false rejects empty strings
+    - Test: Invalid values produce specific error messages
+    - **Property 13: Option Validation**
+    - **Validates: Requirements 18.34-18.42**
+  - [ ] 3.2 Implement option validation to pass tests
+    - Define OptionDefinition with types: bool, string, choice, number in core/options.rs
+    - Implement validation for pattern, min, max, allow_empty
+    - Implement option value resolution (CLI > Package > Global)
+    - Run tests until GREEN
+    - _Requirements: 18.34-18.42, 19.9-19.12_
+  - [ ] 3.3 Write failing tests for dependency graph
+    - Test: Dependency graph builds from package definitions
+    - Test: Topological sort produces valid build order
+    - Test: Every package built after its dependencies
+    - Test: Circular dependencies detected and reported
+    - **Property 2: Dependency Build Order**
+    - **Property 3: Circular Dependency Detection**
+    - **Validates: Requirements 20.1-20.3**
+  - [ ] 3.4 Implement dependency graph to pass tests
+    - Implement dependency graph construction in core/resolver.rs
+    - Implement topological sort algorithm
+    - Implement cycle detection with path reporting
+    - Run tests until GREEN
+    - _Requirements: 18.15, 18.16, 20.1-20.3_
+  - [ ] 3.5 Write failing tests for version constraints
+    - Test: Semver constraints parse correctly (>=, ^, ~, etc.)
+    - Test: Compatible versions resolved across constraints
+    - Test: Conflicts detected and reported with clear message
+    - **Property 21: Dependency Conflict Detection**
+    - **Validates: Requirements 18.28, 20.4, 2.9**
+  - [ ] 3.6 Implement version constraints to pass tests
+    - Implement semver constraint parsing
+    - Implement version resolution algorithm
+    - Implement conflict detection and reporting
+    - Run tests until GREEN
+    - _Requirements: 18.28, 20.4, 2.9_
+  - [ ] 3.7 Checkpoint - Core business logic complete
+
+- [ ] 4. Phase 4: Infrastructure Layer (TDD)
+  - [ ] 4.1 Write failing tests for HTTP download
+    - Test: Files download successfully with progress callback
+    - Test: Parallel downloads work correctly
+    - Test: SHA256 checksum verification passes for valid files
+    - Test: SHA256 checksum verification fails for corrupted files
+    - Test: Corrupted downloads are deleted
+    - Test: Failed downloads retry up to 3 times with exponential backoff
+    - **Property 4: Checksum Verification**
+    - **Property 25: Download Retry Behavior**
+    - **Validates: Requirements 3.1-3.8**
+  - [ ] 4.2 Implement download manager to pass tests
+    - Implement HTTP download with progress in infra/download.rs
+    - Implement SHA256 checksum verification
+    - Implement retry with exponential backoff
+    - Run tests until GREEN
+    - _Requirements: 3.1-3.8_
+  - [ ] 4.3 Write failing tests for git operations
+    - Test: Repository clones successfully
+    - Test: Specified ref (tag/branch/rev) checks out correctly
+    - Test: Branch resolves to commit SHA
+    - **Property 22: Lock File Git SHA Recording**
+    - **Validates: Requirements 18.12, 18.13**
+  - [ ] 4.4 Implement git operations to pass tests
+    - Implement git clone in infra/git.rs
+    - Implement ref checkout
+    - Implement branch to SHA resolution
+    - Run tests until GREEN
+    - _Requirements: 18.12, 18.13_
+  - [ ] 4.5 Write failing tests for registry client
+    - Test: Index fetches from GitHub raw URLs
+    - Test: Index caches locally with TTL
+    - Test: Conditional requests use ETag/Last-Modified
+    - Test: Package metadata.toml + version.toml fetch and merge
+    - Test: Board.toml fetches correctly
+    - **Validates: Requirements 2.1, 2.2, 2.12, 9.1**
+  - [ ] 4.6 Implement registry client to pass tests
+    - Implement registry client in registry/client.rs
+    - Implement local caching in registry/cache.rs
+    - Run tests until GREEN
+    - _Requirements: 2.1, 2.2, 2.12, 9.1_
+  - [ ] 4.7 Write failing tests for lock file
+    - Test: Lock file generates with exact versions and checksums
+    - Test: Lock file records Zig compiler version
+    - Test: Lock file records source URIs correctly
+    - Test: --locked mode uses locked versions
+    - Test: --locked mode fails if package differs
+    - Test: Git branch SHA recorded for reproducibility
+    - Test: Zig version mismatch produces warning
+    - **Property 12: Lock File Reproducibility**
+    - **Property 26: Zig Version Recording**
+    - **Validates: Requirements 13.1-13.7**
+  - [ ] 4.8 Implement lock file to pass tests
+    - Implement lock file generation in core/lock.rs
+    - Implement lock file reading and --locked mode
+    - Implement Zig version warning
+    - Run tests until GREEN
+    - _Requirements: 13.1-13.7_
+  - [ ] 4.9 Checkpoint - Infrastructure layer complete
+
+
+- [ ] 5. Phase 5: CLI Commands - Vertical Slices (TDD)
+  - [ ] 5.1 Write failing integration test for zigroot init
+    - Test: Creates zigroot.toml in empty directory
+    - Test: Creates packages/, boards/, user/files/, user/scripts/ directories
+    - Test: Creates .gitignore with zigroot entries
+    - Test: Fails in non-empty directory without --force
+    - Test: Succeeds with --force in non-empty directory
+    - Test: --board fetches board from registry
+    - Test: Appending to existing .gitignore is idempotent
+    - **Property 24: Gitignore Append Idempotence**
+    - **Validates: Requirements 1.1-1.7**
+  - [ ] 5.2 Implement zigroot init to pass tests
+    - Implement CLI parsing in cli/commands/init.rs
+    - Implement init logic in core/init.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 1.1-1.7_
+  - [ ] 5.3 Checkpoint - zigroot init works end-to-end
+  - [ ] 5.4 Write failing integration test for zigroot add
+    - Test: Adds package from registry to manifest
+    - Test: Adds specific version with @version syntax
+    - Test: Adds package from git with --git flag
+    - Test: Adds package from custom registry with --registry flag
+    - Test: Resolves and adds transitive dependencies
+    - Test: Updates lock file
+    - Test: Detects and reports dependency conflicts
+    - **Property 5: Package Addition Preserves Manifest Validity**
+    - **Property 7: Transitive Dependency Inclusion**
+    - **Validates: Requirements 2.1-2.4, 2.8, 2.9**
+  - [ ] 5.5 Implement zigroot add to pass tests
+    - Implement CLI parsing in cli/commands/add.rs
+    - Implement add logic in core/add.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 2.1-2.4, 2.8, 2.9_
+  - [ ] 5.6 Checkpoint - zigroot add works end-to-end
+  - [ ] 5.7 Write failing integration test for zigroot remove
+    - Test: Removes package from manifest
+    - Test: Updates lock file
+    - Test: Manifest remains valid after removal
+    - **Property 6: Package Removal Preserves Manifest Validity**
+    - **Validates: Requirements 2.5**
+  - [ ] 5.8 Implement zigroot remove to pass tests
+    - Implement CLI parsing in cli/commands/remove.rs
+    - Implement remove logic in core/remove.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 2.5_
+  - [ ] 5.9 Checkpoint - zigroot remove works end-to-end
+  - [ ] 5.10 Write failing integration test for zigroot update
+    - Test: Checks for newer versions of all packages
+    - Test: Updates lock file with new versions
+    - Test: Updates single package when name specified
+    - **Validates: Requirements 2.6, 2.7**
+  - [ ] 5.11 Implement zigroot update to pass tests
+    - Implement CLI parsing in cli/commands/update.rs
+    - Implement update logic in core/update.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 2.6, 2.7_
+  - [ ] 5.12 Checkpoint - zigroot update works end-to-end
+  - [ ] 5.13 Write failing integration test for zigroot fetch
+    - Test: Downloads source archives for all packages
+    - Test: Verifies SHA256 checksums
+    - Test: Skips already downloaded valid files
+    - Test: --parallel downloads concurrently
+    - Test: --force re-downloads all
+    - Test: Downloads external artifacts
+    - **Validates: Requirements 3.1-3.8, 8.3-8.7**
+  - [ ] 5.14 Implement zigroot fetch to pass tests
+    - Implement CLI parsing in cli/commands/fetch.rs
+    - Implement fetch logic in core/fetch.rs
+    - Wire CLI to core (uses infra/download.rs)
+    - Run integration test until GREEN
+    - _Requirements: 3.1-3.8, 8.3-8.7_
+  - [ ] 5.15 Checkpoint - zigroot fetch works end-to-end
+  - [ ] 5.16 Write failing integration test for zigroot build
+    - Test: Compiles all packages in dependency order
+    - Test: Uses Zig cross-compilation with target triple
+    - Test: Builds statically linked binaries
+    - Test: Skips unchanged packages (incremental build)
+    - Test: --package rebuilds only specified package
+    - Test: --jobs limits parallel compilation
+    - Test: --locked fails if package differs from lock
+    - Test: Creates rootfs image
+    - Test: Displays build summary
+    - **Property 8: Incremental Build Correctness**
+    - **Property 11: Local Package Priority**
+    - **Validates: Requirements 4.1-4.13, 5.1-5.7**
+  - [ ] 5.17 Implement zigroot build to pass tests
+    - Implement CLI parsing in cli/commands/build.rs
+    - Implement build environment setup in core/build_env.rs
+    - Implement Zig toolchain integration in infra/toolchain.rs
+    - Implement build type handlers in core/build_types.rs
+    - Implement build orchestration in core/builder.rs
+    - Implement incremental build detection
+    - Implement rootfs assembly in core/rootfs.rs
+    - Implement image creation in core/image.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
     - **Property 14: Build Environment Variables**
-  - [ ] 5.17.3 Implement Zig toolchain integration in infra/toolchain.rs
-  - [ ] 5.17.4 Implement build type handlers in core/build_types.rs
-    - Autotools, CMake, Meson, Make, Custom
-  - [ ] 5.17.5 Implement build orchestration in core/builder.rs
-  - [ ] 5.17.6 Implement incremental build detection
-  - [ ] 5.17.7 Implement rootfs assembly in core/rootfs.rs
-  - [ ] 5.17.8 Implement image creation in core/image.rs
-  - [ ] 5.17.9 Wire CLI to core
-  - [ ] 5.17.10 Run integration test until GREEN
-  - _Requirements: 4.1-4.13, 5.1-5.7, 18.17-18.27_
-
-- [ ] 5.18 Checkpoint - `zigroot build` works end-to-end
-  - Integration test passes
-  - Manual test: `zigroot build` produces rootfs.img
-
-### Command: zigroot clean
-
-- [ ] 5.19 Write failing integration test for `zigroot clean`
-  - Test: Removes build/ directory
-  - Test: Removes output/ directory
-  - **Validates: Requirements 4.5**
-
-- [ ] 5.20 Implement `zigroot clean` to pass tests
-  - [ ] 5.20.1 Implement CLI parsing in cli/commands/clean.rs
-  - [ ] 5.20.2 Implement clean logic in core/clean.rs
-  - [ ] 5.20.3 Wire CLI to core
-  - [ ] 5.20.4 Run integration test until GREEN
-  - _Requirements: 4.5_
-
-- [ ] 5.21 Checkpoint - `zigroot clean` works end-to-end
-
-### Command: zigroot check
-
-- [ ] 5.22 Write failing integration test for `zigroot check`
-  - Test: Validates configuration
-  - Test: Checks all dependencies resolvable
-  - Test: Verifies toolchains available
-  - Test: Reports what would be built without building
-  - **Property 28: Check Command Validation**
-  - **Validates: Requirements 4.13**
-
-- [ ] 5.23 Implement `zigroot check` to pass tests
-  - [ ] 5.23.1 Implement CLI parsing in cli/commands/check.rs
-  - [ ] 5.23.2 Implement check logic in core/check.rs
-  - [ ] 5.23.3 Wire CLI to core
-  - [ ] 5.23.4 Run integration test until GREEN
-  - _Requirements: 4.13_
-
-- [ ] 5.24 Checkpoint - `zigroot check` works end-to-end
-
-
-### Command: zigroot search
-
-- [ ] 5.25 Write failing integration test for `zigroot search`
-  - Test: Searches both packages and boards
-  - Test: Results grouped by type (packages first, then boards)
-  - Test: --packages searches only packages
-  - Test: --boards searches only boards
-  - Test: --refresh forces index refresh
-  - Test: Highlights matching terms
-  - Test: Suggests alternatives when no results
-  - **Property 10: Search Result Grouping**
-  - **Property 29: Search Suggestions on Empty Results**
-  - **Validates: Requirements 10.1-10.9**
-
-- [ ] 5.26 Implement `zigroot search` to pass tests
-  - [ ] 5.26.1 Implement CLI parsing in cli/commands/search.rs
-  - [ ] 5.26.2 Implement search logic in core/search.rs
-  - [ ] 5.26.3 Wire CLI to core
-  - [ ] 5.26.4 Run integration test until GREEN
-  - _Requirements: 10.1-10.9_
-
-- [ ] 5.27 Checkpoint - `zigroot search` works end-to-end
-
-### Command: zigroot package (subcommands)
-
-- [ ] 5.28 Write failing integration test for `zigroot package list`
-  - Test: Displays installed packages with versions and descriptions
-  - **Validates: Requirements 2.10**
-
-- [ ] 5.29 Write failing integration test for `zigroot package info`
-  - Test: Displays detailed package information
-  - **Validates: Requirements 2.11**
-
-- [ ] 5.30 Implement `zigroot package` subcommands to pass tests
-  - [ ] 5.30.1 Implement CLI parsing in cli/commands/package.rs
-  - [ ] 5.30.2 Implement list logic in core/package_list.rs
-  - [ ] 5.30.3 Implement info logic in core/package_info.rs
-  - [ ] 5.30.4 Wire CLI to core
-  - [ ] 5.30.5 Run integration tests until GREEN
-  - _Requirements: 2.10, 2.11_
-
-- [ ] 5.31 Checkpoint - `zigroot package` subcommands work
-
-### Command: zigroot board (subcommands)
-
-- [ ] 5.32 Write failing integration test for `zigroot board list`
-  - Test: Lists available boards from registry
-  - **Validates: Requirements 9.1**
-
-- [ ] 5.33 Write failing integration test for `zigroot board set`
-  - Test: Updates manifest with new board
-  - Test: Validates board compatibility with packages
-  - **Property 23: Board Compatibility Validation**
-  - **Validates: Requirements 9.2, 9.3**
-
-- [ ] 5.34 Write failing integration test for `zigroot board info`
-  - Test: Displays board details
-  - **Validates: Requirements 9.4**
-
-- [ ] 5.35 Implement `zigroot board` subcommands to pass tests
-  - [ ] 5.35.1 Implement CLI parsing in cli/commands/board.rs
-  - [ ] 5.35.2 Implement list/set/info logic in core/board_*.rs
-  - [ ] 5.35.3 Wire CLI to core
-  - [ ] 5.35.4 Run integration tests until GREEN
-  - _Requirements: 9.1-9.4_
-
-- [ ] 5.36 Checkpoint - `zigroot board` subcommands work
-
-### Command: zigroot tree
-
-- [ ] 5.37 Write failing integration test for `zigroot tree`
-  - Test: Displays dependency tree
-  - Test: --graph outputs DOT format
-  - Test: Distinguishes depends vs requires
-  - Test: Detects and highlights circular dependencies
-  - **Property 33: Dependency Tree Correctness**
-  - **Validates: Requirements 23.1-23.5**
-
-- [ ] 5.38 Implement `zigroot tree` to pass tests
-  - [ ] 5.38.1 Implement CLI parsing in cli/commands/tree.rs
-  - [ ] 5.38.2 Implement tree logic in core/tree.rs
-  - [ ] 5.38.3 Wire CLI to core
-  - [ ] 5.38.4 Run integration test until GREEN
-  - _Requirements: 23.1-23.5_
-
-- [ ] 5.39 Checkpoint - `zigroot tree` works end-to-end
-
-
-### Command: zigroot flash
-
-- [ ] 5.40 Write failing integration test for `zigroot flash`
-  - Test: Lists available flash methods when no method specified
-  - Test: Executes specified flash method
-  - Test: Downloads required external artifacts
-  - Test: Validates required tools installed
-  - Test: Requires confirmation before flashing
-  - Test: --yes skips confirmation
-  - Test: --list shows all methods
-  - Test: --device uses specified device path
-  - **Property 30: Flash Confirmation Requirement**
-  - **Validates: Requirements 7.1-7.12**
-
-- [ ] 5.41 Implement `zigroot flash` to pass tests
-  - [ ] 5.41.1 Implement CLI parsing in cli/commands/flash.rs
-  - [ ] 5.41.2 Implement flash logic in core/flash.rs
-  - [ ] 5.41.3 Wire CLI to core
-  - [ ] 5.41.4 Run integration test until GREEN
-  - _Requirements: 7.1-7.12_
-
-- [ ] 5.42 Checkpoint - `zigroot flash` works end-to-end
-
-### Command: zigroot external (subcommands)
-
-- [ ] 5.43 Write failing integration test for `zigroot external`
-  - Test: list shows configured artifacts and status
-  - Test: add --url adds remote artifact
-  - Test: add --path adds local artifact
-  - **Validates: Requirements 8.1, 8.2, 8.9-8.13**
-
-- [ ] 5.44 Implement `zigroot external` to pass tests
-  - [ ] 5.44.1 Implement CLI parsing in cli/commands/external.rs
-  - [ ] 5.44.2 Implement external logic in core/external.rs
-  - [ ] 5.44.3 Wire CLI to core
-  - [ ] 5.44.4 Run integration test until GREEN
-  - _Requirements: 8.1, 8.2, 8.9-8.13_
-
-- [ ] 5.45 Checkpoint - `zigroot external` works end-to-end
-
----
-
-## Phase 6: Binary Compression (TDD)
-
-- [ ] 6.1 Write failing tests for compression
-  - Test: Binaries compress when enabled
-  - Test: Binaries don't compress when disabled
-  - Test: Package setting overrides global
-  - Test: CLI flag overrides all
-  - Test: Unsupported architectures skip compression
-  - Test: Missing UPX shows warning and skips
-  - Test: Compression statistics displayed
-  - Test: Compression failure continues with uncompressed
-  - **Property 9: Compression Toggle Consistency**
-  - **Validates: Requirements 6.1-6.10**
-
-- [ ] 6.2 Implement compression to pass tests
-  - Implement UPX compression in core/compress.rs
-  - Implement compression priority logic
-  - Implement statistics display
-  - Run tests until GREEN
-  - _Requirements: 6.1-6.10_
-
-- [ ] 6.3 Checkpoint - Compression works
-
-
----
-
-## Phase 7: Advanced Commands (TDD)
-
-### Command: zigroot doctor
-
-- [ ] 7.1 Write failing integration test for `zigroot doctor`
-  - Test: Checks system dependencies
-  - Test: Reports issues with suggestions
-  - Test: Detects common misconfigurations
-  - **Validates: Requirements 14.5, 14.6**
-
-- [ ] 7.2 Implement `zigroot doctor` to pass tests
-  - [ ] 7.2.1 Implement CLI parsing in cli/commands/doctor.rs
-  - [ ] 7.2.2 Implement doctor logic in core/doctor.rs
-  - [ ] 7.2.3 Wire CLI to core
-  - [ ] 7.2.4 Run integration test until GREEN
-  - _Requirements: 14.5, 14.6_
-
-- [ ] 7.3 Checkpoint - `zigroot doctor` works
-
-### Command: zigroot sdk
-
-- [ ] 7.4 Write failing integration test for `zigroot sdk`
-  - Test: Generates standalone SDK tarball
-  - Test: SDK contains Zig toolchain
-  - Test: SDK contains built libraries and headers
-  - Test: SDK includes setup script
-  - Test: --output saves to specified path
-  - **Property 31: SDK Completeness**
-  - **Validates: Requirements 21.1-21.6**
-
-- [ ] 7.5 Implement `zigroot sdk` to pass tests
-  - [ ] 7.5.1 Implement CLI parsing in cli/commands/sdk.rs
-  - [ ] 7.5.2 Implement SDK generation in core/sdk.rs
-  - [ ] 7.5.3 Wire CLI to core
-  - [ ] 7.5.4 Run integration test until GREEN
-  - _Requirements: 21.1-21.6_
-
-- [ ] 7.6 Checkpoint - `zigroot sdk` works
-
-### Command: zigroot license
-
-- [ ] 7.7 Write failing integration test for `zigroot license`
-  - Test: Displays license summary
-  - Test: --export generates license report
-  - Test: Flags copyleft licenses
-  - Test: Warns on missing license info
-  - Test: --sbom generates SPDX SBOM
-  - **Property 32: License Detection Accuracy**
-  - **Validates: Requirements 22.1-22.6**
-
-- [ ] 7.8 Implement `zigroot license` to pass tests
-  - [ ] 7.8.1 Implement CLI parsing in cli/commands/license.rs
-  - [ ] 7.8.2 Implement license logic in core/license.rs
-  - [ ] 7.8.3 Wire CLI to core
-  - [ ] 7.8.4 Run integration test until GREEN
-  - _Requirements: 22.1-22.6_
-
-- [ ] 7.9 Checkpoint - `zigroot license` works
-
-### Command: zigroot cache (subcommands)
-
-- [ ] 7.10 Write failing integration test for `zigroot cache`
-  - Test: export creates cache tarball
-  - Test: import loads cache tarball
-  - Test: info shows cache size and location
-  - Test: clean clears cache directory
-  - Test: Cache keys are deterministic
-  - **Property 34: Cache Key Determinism**
-  - **Validates: Requirements 24.1-24.8**
-
-- [ ] 7.11 Implement `zigroot cache` to pass tests
-  - [ ] 7.11.1 Implement CLI parsing in cli/commands/cache.rs
-  - [ ] 7.11.2 Implement cache logic in core/cache.rs
-  - [ ] 7.11.3 Wire CLI to core
-  - [ ] 7.11.4 Run integration test until GREEN
-  - _Requirements: 24.1-24.8_
-
-- [ ] 7.12 Checkpoint - `zigroot cache` works
-
-### Command: zigroot config (TUI)
-
-- [ ] 7.13 Write failing integration test for `zigroot config`
-  - Test: Launches TUI interface
-  - Test: Board selection works
-  - Test: Package selection works
-  - Test: Selecting package auto-selects dependencies
-  - Test: Deselecting warns about dependents
-  - Test: Saves changes to zigroot.toml
-  - Test: Shows diff before saving
-  - **Property 35: TUI Dependency Auto-Selection**
-  - **Validates: Requirements 25.1-25.17**
-
-- [ ] 7.14 Implement `zigroot config` to pass tests
-  - [ ] 7.14.1 Implement CLI parsing in cli/commands/config.rs
-  - [ ] 7.14.2 Implement TUI in cli/tui/config.rs
-  - [ ] 7.14.3 Wire CLI to TUI
-  - [ ] 7.14.4 Run integration test until GREEN
-  - _Requirements: 25.1-25.17_
-
-- [ ] 7.15 Checkpoint - `zigroot config` works
-
-
----
-
-## Phase 8: Package/Board Authoring Commands (TDD)
-
-### Command: zigroot package new
-
-- [ ] 8.1 Write failing integration test for `zigroot package new`
-  - Test: Creates package template in packages/<name>/
-  - Test: Creates metadata.toml and version file
-  - **Validates: Requirements 28.1**
-
-- [ ] 8.2 Implement `zigroot package new` to pass tests
-  - _Requirements: 28.1_
-
-- [ ] 8.3 Checkpoint - `zigroot package new` works
-
-### Command: zigroot verify
-
-- [ ] 8.4 Write failing integration test for `zigroot verify`
-  - Test: Validates package structure
-  - Test: Validates board structure
-  - Test: Checks required fields
-  - Test: --fetch downloads and verifies checksums
-  - **Validates: Requirements 28.2-28.5, 29.2-29.4**
-
-- [ ] 8.5 Implement `zigroot verify` to pass tests
-  - _Requirements: 28.2-28.5, 29.2-29.4_
-
-- [ ] 8.6 Checkpoint - `zigroot verify` works
-
-### Command: zigroot package test
-
-- [ ] 8.7 Write failing integration test for `zigroot package test`
-  - Test: Attempts to build package
-  - Test: Reports success or failure
-  - **Validates: Requirements 28.6**
-
-- [ ] 8.8 Implement `zigroot package test` to pass tests
-  - _Requirements: 28.6_
-
-- [ ] 8.9 Checkpoint - `zigroot package test` works
-
-### Command: zigroot publish
-
-- [ ] 8.10 Write failing integration test for `zigroot publish`
-  - Test: Creates PR to appropriate registry
-  - Test: Validates before publishing
-  - Test: Requires GitHub authentication
-  - Test: Checks for name conflicts
-  - Test: Detects package vs board
-  - **Validates: Requirements 28.7-28.11, 29.5-29.8**
-
-- [ ] 8.11 Implement `zigroot publish` to pass tests
-  - _Requirements: 28.7-28.11, 29.5-29.8_
-
-- [ ] 8.12 Checkpoint - `zigroot publish` works
-
-### Command: zigroot package bump
-
-- [ ] 8.13 Write failing integration test for `zigroot package bump`
-  - Test: Creates new version file from latest
-  - **Validates: Requirements 28.12**
-
-- [ ] 8.14 Implement `zigroot package bump` to pass tests
-  - _Requirements: 28.12_
-
-- [ ] 8.15 Checkpoint - `zigroot package bump` works
-
-### Command: zigroot board new
-
-- [ ] 8.16 Write failing integration test for `zigroot board new`
-  - Test: Creates board template in boards/<name>/
-  - **Validates: Requirements 29.1**
-
-- [ ] 8.17 Implement `zigroot board new` to pass tests
-  - _Requirements: 29.1_
-
-- [ ] 8.18 Checkpoint - `zigroot board new` works
-
-
----
-
-## Phase 9: GCC Toolchain & Kernel Support (TDD)
-
-- [ ] 9.1 Write failing tests for GCC toolchain
-  - Test: Auto-resolves bootlin.com URLs from target
-  - Test: Supports explicit URLs per host platform
-  - Test: Downloads and caches toolchains
-  - **Validates: Requirements 26.2-26.7**
-
-- [ ] 9.2 Implement GCC toolchain to pass tests
-  - Implement in infra/gcc_toolchain.rs
-  - _Requirements: 26.2-26.7_
-
-- [ ] 9.3 Write failing tests for kernel build
-  - Test: Supports defconfig
-  - Test: Supports config_fragments
-  - Test: Builds kernel modules
-  - Test: Installs to /lib/modules/
-  - **Validates: Requirements 26.9, 26.10, 26.14, 26.15**
-
-- [ ] 9.4 Implement kernel build to pass tests
-  - Implement in core/kernel.rs
-  - _Requirements: 26.9, 26.10, 26.14, 26.15_
-
-### Command: zigroot kernel menuconfig
-
-- [ ] 9.5 Write failing integration test for `zigroot kernel menuconfig`
-  - Test: Launches kernel menuconfig
-  - Test: Saves config to kernel/ directory
-  - **Validates: Requirements 26.11, 26.12**
-
-- [ ] 9.6 Implement `zigroot kernel menuconfig` to pass tests
-  - _Requirements: 26.11, 26.12_
-
-- [ ] 9.7 Write failing test for --kernel-only flag
-  - Test: Builds only kernel and modules
-  - **Validates: Requirements 26.16**
-
-- [ ] 9.8 Implement --kernel-only to pass tests
-  - _Requirements: 26.16_
-
-- [ ] 9.9 Checkpoint - Kernel support works
-
----
-
-## Phase 10: Build Isolation (TDD)
-
-- [ ] 10.1 Write failing tests for Docker/Podman sandbox
-  - Test: Runs builds in container when --sandbox
-  - Test: Configures read/write access correctly
-  - Test: Blocks network by default
-  - Test: Allows network for packages with build.network = true
-  - Test: --no-sandbox disables isolation
-  - Test: Error when Docker/Podman not available
-  - **Validates: Requirements 27.1-27.9**
-
-- [ ] 10.2 Implement sandbox to pass tests
-  - Implement in infra/sandbox.rs
-  - _Requirements: 27.1-27.9_
-
-- [ ] 10.3 Checkpoint - Build isolation works
-
----
-
-## Phase 11: Version Management (TDD)
-
-- [ ] 11.1 Write failing tests for minimum version checking
-  - Test: Parses zigroot_version from packages
-  - Test: Parses zigroot_version from boards
-  - Test: Compares against current version
-  - Test: Displays error with update suggestion
-  - **Property 15: Minimum Version Enforcement**
-  - **Validates: Requirements 30.1-30.7**
-
-- [ ] 11.2 Implement minimum version checking to pass tests
-  - _Requirements: 30.1-30.7_
-
-- [ ] 11.3 Write failing tests for semver comparison
-  - Test: Follows semver standards
-  - **Property 16: Semver Compliance**
-  - **Validates: Requirements 30.8, 31.10**
-
-- [ ] 11.4 Implement semver comparison to pass tests
-  - _Requirements: 30.8, 31.10_
-
-### Command: zigroot update --self
-
-- [ ] 11.5 Write failing integration test for `zigroot update --self`
-  - Test: Checks for newer zigroot versions
-  - Test: Displays update instructions
-  - Test: Detects installation method
-  - Test: --install attempts to update
-  - **Validates: Requirements 31.1, 31.2, 31.7-31.9**
-
-- [ ] 11.6 Implement `zigroot update --self` to pass tests
-  - _Requirements: 31.1, 31.2, 31.7-31.9_
-
-- [ ] 11.7 Write failing tests for background update check
-  - Test: Checks at most once per day
-  - Test: Displays non-intrusive notification
-  - Test: Caches results
-  - **Validates: Requirements 31.3-31.6**
-
-- [ ] 11.8 Implement background update check to pass tests
-  - _Requirements: 31.3-31.6_
-
-- [ ] 11.9 Checkpoint - Version management works
-
-
----
-
-## Phase 12: Output & Diagnostics (TDD)
-
-- [ ] 12.1 Write failing tests for colored output
-  - Test: Green for success, red for errors, yellow for warnings
-  - Test: --quiet suppresses all output except errors
-  - Test: --json outputs machine-readable format
-  - **Validates: Requirements 14.2, 15.4, 15.8-15.10**
-
-- [ ] 12.2 Implement colored output to pass tests
-  - Implement in cli/output.rs
-  - _Requirements: 14.2, 15.4, 15.8-15.10_
-
-- [ ] 12.3 Write failing tests for progress indicators
-  - Test: Animated spinners for unknown duration
-  - Test: Progress bars for downloads and builds
-  - Test: Multi-line view for parallel operations
-  - Test: Non-interactive fallback when piped
-  - **Validates: Requirements 15.1-15.3, 15.5, 15.6**
-
-- [ ] 12.4 Implement progress indicators to pass tests
-  - _Requirements: 15.1-15.3, 15.5, 15.6_
-
-- [ ] 12.5 Write failing tests for summary banner
-  - Test: Displays total time, packages built, image size
-  - **Validates: Requirements 15.7**
-
-- [ ] 12.6 Implement summary banner to pass tests
-  - _Requirements: 15.7_
-
-- [ ] 12.7 Write failing tests for error suggestions
-  - Test: Suggests solutions for common errors
-  - **Validates: Requirements 14.1, 14.6**
-
-- [ ] 12.8 Implement error suggestions to pass tests
-  - _Requirements: 14.1, 14.6_
-
-- [ ] 12.9 Checkpoint - Output & diagnostics work
-
----
-
-## Phase 13: Local Data Storage (TDD)
-
-- [ ] 13.1 Write failing tests for platform-specific directories
-  - Test: Uses XDG on Linux, Library/Caches on macOS
-  - Test: Environment variables override defaults
-  - **Validates: Requirements 32.1-32.4**
-
-- [ ] 13.2 Implement platform directories to pass tests
-  - Implement in infra/dirs.rs
-  - _Requirements: 32.1-32.4_
-
-- [ ] 13.3 Write failing tests for global config
-  - Test: Reads config.toml from config directory
-  - **Validates: Requirements 32.5, 32.6**
-
-- [ ] 13.4 Implement global config to pass tests
-  - _Requirements: 32.5, 32.6_
-
-- [ ] 13.5 Write failing tests for shared downloads
-  - Test: Shares source archives across projects
-  - Test: Content-addressable build cache
-  - **Validates: Requirements 32.9, 32.10**
-
-- [ ] 13.6 Implement shared downloads to pass tests
-  - _Requirements: 32.9, 32.10_
-
-- [ ] 13.7 Checkpoint - Local data storage works
-
----
-
-## Phase 14: Configuration Management (TDD)
-
-- [ ] 14.1 Write failing tests for environment variable substitution
-  - Test: ${VAR} syntax substitutes correctly
-  - **Validates: Requirements 11.2**
-
-- [ ] 14.2 Implement env var substitution to pass tests
-  - _Requirements: 11.2_
-
-- [ ] 14.3 Write failing tests for configuration inheritance
-  - Test: extends directive works
-  - **Validates: Requirements 11.5**
-
-- [ ] 14.4 Implement config inheritance to pass tests
-  - _Requirements: 11.5_
-
-- [ ] 14.5 Write failing tests for manifest validation
-  - Test: Validates schema before build
-  - Test: Reports all errors
-  - **Validates: Requirements 11.3, 11.4**
-
-- [ ] 14.6 Implement manifest validation to pass tests
-  - _Requirements: 11.3, 11.4_
-
-- [ ] 14.7 Checkpoint - Configuration management works
-
-
-
----
-
-## Phase 15: Final Integration & Cleanup
-
-- [ ] 15.1 Write failing integration tests for full workflow
-  - Test: init → add → fetch → build → flash workflow
-  - Test: Multiple packages with dependencies build correctly
-  - Test: Lock file ensures reproducible builds
-  - **Validates: End-to-end workflow**
-
-- [ ] 15.2 Implement any missing integration glue
-  - Wire all commands together
-  - Ensure consistent error handling across commands
-  - _Requirements: All_
-
-- [ ] 15.3 Write failing tests for verbose/logging modes
-  - Test: --verbose shows detailed output
-  - Test: Build logs preserved in build/logs/
-  - **Validates: Requirements 14.3, 14.4**
-
-- [ ] 15.4 Implement verbose/logging to pass tests
-  - _Requirements: 14.3, 14.4_
-
-- [ ] 15.5 Final code cleanup and refactoring
-  - Remove dead code
-  - Ensure consistent naming
-  - Add missing documentation
-  - Run clippy --pedantic and fix all warnings
-  - Run rustfmt on all files
-
-- [ ] 15.6 Verify test coverage
-  - Ensure minimum 80% line coverage for core/, registry/, infra/
-  - Ensure 100% coverage for all 35 properties
-  - **Validates: Requirements 33.2, 33.3**
-
-- [ ] 15.7 Final checkpoint - All tests pass
-  - All unit tests pass
-  - All integration tests pass
-  - All property tests pass
-  - Manual smoke test of key workflows
-
----
+    - _Requirements: 4.1-4.13, 5.1-5.7, 18.17-18.27_
+  - [ ] 5.18 Checkpoint - zigroot build works end-to-end
+  - [ ] 5.19 Write failing integration test for zigroot clean
+    - Test: Removes build/ directory
+    - Test: Removes output/ directory
+    - **Validates: Requirements 4.5**
+  - [ ] 5.20 Implement zigroot clean to pass tests
+    - Implement CLI parsing in cli/commands/clean.rs
+    - Implement clean logic in core/clean.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 4.5_
+  - [ ] 5.21 Checkpoint - zigroot clean works end-to-end
+  - [ ] 5.22 Write failing integration test for zigroot check
+    - Test: Validates configuration
+    - Test: Checks all dependencies resolvable
+    - Test: Verifies toolchains available
+    - Test: Reports what would be built without building
+    - **Property 28: Check Command Validation**
+    - **Validates: Requirements 4.13**
+  - [ ] 5.23 Implement zigroot check to pass tests
+    - Implement CLI parsing in cli/commands/check.rs
+    - Implement check logic in core/check.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 4.13_
+  - [ ] 5.24 Checkpoint - zigroot check works end-to-end
+
+  - [ ] 5.25 Write failing integration test for zigroot search
+    - Test: Searches both packages and boards
+    - Test: Results grouped by type (packages first, then boards)
+    - Test: --packages searches only packages
+    - Test: --boards searches only boards
+    - Test: --refresh forces index refresh
+    - Test: Highlights matching terms
+    - Test: Suggests alternatives when no results
+    - **Property 10: Search Result Grouping**
+    - **Property 29: Search Suggestions on Empty Results**
+    - **Validates: Requirements 10.1-10.9**
+  - [ ] 5.26 Implement zigroot search to pass tests
+    - Implement CLI parsing in cli/commands/search.rs
+    - Implement search logic in core/search.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 10.1-10.9_
+  - [ ] 5.27 Checkpoint - zigroot search works end-to-end
+  - [ ] 5.28 Write failing integration test for zigroot package list
+    - Test: Displays installed packages with versions and descriptions
+    - **Validates: Requirements 2.10**
+  - [ ] 5.29 Write failing integration test for zigroot package info
+    - Test: Displays detailed package information
+    - **Validates: Requirements 2.11**
+  - [ ] 5.30 Implement zigroot package subcommands to pass tests
+    - Implement CLI parsing in cli/commands/package.rs
+    - Implement list logic in core/package_list.rs
+    - Implement info logic in core/package_info.rs
+    - Wire CLI to core
+    - Run integration tests until GREEN
+    - _Requirements: 2.10, 2.11_
+  - [ ] 5.31 Checkpoint - zigroot package subcommands work
+  - [ ] 5.32 Write failing integration test for zigroot board list
+    - Test: Lists available boards from registry
+    - **Validates: Requirements 9.1**
+  - [ ] 5.33 Write failing integration test for zigroot board set
+    - Test: Updates manifest with new board
+    - Test: Validates board compatibility with packages
+    - **Property 23: Board Compatibility Validation**
+    - **Validates: Requirements 9.2, 9.3**
+  - [ ] 5.34 Write failing integration test for zigroot board info
+    - Test: Displays board details
+    - **Validates: Requirements 9.4**
+  - [ ] 5.35 Implement zigroot board subcommands to pass tests
+    - Implement CLI parsing in cli/commands/board.rs
+    - Implement list/set/info logic in core/board_*.rs
+    - Wire CLI to core
+    - Run integration tests until GREEN
+    - _Requirements: 9.1-9.4_
+  - [ ] 5.36 Checkpoint - zigroot board subcommands work
+  - [ ] 5.37 Write failing integration test for zigroot tree
+    - Test: Displays dependency tree
+    - Test: --graph outputs DOT format
+    - Test: Distinguishes depends vs requires
+    - Test: Detects and highlights circular dependencies
+    - **Property 33: Dependency Tree Correctness**
+    - **Validates: Requirements 23.1-23.5**
+  - [ ] 5.38 Implement zigroot tree to pass tests
+    - Implement CLI parsing in cli/commands/tree.rs
+    - Implement tree logic in core/tree.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 23.1-23.5_
+  - [ ] 5.39 Checkpoint - zigroot tree works end-to-end
+  - [ ] 5.40 Write failing integration test for zigroot flash
+    - Test: Lists available flash methods when no method specified
+    - Test: Executes specified flash method
+    - Test: Downloads required external artifacts
+    - Test: Validates required tools installed
+    - Test: Requires confirmation before flashing
+    - Test: --yes skips confirmation
+    - Test: --list shows all methods
+    - Test: --device uses specified device path
+    - **Property 30: Flash Confirmation Requirement**
+    - **Validates: Requirements 7.1-7.12**
+  - [ ] 5.41 Implement zigroot flash to pass tests
+    - Implement CLI parsing in cli/commands/flash.rs
+    - Implement flash logic in core/flash.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 7.1-7.12_
+  - [ ] 5.42 Checkpoint - zigroot flash works end-to-end
+  - [ ] 5.43 Write failing integration test for zigroot external
+    - Test: list shows configured artifacts and status
+    - Test: add --url adds remote artifact
+    - Test: add --path adds local artifact
+    - **Validates: Requirements 8.1, 8.2, 8.9-8.13**
+  - [ ] 5.44 Implement zigroot external to pass tests
+    - Implement CLI parsing in cli/commands/external.rs
+    - Implement external logic in core/external.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 8.1, 8.2, 8.9-8.13_
+  - [ ] 5.45 Checkpoint - zigroot external works end-to-end
+
+
+- [ ] 6. Phase 6: Binary Compression (TDD)
+  - [ ] 6.1 Write failing tests for compression
+    - Test: Binaries compress when enabled
+    - Test: Binaries don't compress when disabled
+    - Test: Package setting overrides global
+    - Test: CLI flag overrides all
+    - Test: Unsupported architectures skip compression
+    - Test: Missing UPX shows warning and skips
+    - Test: Compression statistics displayed
+    - Test: Compression failure continues with uncompressed
+    - **Property 9: Compression Toggle Consistency**
+    - **Validates: Requirements 6.1-6.10**
+  - [ ] 6.2 Implement compression to pass tests
+    - Implement UPX compression in core/compress.rs
+    - Implement compression priority logic
+    - Implement statistics display
+    - Run tests until GREEN
+    - _Requirements: 6.1-6.10_
+  - [ ] 6.3 Checkpoint - Compression works
+
+- [ ] 7. Phase 7: Advanced Commands (TDD)
+  - [ ] 7.1 Write failing integration test for zigroot doctor
+    - Test: Checks system dependencies
+    - Test: Reports issues with suggestions
+    - Test: Detects common misconfigurations
+    - **Validates: Requirements 14.5, 14.6**
+  - [ ] 7.2 Implement zigroot doctor to pass tests
+    - Implement CLI parsing in cli/commands/doctor.rs
+    - Implement doctor logic in core/doctor.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 14.5, 14.6_
+  - [ ] 7.3 Checkpoint - zigroot doctor works
+  - [ ] 7.4 Write failing integration test for zigroot sdk
+    - Test: Generates standalone SDK tarball
+    - Test: SDK contains Zig toolchain
+    - Test: SDK contains built libraries and headers
+    - Test: SDK includes setup script
+    - Test: --output saves to specified path
+    - **Property 31: SDK Completeness**
+    - **Validates: Requirements 21.1-21.6**
+  - [ ] 7.5 Implement zigroot sdk to pass tests
+    - Implement CLI parsing in cli/commands/sdk.rs
+    - Implement SDK generation in core/sdk.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 21.1-21.6_
+  - [ ] 7.6 Checkpoint - zigroot sdk works
+  - [ ] 7.7 Write failing integration test for zigroot license
+    - Test: Displays license summary
+    - Test: --export generates license report
+    - Test: Flags copyleft licenses
+    - Test: Warns on missing license info
+    - Test: --sbom generates SPDX SBOM
+    - **Property 32: License Detection Accuracy**
+    - **Validates: Requirements 22.1-22.6**
+  - [ ] 7.8 Implement zigroot license to pass tests
+    - Implement CLI parsing in cli/commands/license.rs
+    - Implement license logic in core/license.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 22.1-22.6_
+  - [ ] 7.9 Checkpoint - zigroot license works
+  - [ ] 7.10 Write failing integration test for zigroot cache
+    - Test: export creates cache tarball
+    - Test: import loads cache tarball
+    - Test: info shows cache size and location
+    - Test: clean clears cache directory
+    - Test: Cache keys are deterministic
+    - **Property 34: Cache Key Determinism**
+    - **Validates: Requirements 24.1-24.8**
+  - [ ] 7.11 Implement zigroot cache to pass tests
+    - Implement CLI parsing in cli/commands/cache.rs
+    - Implement cache logic in core/cache.rs
+    - Wire CLI to core
+    - Run integration test until GREEN
+    - _Requirements: 24.1-24.8_
+  - [ ] 7.12 Checkpoint - zigroot cache works
+  - [ ] 7.13 Write failing integration test for zigroot config (TUI)
+    - Test: Launches TUI interface
+    - Test: Board selection works
+    - Test: Package selection works
+    - Test: Selecting package auto-selects dependencies
+    - Test: Deselecting warns about dependents
+    - Test: Saves changes to zigroot.toml
+    - Test: Shows diff before saving
+    - **Property 35: TUI Dependency Auto-Selection**
+    - **Validates: Requirements 25.1-25.17**
+  - [ ] 7.14 Implement zigroot config to pass tests
+    - Implement CLI parsing in cli/commands/config.rs
+    - Implement TUI in cli/tui/config.rs
+    - Wire CLI to TUI
+    - Run integration test until GREEN
+    - _Requirements: 25.1-25.17_
+  - [ ] 7.15 Checkpoint - zigroot config works
+
+
+- [ ] 8. Phase 8: Package/Board Authoring Commands (TDD)
+  - [ ] 8.1 Write failing integration test for zigroot package new
+    - Test: Creates package template in packages/<name>/
+    - Test: Creates metadata.toml and version file
+    - **Validates: Requirements 28.1**
+  - [ ] 8.2 Implement zigroot package new to pass tests
+    - _Requirements: 28.1_
+  - [ ] 8.3 Checkpoint - zigroot package new works
+  - [ ] 8.4 Write failing integration test for zigroot verify
+    - Test: Validates package structure
+    - Test: Validates board structure
+    - Test: Checks required fields
+    - Test: --fetch downloads and verifies checksums
+    - **Validates: Requirements 28.2-28.5, 29.2-29.4**
+  - [ ] 8.5 Implement zigroot verify to pass tests
+    - _Requirements: 28.2-28.5, 29.2-29.4_
+  - [ ] 8.6 Checkpoint - zigroot verify works
+  - [ ] 8.7 Write failing integration test for zigroot package test
+    - Test: Attempts to build package
+    - Test: Reports success or failure
+    - **Validates: Requirements 28.6**
+  - [ ] 8.8 Implement zigroot package test to pass tests
+    - _Requirements: 28.6_
+  - [ ] 8.9 Checkpoint - zigroot package test works
+  - [ ] 8.10 Write failing integration test for zigroot publish
+    - Test: Creates PR to appropriate registry
+    - Test: Validates before publishing
+    - Test: Requires GitHub authentication
+    - Test: Checks for name conflicts
+    - Test: Detects package vs board
+    - **Validates: Requirements 28.7-28.11, 29.5-29.8**
+  - [ ] 8.11 Implement zigroot publish to pass tests
+    - _Requirements: 28.7-28.11, 29.5-29.8_
+  - [ ] 8.12 Checkpoint - zigroot publish works
+  - [ ] 8.13 Write failing integration test for zigroot package bump
+    - Test: Creates new version file from latest
+    - **Validates: Requirements 28.12**
+  - [ ] 8.14 Implement zigroot package bump to pass tests
+    - _Requirements: 28.12_
+  - [ ] 8.15 Checkpoint - zigroot package bump works
+  - [ ] 8.16 Write failing integration test for zigroot board new
+    - Test: Creates board template in boards/<name>/
+    - **Validates: Requirements 29.1**
+  - [ ] 8.17 Implement zigroot board new to pass tests
+    - _Requirements: 29.1_
+  - [ ] 8.18 Checkpoint - zigroot board new works
+
+- [ ] 9. Phase 9: GCC Toolchain and Kernel Support (TDD)
+  - [ ] 9.1 Write failing tests for GCC toolchain
+    - Test: Auto-resolves bootlin.com URLs from target
+    - Test: Supports explicit URLs per host platform
+    - Test: Downloads and caches toolchains
+    - **Validates: Requirements 26.2-26.7**
+  - [ ] 9.2 Implement GCC toolchain to pass tests
+    - Implement in infra/gcc_toolchain.rs
+    - _Requirements: 26.2-26.7_
+  - [ ] 9.3 Write failing tests for kernel build
+    - Test: Supports defconfig
+    - Test: Supports config_fragments
+    - Test: Builds kernel modules
+    - Test: Installs to /lib/modules/
+    - **Validates: Requirements 26.9, 26.10, 26.14, 26.15**
+  - [ ] 9.4 Implement kernel build to pass tests
+    - Implement in core/kernel.rs
+    - _Requirements: 26.9, 26.10, 26.14, 26.15_
+  - [ ] 9.5 Write failing integration test for zigroot kernel menuconfig
+    - Test: Launches kernel menuconfig
+    - Test: Saves config to kernel/ directory
+    - **Validates: Requirements 26.11, 26.12**
+  - [ ] 9.6 Implement zigroot kernel menuconfig to pass tests
+    - _Requirements: 26.11, 26.12_
+  - [ ] 9.7 Write failing test for --kernel-only flag
+    - Test: Builds only kernel and modules
+    - **Validates: Requirements 26.16**
+  - [ ] 9.8 Implement --kernel-only to pass tests
+    - _Requirements: 26.16_
+  - [ ] 9.9 Checkpoint - Kernel support works
+
+- [ ] 10. Phase 10: Build Isolation (TDD)
+  - [ ] 10.1 Write failing tests for Docker/Podman sandbox
+    - Test: Runs builds in container when --sandbox
+    - Test: Configures read/write access correctly
+    - Test: Blocks network by default
+    - Test: Allows network for packages with build.network = true
+    - Test: --no-sandbox disables isolation
+    - Test: Error when Docker/Podman not available
+    - **Validates: Requirements 27.1-27.9**
+  - [ ] 10.2 Implement sandbox to pass tests
+    - Implement in infra/sandbox.rs
+    - _Requirements: 27.1-27.9_
+  - [ ] 10.3 Checkpoint - Build isolation works
+
+
+- [ ] 11. Phase 11: Version Management (TDD)
+  - [ ] 11.1 Write failing tests for minimum version checking
+    - Test: Parses zigroot_version from packages
+    - Test: Parses zigroot_version from boards
+    - Test: Compares against current version
+    - Test: Displays error with update suggestion
+    - **Property 15: Minimum Version Enforcement**
+    - **Validates: Requirements 30.1-30.7**
+  - [ ] 11.2 Implement minimum version checking to pass tests
+    - _Requirements: 30.1-30.7_
+  - [ ] 11.3 Write failing tests for semver comparison
+    - Test: Follows semver standards
+    - **Property 16: Semver Compliance**
+    - **Validates: Requirements 30.8, 31.10**
+  - [ ] 11.4 Implement semver comparison to pass tests
+    - _Requirements: 30.8, 31.10_
+  - [ ] 11.5 Write failing integration test for zigroot update --self
+    - Test: Checks for newer zigroot versions
+    - Test: Displays update instructions
+    - Test: Detects installation method
+    - Test: --install attempts to update
+    - **Validates: Requirements 31.1, 31.2, 31.7-31.9**
+  - [ ] 11.6 Implement zigroot update --self to pass tests
+    - _Requirements: 31.1, 31.2, 31.7-31.9_
+  - [ ] 11.7 Write failing tests for background update check
+    - Test: Checks at most once per day
+    - Test: Displays non-intrusive notification
+    - Test: Caches results
+    - **Validates: Requirements 31.3-31.6**
+  - [ ] 11.8 Implement background update check to pass tests
+    - _Requirements: 31.3-31.6_
+  - [ ] 11.9 Checkpoint - Version management works
+
+- [ ] 12. Phase 12: Output and Diagnostics (TDD)
+  - [ ] 12.1 Write failing tests for colored output
+    - Test: Green for success, red for errors, yellow for warnings
+    - Test: --quiet suppresses all output except errors
+    - Test: --json outputs machine-readable format
+    - **Validates: Requirements 14.2, 15.4, 15.8-15.10**
+  - [ ] 12.2 Implement colored output to pass tests
+    - Implement in cli/output.rs
+    - _Requirements: 14.2, 15.4, 15.8-15.10_
+  - [ ] 12.3 Write failing tests for progress indicators
+    - Test: Animated spinners for unknown duration
+    - Test: Progress bars for downloads and builds
+    - Test: Multi-line view for parallel operations
+    - Test: Non-interactive fallback when piped
+    - **Validates: Requirements 15.1-15.3, 15.5, 15.6**
+  - [ ] 12.4 Implement progress indicators to pass tests
+    - _Requirements: 15.1-15.3, 15.5, 15.6_
+  - [ ] 12.5 Write failing tests for summary banner
+    - Test: Displays total time, packages built, image size
+    - **Validates: Requirements 15.7**
+  - [ ] 12.6 Implement summary banner to pass tests
+    - _Requirements: 15.7_
+  - [ ] 12.7 Write failing tests for error suggestions
+    - Test: Suggests solutions for common errors
+    - **Validates: Requirements 14.1, 14.6**
+  - [ ] 12.8 Implement error suggestions to pass tests
+    - _Requirements: 14.1, 14.6_
+  - [ ] 12.9 Checkpoint - Output and diagnostics work
+
+- [ ] 13. Phase 13: Local Data Storage (TDD)
+  - [ ] 13.1 Write failing tests for platform-specific directories
+    - Test: Uses XDG on Linux, Library/Caches on macOS
+    - Test: Environment variables override defaults
+    - **Validates: Requirements 32.1-32.4**
+  - [ ] 13.2 Implement platform directories to pass tests
+    - Implement in infra/dirs.rs
+    - _Requirements: 32.1-32.4_
+  - [ ] 13.3 Write failing tests for global config
+    - Test: Reads config.toml from config directory
+    - **Validates: Requirements 32.5, 32.6**
+  - [ ] 13.4 Implement global config to pass tests
+    - _Requirements: 32.5, 32.6_
+  - [ ] 13.5 Write failing tests for shared downloads
+    - Test: Shares source archives across projects
+    - Test: Content-addressable build cache
+    - **Validates: Requirements 32.9, 32.10**
+  - [ ] 13.6 Implement shared downloads to pass tests
+    - _Requirements: 32.9, 32.10_
+  - [ ] 13.7 Checkpoint - Local data storage works
+
+- [ ] 14. Phase 14: Configuration Management (TDD)
+  - [ ] 14.1 Write failing tests for environment variable substitution
+    - Test: ${VAR} syntax substitutes correctly
+    - **Validates: Requirements 11.2**
+  - [ ] 14.2 Implement env var substitution to pass tests
+    - _Requirements: 11.2_
+  - [ ] 14.3 Write failing tests for configuration inheritance
+    - Test: extends directive works
+    - **Validates: Requirements 11.5**
+  - [ ] 14.4 Implement config inheritance to pass tests
+    - _Requirements: 11.5_
+  - [ ] 14.5 Write failing tests for manifest validation
+    - Test: Validates schema before build
+    - Test: Reports all errors
+    - **Validates: Requirements 11.3, 11.4**
+  - [ ] 14.6 Implement manifest validation to pass tests
+    - _Requirements: 11.3, 11.4_
+  - [ ] 14.7 Checkpoint - Configuration management works
+
+
+- [ ] 15. Phase 15: Final Integration and Cleanup
+  - [ ] 15.1 Write failing integration tests for full workflow
+    - Test: init → add → fetch → build → flash workflow
+    - Test: Multiple packages with dependencies build correctly
+    - Test: Lock file ensures reproducible builds
+    - **Validates: End-to-end workflow**
+  - [ ] 15.2 Implement any missing integration glue
+    - Wire all commands together
+    - Ensure consistent error handling across commands
+    - _Requirements: All_
+  - [ ] 15.3 Write failing tests for verbose/logging modes
+    - Test: --verbose shows detailed output
+    - Test: Build logs preserved in build/logs/
+    - **Validates: Requirements 14.3, 14.4**
+  - [ ] 15.4 Implement verbose/logging to pass tests
+    - _Requirements: 14.3, 14.4_
+  - [ ] 15.5 Final code cleanup and refactoring
+    - Remove dead code
+    - Ensure consistent naming
+    - Add missing documentation
+    - Run clippy --pedantic and fix all warnings
+    - Run rustfmt on all files
+  - [ ] 15.6 Verify test coverage
+    - Ensure minimum 80% line coverage for core/, registry/, infra/
+    - Ensure 100% coverage for all 35 properties
+    - **Validates: Requirements 33.2, 33.3**
+  - [ ] 15.7 Final checkpoint - All tests pass
 
 ## Notes
 
@@ -1058,11 +745,6 @@ This implementation plan follows **strict Test-Driven Development (TDD)**:
 2. **GREEN** - Write the minimum code necessary to make the test pass
 3. **REFACTOR** - Clean up the code while keeping tests green
 
-**Key principles:**
-- Tests are NOT optional - they are mandatory and come FIRST
-- Each task that starts with "Write failing test" must be completed before its corresponding implementation task
-- Checkpoints verify that all tests pass before moving to the next phase
-
 ### Vertical Slices
 
 Each CLI command is implemented as a **complete vertical slice**:
@@ -1072,11 +754,7 @@ Each CLI command is implemented as a **complete vertical slice**:
 4. Infrastructure (infra/*.rs if needed)
 5. Wire together and run until GREEN
 
-This ensures each command works end-to-end before moving to the next.
-
 ### Separation of Concerns
-
-The codebase follows strict layer separation:
 
 | Layer | Responsibility | I/O Allowed |
 |-------|---------------|-------------|
@@ -1084,12 +762,6 @@ The codebase follows strict layer separation:
 | `core/` | Business logic, validation, orchestration | **NO** |
 | `registry/` | Package/board registry client | Network (via infra) |
 | `infra/` | Network, filesystem, process execution | **YES** |
-
-**Rules:**
-- `core/` modules must NOT import from `infra/` directly
-- `core/` receives dependencies via traits (dependency injection)
-- All I/O operations go through `infra/` layer
-- Tests for `core/` use mock implementations of traits
 
 ### Property Coverage
 
@@ -1110,7 +782,7 @@ All 35 properties from design.md are covered in tasks:
 | 11 | 5.16 | Local Package Priority |
 | 12 | 4.7 | Lock File Reproducibility |
 | 13 | 3.1 | Option Validation |
-| 14 | 5.17.2 | Build Environment Variables |
+| 14 | 5.17 | Build Environment Variables |
 | 15 | 11.1 | Minimum Version Enforcement |
 | 16 | 11.3 | Semver Compliance |
 | 17 | 2.4 | Source Type Exclusivity |
@@ -1132,43 +804,3 @@ All 35 properties from design.md are covered in tasks:
 | 33 | 5.37 | Dependency Tree Correctness |
 | 34 | 7.10 | Cache Key Determinism |
 | 35 | 7.13 | TUI Dependency Auto-Selection |
-
-### Requirement Coverage
-
-All 33 requirements are covered across the phases:
-
-| Req | Description | Phase(s) |
-|-----|-------------|----------|
-| 1 | Project Initialization | 5 (init) |
-| 2 | Package Management | 5 (add, remove, update, package) |
-| 3 | Package Download | 4, 5 (fetch) |
-| 4 | Build System | 5 (build, clean, check) |
-| 5 | Image Creation | 5 (build) |
-| 6 | Binary Compression | 6 |
-| 7 | Device Flashing | 5 (flash) |
-| 8 | External Artifacts | 5 (external, fetch) |
-| 9 | Board Management | 5 (board) |
-| 10 | Unified Search | 5 (search) |
-| 11 | Configuration Management | 14 |
-| 12 | Local Package Development | 5 (build) |
-| 13 | Reproducible Builds | 4 (lock file) |
-| 14 | Error Handling and Diagnostics | 7, 12, 15 |
-| 15 | Interactive Output and Progress | 12 |
-| 16 | Manifest Serialization | 2 |
-| 17 | Package Definition Parsing | 2 |
-| 18 | Package Definition Format | 2, 3 |
-| 19 | Board Definition Format | 2 |
-| 20 | Dependency Resolution | 3 |
-| 21 | SDK Generation | 7 (sdk) |
-| 22 | License Compliance | 7 (license) |
-| 23 | Dependency Visualization | 5 (tree) |
-| 24 | Build Cache Sharing | 7 (cache) |
-| 25 | Interactive Configuration (TUI) | 7 (config) |
-| 26 | Kernel Building | 9 |
-| 27 | Build Isolation | 10 |
-| 28 | Package Authoring | 8 |
-| 29 | Board Authoring | 8 |
-| 30 | Minimum Zigroot Version | 11 |
-| 31 | Update Check | 11 |
-| 32 | Local Data Storage | 13 |
-| 33 | Test-Driven Development | 1, 15 |

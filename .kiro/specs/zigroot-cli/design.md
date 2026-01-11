@@ -244,7 +244,7 @@ fn get_suggestion(error: &anyhow::Error) -> Option<String> {
 
 ## Repository and CI/CD Setup
 
-The zigroot-cli repository (`github.com/zigroot/zigroot-cli`) follows modern Rust project practices:
+The zigroot-cli repository (`github.com/zigroot-project/zigroot-cli`) follows modern Rust project practices:
 
 ### Version Embedding
 
@@ -588,16 +588,16 @@ jobs:
           cat > Formula/zigroot.rb << EOF
           class Zigroot < Formula
             desc "Modern embedded Linux rootfs builder - npm for embedded systems"
-            homepage "https://github.com/zigroot/zigroot-cli"
+            homepage "https://github.com/zigroot-project/zigroot-cli"
             version "${VERSION}"
             license "MIT"
 
             on_macos do
               if Hardware::CPU.intel?
-                url "https://github.com/zigroot/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-x86_64-apple-darwin.tar.gz"
+                url "https://github.com/zigroot-project/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-x86_64-apple-darwin.tar.gz"
                 sha256 "${{ steps.checksums.outputs.x64_sha }}"
               else
-                url "https://github.com/zigroot/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-aarch64-apple-darwin.tar.gz"
+                url "https://github.com/zigroot-project/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-aarch64-apple-darwin.tar.gz"
                 sha256 "${{ steps.checksums.outputs.arm64_sha }}"
               end
             end
@@ -649,7 +649,7 @@ pkgver=0.1.0
 pkgrel=1
 pkgdesc="Modern embedded Linux rootfs builder - npm for embedded systems"
 arch=('x86_64' 'aarch64')
-url="https://github.com/zigroot/zigroot-cli"
+url="https://github.com/zigroot-project/zigroot-cli"
 license=('MIT')
 depends=()
 makedepends=('cargo')
@@ -690,7 +690,7 @@ package() {
 | crates.io | `cargo install zigroot` | crates.io/crates/zigroot |
 | Homebrew | `brew install zigroot/tap/zigroot` | github.com/zigroot/homebrew-tap |
 | AUR | `yay -S zigroot` | aur.archlinux.org/packages/zigroot |
-| GitHub | Download binary | github.com/zigroot/zigroot-cli/releases |
+| GitHub | Download binary | github.com/zigroot-project/zigroot-cli/releases |
 
 ### GitHub Organization Setup
 
@@ -698,12 +698,12 @@ The `zigroot` GitHub organization requires the following repositories:
 
 | Repository | Purpose |
 |------------|---------|
-| `zigroot/zigroot-cli` | Main CLI tool (this project) |
-| `zigroot/zigroot-packages` | Community package definitions |
-| `zigroot/zigroot-boards` | Board definitions for various hardware |
+| `zigroot-project/zigroot-cli` | Main CLI tool (this project) |
+| `zigroot-project/zigroot-packages` | Community package definitions |
+| `zigroot-project/zigroot-boards` | Board definitions for various hardware |
 | `zigroot/homebrew-tap` | Homebrew formula for macOS installation |
 
-**Required Secrets** (in `zigroot/zigroot-cli` repository settings):
+**Required Secrets** (in `zigroot-project/zigroot-cli` repository settings):
 
 | Secret | Purpose |
 |--------|---------|
@@ -841,7 +841,7 @@ sha256 = "b8cc24c9574d809e7279c3be349795c5d5ceb6fdf19ca709f80cde50e47de314"
    ```bash
    export GITHUB_TOKEN=ghp_xxx  # Or use `gh auth login`
    zigroot publish packages/mypackage
-   # Creates PR to zigroot/zigroot-packages
+   # Creates PR to zigroot-project/zigroot-packages
    ```
 
 6. **Add new version:**
@@ -869,7 +869,7 @@ sha256 = "b8cc24c9574d809e7279c3be349795c5d5ceb6fdf19ca709f80cde50e47de314"
 3. **Publish:**
    ```bash
    zigroot publish boards/myboard
-   # Creates PR to zigroot/zigroot-boards
+   # Creates PR to zigroot-project/zigroot-boards
    ```
 
 **Publishing Implementation:**
@@ -1579,7 +1579,7 @@ impl UpdateChecker {
                 current: self.current_version.to_string(),
                 suggestion: format!(
                     "Update zigroot with: zigroot update --self --install\n\
-                     Or download from: https://github.com/zigroot/zigroot-cli/releases"
+                     Or download from: https://github.com/zigroot-project/zigroot-cli/releases"
                 ),
             });
         }
@@ -1610,7 +1610,7 @@ impl UpdateChecker {
             }
             InstallMethod::Binary => {
                 println!("Manual installation detected.");
-                println!("Download latest from: https://github.com/zigroot/zigroot-cli/releases");
+                println!("Download latest from: https://github.com/zigroot-project/zigroot-cli/releases");
             }
         }
         
@@ -1719,7 +1719,7 @@ pub struct RegistryClient {
 }
 
 pub struct RegistryConfig {
-    /// GitHub org/repo, e.g., "zigroot/zigroot-packages"
+    /// GitHub org/repo, e.g., "zigroot-project/zigroot-packages"
     pub repo: String,
     /// Branch to use, default "main"
     pub branch: String,
@@ -1769,17 +1769,17 @@ impl RegistryClient {
 
 1. **Index Fetching** - On first use or when cache expires, fetch `index.json`:
    ```
-   GET https://raw.githubusercontent.com/zigroot/zigroot-packages/main/index.json
+   GET https://raw.githubusercontent.com/zigroot-project/zigroot-packages/main/index.json
    ```
 
 2. **Package Metadata Fetching** - When package details needed:
    ```
-   GET https://raw.githubusercontent.com/zigroot/zigroot-packages/main/packages/busybox/metadata.toml
+   GET https://raw.githubusercontent.com/zigroot-project/zigroot-packages/main/packages/busybox/metadata.toml
    ```
 
 3. **Version Fetching** - When a specific version is needed:
    ```
-   GET https://raw.githubusercontent.com/zigroot/zigroot-packages/main/packages/busybox/1.36.1.toml
+   GET https://raw.githubusercontent.com/zigroot-project/zigroot-packages/main/packages/busybox/1.36.1.toml
    ```
 
 4. **Caching Strategy**:
@@ -2511,7 +2511,7 @@ The update check result is cached to avoid repeated network requests:
   "checked_at": "2025-01-11T12:00:00Z",
   "current_version": "0.1.0",
   "latest_version": "0.2.0",
-  "release_url": "https://github.com/zigroot/zigroot-cli/releases/tag/v0.2.0",
+  "release_url": "https://github.com/zigroot-project/zigroot-cli/releases/tag/v0.2.0",
   "has_update": true
 }
 ```
