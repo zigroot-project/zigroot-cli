@@ -368,20 +368,20 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration tests until GREEN
     - _Requirements: 9.1-9.4_
   - [x] 5.36 Checkpoint - zigroot board subcommands work
-  - [ ] 5.37 Write failing integration test for zigroot tree
+  - [x] 5.37 Write failing integration test for zigroot tree
     - Test: Displays dependency tree
     - Test: --graph outputs DOT format
     - Test: Distinguishes depends vs requires
     - Test: Detects and highlights circular dependencies
     - **Property 33: Dependency Tree Correctness**
     - **Validates: Requirements 23.1-23.5**
-  - [ ] 5.38 Implement zigroot tree to pass tests
+  - [x] 5.38 Implement zigroot tree to pass tests
     - Implement CLI parsing in cli/commands/tree.rs
     - Implement tree logic in core/tree.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 23.1-23.5_
-  - [ ] 5.39 Checkpoint - zigroot tree works end-to-end
+  - [-] 5.39 Checkpoint - zigroot tree works end-to-end
   - [ ] 5.40 Write failing integration test for zigroot flash
     - Test: Lists available flash methods when no method specified
     - Test: Executes specified flash method

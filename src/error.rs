@@ -226,6 +226,14 @@ pub enum ZigrootError {
     #[error("Manifest error: {0}")]
     Manifest(String),
 
+    /// Manifest not found
+    #[error("Manifest not found at '{path}'. Run 'zigroot init' to create a project.")]
+    ManifestNotFound { path: String },
+
+    /// Manifest parse error
+    #[error("Failed to parse manifest: {source}")]
+    ManifestParse { source: toml::de::Error },
+
     /// Package error
     #[error("Package error: {0}")]
     Package(#[from] PackageError),
@@ -259,8 +267,8 @@ pub enum ZigrootError {
     Option(#[from] OptionError),
 
     /// IO error
-    #[error("IO error: {0}")]
-    Io(#[from] std::io::Error),
+    #[error("IO error: {source}")]
+    Io { source: std::io::Error },
 
     /// Generic error
     #[error("{0}")]

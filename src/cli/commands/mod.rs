@@ -12,6 +12,7 @@ pub mod init;
 pub mod package;
 pub mod remove;
 pub mod search;
+pub mod tree;
 pub mod update;
 
 use anyhow::Result;
@@ -151,6 +152,9 @@ pub enum Commands {
 
     /// Display dependency tree
     Tree {
+        /// Show dependencies for specific package
+        package: Option<String>,
+
         /// Output in DOT graph format
         #[arg(long)]
         graph: bool,
@@ -415,6 +419,10 @@ impl Commands {
                         Ok(())
                     }
                 }
+            }
+            Self::Tree { package, graph } => {
+                let current_dir = std::env::current_dir()?;
+                tree::execute(&current_dir, package, graph).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");
