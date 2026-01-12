@@ -57,6 +57,10 @@ backoff = { version = "0.4", features = ["tokio"] }
 futures = "0.3"
 tokio-util = { version = "0.7", features = ["io"] }
 
+# System utilities
+num_cpus = "1.16"
+which = "7.0"
+
 [dev-dependencies]
 # Property-based testing
 proptest = "1.5"

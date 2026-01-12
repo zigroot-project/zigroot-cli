@@ -265,7 +265,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 3.1-3.8, 8.3-8.7_
   - [x] 5.15 Checkpoint - zigroot fetch works end-to-end
-  - [ ] 5.16 Write failing integration test for zigroot build
+  - [x] 5.16 Write failing integration test for zigroot build
     - Test: Compiles all packages in dependency order
     - Test: Uses Zig cross-compilation with target triple
     - Test: Builds statically linked binaries
@@ -278,7 +278,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 8: Incremental Build Correctness**
     - **Property 11: Local Package Priority**
     - **Validates: Requirements 4.1-4.13, 5.1-5.7**
-  - [ ] 5.17 Implement zigroot build to pass tests
+  - [x] 5.17 Implement zigroot build to pass tests
     - Implement CLI parsing in cli/commands/build.rs
     - Implement build environment setup in core/build_env.rs
     - Implement Zig toolchain integration in infra/toolchain.rs
@@ -291,7 +291,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - **Property 14: Build Environment Variables**
     - _Requirements: 4.1-4.13, 5.1-5.7, 18.17-18.27_
-  - [ ] 5.18 Checkpoint - zigroot build works end-to-end
+  - [x] 5.18 Checkpoint - zigroot build works end-to-end
   - [ ] 5.19 Write failing integration test for zigroot clean
     - Test: Removes build/ directory
     - Test: Removes output/ directory

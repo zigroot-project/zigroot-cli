@@ -10,6 +10,7 @@
 //! - [`board`] - Board definition handling
 //! - [`resolver`] - Dependency resolution
 //! - [`builder`] - Build orchestration logic
+//! - [`build_env`] - Build environment setup
 //! - [`lock`] - Lock file handling
 //! - [`init`] - Project initialization logic
 //! - [`add`] - Package addition logic
@@ -19,6 +20,7 @@
 
 pub mod add;
 pub mod board;
+pub mod build_env;
 pub mod builder;
 pub mod fetch;
 pub mod init;
