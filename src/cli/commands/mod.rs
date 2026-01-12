@@ -2,6 +2,7 @@
 //!
 //! Each command is implemented in its own submodule.
 
+pub mod add;
 pub mod init;
 
 use anyhow::Result;
@@ -325,6 +326,14 @@ impl Commands {
             Self::Init { board, force } => {
                 let current_dir = std::env::current_dir()?;
                 init::execute(&current_dir, board, force).await
+            }
+            Self::Add {
+                package,
+                git,
+                registry,
+            } => {
+                let current_dir = std::env::current_dir()?;
+                add::execute(&current_dir, &package, git, registry).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

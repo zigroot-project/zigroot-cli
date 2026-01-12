@@ -207,7 +207,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 1.1-1.7_
   - [x] 5.3 Checkpoint - zigroot init works end-to-end
-  - [-] 5.4 Write failing integration test for zigroot add
+  - [x] 5.4 Write failing integration test for zigroot add
     - Test: Adds package from registry to manifest
     - Test: Adds specific version with @version syntax
     - Test: Adds package from git with --git flag
@@ -218,13 +218,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 5: Package Addition Preserves Manifest Validity**
     - **Property 7: Transitive Dependency Inclusion**
     - **Validates: Requirements 2.1-2.4, 2.8, 2.9**
-  - [ ] 5.5 Implement zigroot add to pass tests
+  - [x] 5.5 Implement zigroot add to pass tests
     - Implement CLI parsing in cli/commands/add.rs
     - Implement add logic in core/add.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 2.1-2.4, 2.8, 2.9_
-  - [ ] 5.6 Checkpoint - zigroot add works end-to-end
+  - [x] 5.6 Checkpoint - zigroot add works end-to-end
   - [ ] 5.7 Write failing integration test for zigroot remove
     - Test: Removes package from manifest
     - Test: Updates lock file

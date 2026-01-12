@@ -12,7 +12,9 @@
 //! - [`builder`] - Build orchestration logic
 //! - [`lock`] - Lock file handling
 //! - [`init`] - Project initialization logic
+//! - [`add`] - Package addition logic
 
+pub mod add;
 pub mod board;
 pub mod builder;
 pub mod init;
