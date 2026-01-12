@@ -4,6 +4,7 @@
 
 pub mod add;
 pub mod build;
+pub mod check;
 pub mod clean;
 pub mod fetch;
 pub mod init;
@@ -366,6 +367,10 @@ impl Commands {
             Self::Clean => {
                 let current_dir = std::env::current_dir()?;
                 clean::execute(&current_dir).await
+            }
+            Self::Check => {
+                let current_dir = std::env::current_dir()?;
+                check::execute(&current_dir).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

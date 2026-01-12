@@ -18,11 +18,13 @@
 //! - [`update`] - Package update logic
 //! - [`fetch`] - Package fetch logic
 //! - [`clean`] - Clean build artifacts logic
+//! - [`check`] - Configuration validation logic
 
 pub mod add;
 pub mod board;
 pub mod build_env;
 pub mod builder;
+pub mod check;
 pub mod clean;
 pub mod fetch;
 pub mod init;

@@ -217,3 +217,52 @@ pub enum OptionError {
         error: String,
     },
 }
+
+
+/// Top-level zigroot error type
+#[derive(Error, Debug)]
+pub enum ZigrootError {
+    /// Manifest error
+    #[error("Manifest error: {0}")]
+    Manifest(String),
+
+    /// Package error
+    #[error("Package error: {0}")]
+    Package(#[from] PackageError),
+
+    /// Board error
+    #[error("Board error: {0}")]
+    Board(#[from] BoardError),
+
+    /// Resolver error
+    #[error("Resolver error: {0}")]
+    Resolver(#[from] ResolverError),
+
+    /// Build error
+    #[error("Build error: {0}")]
+    Build(#[from] BuildError),
+
+    /// Download error
+    #[error("Download error: {0}")]
+    Download(#[from] DownloadError),
+
+    /// Filesystem error
+    #[error("Filesystem error: {0}")]
+    Filesystem(#[from] FilesystemError),
+
+    /// Init error
+    #[error("Init error: {0}")]
+    Init(#[from] InitError),
+
+    /// Option error
+    #[error("Option error: {0}")]
+    Option(#[from] OptionError),
+
+    /// IO error
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    /// Generic error
+    #[error("{0}")]
+    Generic(String),
+}

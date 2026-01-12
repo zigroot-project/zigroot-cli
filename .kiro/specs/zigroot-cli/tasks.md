@@ -303,20 +303,20 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 4.5_
   - [x] 5.21 Checkpoint - zigroot clean works end-to-end
-  - [ ] 5.22 Write failing integration test for zigroot check
+  - [x] 5.22 Write failing integration test for zigroot check
     - Test: Validates configuration
     - Test: Checks all dependencies resolvable
     - Test: Verifies toolchains available
     - Test: Reports what would be built without building
     - **Property 28: Check Command Validation**
     - **Validates: Requirements 4.13**
-  - [ ] 5.23 Implement zigroot check to pass tests
+  - [x] 5.23 Implement zigroot check to pass tests
     - Implement CLI parsing in cli/commands/check.rs
     - Implement check logic in core/check.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 4.13_
-  - [ ] 5.24 Checkpoint - zigroot check works end-to-end
+  - [x] 5.24 Checkpoint - zigroot check works end-to-end
 
   - [ ] 5.25 Write failing integration test for zigroot search
     - Test: Searches both packages and boards
