@@ -8,6 +8,7 @@ pub mod build;
 pub mod check;
 pub mod clean;
 pub mod fetch;
+pub mod flash;
 pub mod init;
 pub mod package;
 pub mod remove;
@@ -423,6 +424,10 @@ impl Commands {
             Self::Tree { package, graph } => {
                 let current_dir = std::env::current_dir()?;
                 tree::execute(&current_dir, package, graph).await
+            }
+            Self::Flash { method, device, yes, list } => {
+                let current_dir = std::env::current_dir()?;
+                flash::execute(&current_dir, method, device, yes, list).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

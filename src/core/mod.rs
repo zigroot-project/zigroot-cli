@@ -20,6 +20,7 @@
 //! - [`clean`] - Clean build artifacts logic
 //! - [`check`] - Configuration validation logic
 //! - [`search`] - Search functionality for packages and boards
+//! - [`flash`] - Device flashing logic
 
 pub mod add;
 pub mod board;
@@ -28,6 +29,7 @@ pub mod builder;
 pub mod check;
 pub mod clean;
 pub mod fetch;
+pub mod flash;
 pub mod init;
 pub mod lock;
 pub mod manifest;

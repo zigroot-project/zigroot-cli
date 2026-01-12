@@ -382,7 +382,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 23.1-23.5_
   - [x] 5.39 Checkpoint - zigroot tree works end-to-end
-  - [ ] 5.40 Write failing integration test for zigroot flash
+  - [x] 5.40 Write failing integration test for zigroot flash
     - Test: Lists available flash methods when no method specified
     - Test: Executes specified flash method
     - Test: Downloads required external artifacts
@@ -393,13 +393,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: --device uses specified device path
     - **Property 30: Flash Confirmation Requirement**
     - **Validates: Requirements 7.1-7.12**
-  - [ ] 5.41 Implement zigroot flash to pass tests
+  - [x] 5.41 Implement zigroot flash to pass tests
     - Implement CLI parsing in cli/commands/flash.rs
     - Implement flash logic in core/flash.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 7.1-7.12_
-  - [ ] 5.42 Checkpoint - zigroot flash works end-to-end
+  - [x] 5.42 Checkpoint - zigroot flash works end-to-end
   - [ ] 5.43 Write failing integration test for zigroot external
     - Test: list shows configured artifacts and status
     - Test: add --url adds remote artifact
