@@ -381,7 +381,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 23.1-23.5_
-  - [-] 5.39 Checkpoint - zigroot tree works end-to-end
+  - [x] 5.39 Checkpoint - zigroot tree works end-to-end
   - [ ] 5.40 Write failing integration test for zigroot flash
     - Test: Lists available flash methods when no method specified
     - Test: Executes specified flash method
