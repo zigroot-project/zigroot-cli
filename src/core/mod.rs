@@ -21,6 +21,7 @@
 //! - [`check`] - Configuration validation logic
 //! - [`search`] - Search functionality for packages and boards
 //! - [`flash`] - Device flashing logic
+//! - [`external`] - External artifact management
 
 pub mod add;
 pub mod board;
@@ -28,6 +29,7 @@ pub mod build_env;
 pub mod builder;
 pub mod check;
 pub mod clean;
+pub mod external;
 pub mod fetch;
 pub mod flash;
 pub mod init;

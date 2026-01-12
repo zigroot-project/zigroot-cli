@@ -189,7 +189,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
   - [x] 4.9 Checkpoint - Infrastructure layer complete
 
 
-- [-] 5. Phase 5: CLI Commands - Vertical Slices (TDD)
+- [x] 5. Phase 5: CLI Commands - Vertical Slices (TDD)
   - [x] 5.1 Write failing integration test for zigroot init
     - Test: Creates zigroot.toml in empty directory
     - Test: Creates packages/, boards/, user/files/, user/scripts/ directories
@@ -400,18 +400,18 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 7.1-7.12_
   - [x] 5.42 Checkpoint - zigroot flash works end-to-end
-  - [ ] 5.43 Write failing integration test for zigroot external
+  - [x] 5.43 Write failing integration test for zigroot external
     - Test: list shows configured artifacts and status
     - Test: add --url adds remote artifact
     - Test: add --path adds local artifact
     - **Validates: Requirements 8.1, 8.2, 8.9-8.13**
-  - [ ] 5.44 Implement zigroot external to pass tests
+  - [x] 5.44 Implement zigroot external to pass tests
     - Implement CLI parsing in cli/commands/external.rs
     - Implement external logic in core/external.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 8.1, 8.2, 8.9-8.13_
-  - [ ] 5.45 Checkpoint - zigroot external works end-to-end
+  - [x] 5.45 Checkpoint - zigroot external works end-to-end
 
 
 - [ ] 6. Phase 6: Binary Compression (TDD)

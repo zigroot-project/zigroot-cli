@@ -7,6 +7,7 @@ pub mod board;
 pub mod build;
 pub mod check;
 pub mod clean;
+pub mod external;
 pub mod fetch;
 pub mod flash;
 pub mod init;
@@ -428,6 +429,23 @@ impl Commands {
             Self::Flash { method, device, yes, list } => {
                 let current_dir = std::env::current_dir()?;
                 flash::execute(&current_dir, method, device, yes, list).await
+            }
+            Self::External { command } => {
+                let current_dir = std::env::current_dir()?;
+                match command {
+                    ExternalCommands::List => {
+                        external::execute_list(&current_dir).await
+                    }
+                    ExternalCommands::Add { name, artifact_type, url, path } => {
+                        external::execute_add(
+                            &current_dir,
+                            &name,
+                            &artifact_type,
+                            url.as_deref(),
+                            path.as_deref(),
+                        ).await
+                    }
+                }
             }
             _ => {
                 tracing::info!("Command not yet implemented");
