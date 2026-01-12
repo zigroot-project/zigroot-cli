@@ -318,7 +318,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - _Requirements: 4.13_
   - [x] 5.24 Checkpoint - zigroot check works end-to-end
 
-  - [ ] 5.25 Write failing integration test for zigroot search
+  - [x] 5.25 Write failing integration test for zigroot search
     - Test: Searches both packages and boards
     - Test: Results grouped by type (packages first, then boards)
     - Test: --packages searches only packages
@@ -329,13 +329,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 10: Search Result Grouping**
     - **Property 29: Search Suggestions on Empty Results**
     - **Validates: Requirements 10.1-10.9**
-  - [ ] 5.26 Implement zigroot search to pass tests
+  - [x] 5.26 Implement zigroot search to pass tests
     - Implement CLI parsing in cli/commands/search.rs
     - Implement search logic in core/search.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 10.1-10.9_
-  - [ ] 5.27 Checkpoint - zigroot search works end-to-end
+  - [x] 5.27 Checkpoint - zigroot search works end-to-end
   - [ ] 5.28 Write failing integration test for zigroot package list
     - Test: Displays installed packages with versions and descriptions
     - **Validates: Requirements 2.10**

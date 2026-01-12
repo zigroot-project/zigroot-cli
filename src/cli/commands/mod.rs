@@ -9,6 +9,7 @@ pub mod clean;
 pub mod fetch;
 pub mod init;
 pub mod remove;
+pub mod search;
 pub mod update;
 
 use anyhow::Result;
@@ -371,6 +372,14 @@ impl Commands {
             Self::Check => {
                 let current_dir = std::env::current_dir()?;
                 check::execute(&current_dir).await
+            }
+            Self::Search {
+                query,
+                packages,
+                boards,
+                refresh,
+            } => {
+                search::execute(&query, packages, boards, refresh).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

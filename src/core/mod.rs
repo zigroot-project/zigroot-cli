@@ -19,6 +19,7 @@
 //! - [`fetch`] - Package fetch logic
 //! - [`clean`] - Clean build artifacts logic
 //! - [`check`] - Configuration validation logic
+//! - [`search`] - Search functionality for packages and boards
 
 pub mod add;
 pub mod board;
@@ -34,4 +35,5 @@ pub mod options;
 pub mod package;
 pub mod remove;
 pub mod resolver;
+pub mod search;
 pub mod update;
