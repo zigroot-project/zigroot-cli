@@ -238,18 +238,18 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 2.5_
   - [x] 5.9 Checkpoint - zigroot remove works end-to-end
-  - [ ] 5.10 Write failing integration test for zigroot update
+  - [x] 5.10 Write failing integration test for zigroot update
     - Test: Checks for newer versions of all packages
     - Test: Updates lock file with new versions
     - Test: Updates single package when name specified
     - **Validates: Requirements 2.6, 2.7**
-  - [ ] 5.11 Implement zigroot update to pass tests
+  - [x] 5.11 Implement zigroot update to pass tests
     - Implement CLI parsing in cli/commands/update.rs
     - Implement update logic in core/update.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 2.6, 2.7_
-  - [ ] 5.12 Checkpoint - zigroot update works end-to-end
+  - [x] 5.12 Checkpoint - zigroot update works end-to-end
   - [ ] 5.13 Write failing integration test for zigroot fetch
     - Test: Downloads source archives for all packages
     - Test: Verifies SHA256 checksums
