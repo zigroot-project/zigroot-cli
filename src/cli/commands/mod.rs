@@ -4,6 +4,7 @@
 
 pub mod add;
 pub mod init;
+pub mod remove;
 
 use anyhow::Result;
 use clap::Subcommand;
@@ -334,6 +335,10 @@ impl Commands {
             } => {
                 let current_dir = std::env::current_dir()?;
                 add::execute(&current_dir, &package, git, registry).await
+            }
+            Self::Remove { package } => {
+                let current_dir = std::env::current_dir()?;
+                remove::execute(&current_dir, &package).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

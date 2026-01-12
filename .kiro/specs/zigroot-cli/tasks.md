@@ -225,19 +225,19 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 2.1-2.4, 2.8, 2.9_
   - [x] 5.6 Checkpoint - zigroot add works end-to-end
-  - [ ] 5.7 Write failing integration test for zigroot remove
+  - [x] 5.7 Write failing integration test for zigroot remove
     - Test: Removes package from manifest
     - Test: Updates lock file
     - Test: Manifest remains valid after removal
     - **Property 6: Package Removal Preserves Manifest Validity**
     - **Validates: Requirements 2.5**
-  - [ ] 5.8 Implement zigroot remove to pass tests
+  - [x] 5.8 Implement zigroot remove to pass tests
     - Implement CLI parsing in cli/commands/remove.rs
     - Implement remove logic in core/remove.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 2.5_
-  - [ ] 5.9 Checkpoint - zigroot remove works end-to-end
+  - [x] 5.9 Checkpoint - zigroot remove works end-to-end
   - [ ] 5.10 Write failing integration test for zigroot update
     - Test: Checks for newer versions of all packages
     - Test: Updates lock file with new versions

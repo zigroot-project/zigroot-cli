@@ -13,6 +13,7 @@
 //! - [`lock`] - Lock file handling
 //! - [`init`] - Project initialization logic
 //! - [`add`] - Package addition logic
+//! - [`remove`] - Package removal logic
 
 pub mod add;
 pub mod board;
@@ -22,4 +23,5 @@ pub mod lock;
 pub mod manifest;
 pub mod options;
 pub mod package;
+pub mod remove;
 pub mod resolver;
