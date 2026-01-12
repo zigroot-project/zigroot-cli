@@ -292,17 +292,17 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - **Property 14: Build Environment Variables**
     - _Requirements: 4.1-4.13, 5.1-5.7, 18.17-18.27_
   - [x] 5.18 Checkpoint - zigroot build works end-to-end
-  - [ ] 5.19 Write failing integration test for zigroot clean
+  - [x] 5.19 Write failing integration test for zigroot clean
     - Test: Removes build/ directory
     - Test: Removes output/ directory
     - **Validates: Requirements 4.5**
-  - [ ] 5.20 Implement zigroot clean to pass tests
+  - [x] 5.20 Implement zigroot clean to pass tests
     - Implement CLI parsing in cli/commands/clean.rs
     - Implement clean logic in core/clean.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 4.5_
-  - [ ] 5.21 Checkpoint - zigroot clean works end-to-end
+  - [x] 5.21 Checkpoint - zigroot clean works end-to-end
   - [ ] 5.22 Write failing integration test for zigroot check
     - Test: Validates configuration
     - Test: Checks all dependencies resolvable
