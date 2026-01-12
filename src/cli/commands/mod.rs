@@ -3,6 +3,7 @@
 //! Each command is implemented in its own submodule.
 
 pub mod add;
+pub mod fetch;
 pub mod init;
 pub mod remove;
 pub mod update;
@@ -344,6 +345,10 @@ impl Commands {
             Self::Update { package, self_update: _ } => {
                 let current_dir = std::env::current_dir()?;
                 update::execute(&current_dir, package).await
+            }
+            Self::Fetch { parallel, force } => {
+                let current_dir = std::env::current_dir()?;
+                fetch::execute(&current_dir, parallel, force).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

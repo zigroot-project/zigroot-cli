@@ -250,7 +250,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 2.6, 2.7_
   - [x] 5.12 Checkpoint - zigroot update works end-to-end
-  - [ ] 5.13 Write failing integration test for zigroot fetch
+  - [x] 5.13 Write failing integration test for zigroot fetch
     - Test: Downloads source archives for all packages
     - Test: Verifies SHA256 checksums
     - Test: Skips already downloaded valid files
@@ -258,13 +258,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: --force re-downloads all
     - Test: Downloads external artifacts
     - **Validates: Requirements 3.1-3.8, 8.3-8.7**
-  - [ ] 5.14 Implement zigroot fetch to pass tests
+  - [x] 5.14 Implement zigroot fetch to pass tests
     - Implement CLI parsing in cli/commands/fetch.rs
     - Implement fetch logic in core/fetch.rs
     - Wire CLI to core (uses infra/download.rs)
     - Run integration test until GREEN
     - _Requirements: 3.1-3.8, 8.3-8.7_
-  - [ ] 5.15 Checkpoint - zigroot fetch works end-to-end
+  - [x] 5.15 Checkpoint - zigroot fetch works end-to-end
   - [ ] 5.16 Write failing integration test for zigroot build
     - Test: Compiles all packages in dependency order
     - Test: Uses Zig cross-compilation with target triple

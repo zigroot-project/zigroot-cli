@@ -15,10 +15,12 @@
 //! - [`add`] - Package addition logic
 //! - [`remove`] - Package removal logic
 //! - [`update`] - Package update logic
+//! - [`fetch`] - Package fetch logic
 
 pub mod add;
 pub mod board;
 pub mod builder;
+pub mod fetch;
 pub mod init;
 pub mod lock;
 pub mod manifest;
