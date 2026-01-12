@@ -350,24 +350,24 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration tests until GREEN
     - _Requirements: 2.10, 2.11_
   - [x] 5.31 Checkpoint - zigroot package subcommands work
-  - [ ] 5.32 Write failing integration test for zigroot board list
+  - [x] 5.32 Write failing integration test for zigroot board list
     - Test: Lists available boards from registry
     - **Validates: Requirements 9.1**
-  - [ ] 5.33 Write failing integration test for zigroot board set
+  - [x] 5.33 Write failing integration test for zigroot board set
     - Test: Updates manifest with new board
     - Test: Validates board compatibility with packages
     - **Property 23: Board Compatibility Validation**
     - **Validates: Requirements 9.2, 9.3**
-  - [ ] 5.34 Write failing integration test for zigroot board info
+  - [x] 5.34 Write failing integration test for zigroot board info
     - Test: Displays board details
     - **Validates: Requirements 9.4**
-  - [ ] 5.35 Implement zigroot board subcommands to pass tests
+  - [x] 5.35 Implement zigroot board subcommands to pass tests
     - Implement CLI parsing in cli/commands/board.rs
     - Implement list/set/info logic in core/board_*.rs
     - Wire CLI to core
     - Run integration tests until GREEN
     - _Requirements: 9.1-9.4_
-  - [ ] 5.36 Checkpoint - zigroot board subcommands work
+  - [x] 5.36 Checkpoint - zigroot board subcommands work
   - [ ] 5.37 Write failing integration test for zigroot tree
     - Test: Displays dependency tree
     - Test: --graph outputs DOT format

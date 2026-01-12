@@ -3,6 +3,7 @@
 //! Each command is implemented in its own submodule.
 
 pub mod add;
+pub mod board;
 pub mod build;
 pub mod check;
 pub mod clean;
@@ -393,6 +394,24 @@ impl Commands {
                     }
                     _ => {
                         tracing::info!("Package subcommand not yet implemented");
+                        Ok(())
+                    }
+                }
+            }
+            Self::Board { command } => {
+                let current_dir = std::env::current_dir()?;
+                match command {
+                    BoardCommands::List => {
+                        board::execute_list().await
+                    }
+                    BoardCommands::Set { board: board_name } => {
+                        board::execute_set(&current_dir, &board_name).await
+                    }
+                    BoardCommands::Info { board: board_name } => {
+                        board::execute_info(&board_name).await
+                    }
+                    _ => {
+                        tracing::info!("Board subcommand not yet implemented");
                         Ok(())
                     }
                 }

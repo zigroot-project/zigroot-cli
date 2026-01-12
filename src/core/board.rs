@@ -104,6 +104,18 @@ impl BoardDefinition {
     }
 }
 
+impl TryFrom<toml::Value> for BoardDefinition {
+    type Error = toml::de::Error;
+
+    fn try_from(value: toml::Value) -> Result<Self, Self::Error> {
+        // Convert toml::Value to string and parse
+        let toml_str = toml::to_string(&value).map_err(|e| {
+            serde::de::Error::custom(format!("Failed to serialize TOML value: {}", e))
+        })?;
+        Self::from_toml(&toml_str)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
