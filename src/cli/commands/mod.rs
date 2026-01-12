@@ -8,6 +8,7 @@ pub mod check;
 pub mod clean;
 pub mod fetch;
 pub mod init;
+pub mod package;
 pub mod remove;
 pub mod search;
 pub mod update;
@@ -380,6 +381,21 @@ impl Commands {
                 refresh,
             } => {
                 search::execute(&query, packages, boards, refresh).await
+            }
+            Self::Package { command } => {
+                let current_dir = std::env::current_dir()?;
+                match command {
+                    PackageCommands::List => {
+                        package::execute_list(&current_dir).await
+                    }
+                    PackageCommands::Info { package: pkg_name } => {
+                        package::execute_info(&current_dir, &pkg_name).await
+                    }
+                    _ => {
+                        tracing::info!("Package subcommand not yet implemented");
+                        Ok(())
+                    }
+                }
             }
             _ => {
                 tracing::info!("Command not yet implemented");

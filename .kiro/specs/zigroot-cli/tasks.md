@@ -336,20 +336,20 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 10.1-10.9_
   - [x] 5.27 Checkpoint - zigroot search works end-to-end
-  - [ ] 5.28 Write failing integration test for zigroot package list
+  - [x] 5.28 Write failing integration test for zigroot package list
     - Test: Displays installed packages with versions and descriptions
     - **Validates: Requirements 2.10**
-  - [ ] 5.29 Write failing integration test for zigroot package info
+  - [x] 5.29 Write failing integration test for zigroot package info
     - Test: Displays detailed package information
     - **Validates: Requirements 2.11**
-  - [ ] 5.30 Implement zigroot package subcommands to pass tests
+  - [x] 5.30 Implement zigroot package subcommands to pass tests
     - Implement CLI parsing in cli/commands/package.rs
     - Implement list logic in core/package_list.rs
     - Implement info logic in core/package_info.rs
     - Wire CLI to core
     - Run integration tests until GREEN
     - _Requirements: 2.10, 2.11_
-  - [ ] 5.31 Checkpoint - zigroot package subcommands work
+  - [x] 5.31 Checkpoint - zigroot package subcommands work
   - [ ] 5.32 Write failing integration test for zigroot board list
     - Test: Lists available boards from registry
     - **Validates: Requirements 9.1**
