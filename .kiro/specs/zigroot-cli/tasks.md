@@ -666,26 +666,26 @@ w    - Test: Creates zigroot.toml in empty directory
     - _Requirements: 14.1, 14.6_
   - [x] 12.9 Checkpoint - Output and diagnostics work
 
-- [ ] 13. Phase 13: Local Data Storage (TDD)
-  - [ ] 13.1 Write failing tests for platform-specific directories
+- [-] 13. Phase 13: Local Data Storage (TDD)
+  - [x] 13.1 Write failing tests for platform-specific directories
     - Test: Uses XDG on Linux, Library/Caches on macOS
     - Test: Environment variables override defaults
     - **Validates: Requirements 32.1-32.4**
-  - [ ] 13.2 Implement platform directories to pass tests
+  - [x] 13.2 Implement platform directories to pass tests
     - Implement in infra/dirs.rs
     - _Requirements: 32.1-32.4_
-  - [ ] 13.3 Write failing tests for global config
+  - [x] 13.3 Write failing tests for global config
     - Test: Reads config.toml from config directory
     - **Validates: Requirements 32.5, 32.6**
-  - [ ] 13.4 Implement global config to pass tests
+  - [x] 13.4 Implement global config to pass tests
     - _Requirements: 32.5, 32.6_
-  - [ ] 13.5 Write failing tests for shared downloads
+  - [x] 13.5 Write failing tests for shared downloads
     - Test: Shares source archives across projects
     - Test: Content-addressable build cache
     - **Validates: Requirements 32.9, 32.10**
-  - [ ] 13.6 Implement shared downloads to pass tests
+  - [x] 13.6 Implement shared downloads to pass tests
     - _Requirements: 32.9, 32.10_
-  - [ ] 13.7 Checkpoint - Local data storage works
+  - [x] 13.7 Checkpoint - Local data storage works
 
 - [ ] 14. Phase 14: Configuration Management (TDD)
   - [ ] 14.1 Write failing tests for environment variable substitution

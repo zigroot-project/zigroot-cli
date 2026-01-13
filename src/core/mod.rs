@@ -24,6 +24,8 @@
 //! - [`external`] - External artifact management
 //! - [`compress`] - Binary compression using UPX
 //! - [`kernel`] - Linux kernel build support
+//! - [`global_config`] - Global configuration management
+//! - [`shared_storage`] - Shared downloads and build cache
 
 pub mod add;
 pub mod board;
@@ -38,6 +40,7 @@ pub mod doctor;
 pub mod external;
 pub mod fetch;
 pub mod flash;
+pub mod global_config;
 pub mod init;
 pub mod kernel;
 pub mod license;
@@ -49,6 +52,7 @@ pub mod remove;
 pub mod resolver;
 pub mod sdk;
 pub mod search;
+pub mod shared_storage;
 pub mod tree;
 pub mod update;
 pub mod version;
