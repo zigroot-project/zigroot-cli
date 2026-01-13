@@ -22,6 +22,7 @@
 //! - [`search`] - Search functionality for packages and boards
 //! - [`flash`] - Device flashing logic
 //! - [`external`] - External artifact management
+//! - [`compress`] - Binary compression using UPX
 
 pub mod add;
 pub mod board;
@@ -29,6 +30,7 @@ pub mod build_env;
 pub mod builder;
 pub mod check;
 pub mod clean;
+pub mod compress;
 pub mod external;
 pub mod fetch;
 pub mod flash;

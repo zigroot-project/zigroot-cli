@@ -60,6 +60,7 @@ tokio-util = { version = "0.7", features = ["io"] }
 # System utilities
 num_cpus = "1.16"
 which = "7.0"
+walkdir = "2.5"
 
 [dev-dependencies]
 # Property-based testing

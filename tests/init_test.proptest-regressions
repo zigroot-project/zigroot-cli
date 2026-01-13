@@ -5,3 +5,4 @@
 # It is recommended to check this file in to source control so that
 # everyone who runs the test benefits from these saved cases.
 cc 9e81e31d71f63739b05f592b42ec419f69e5f26e1e84a2d7ce215b7891297b17 # shrinks to existing_entries = []
+cc 48465151dd2967d9c4d6b0851d8351acdf316e4997e25ebe32ce0a843d9eac11 # shrinks to files = [("h.md", "A"), ("h.md", "a")]

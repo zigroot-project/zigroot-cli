@@ -2,12 +2,13 @@
 //!
 //! Implements `zigroot build` to compile packages and create rootfs images.
 //!
-//! **Validates: Requirements 4.1-4.13, 5.1-5.7**
+//! **Validates: Requirements 4.1-4.13, 5.1-5.7, 6.1-6.10**
 
 use anyhow::{bail, Context, Result};
 use std::fs;
 use std::path::Path;
 
+use crate::core::compress::{self, CompressionConfig};
 use crate::core::lock::{LockFile, LockedPackageBuilder};
 use crate::core::manifest::Manifest;
 
@@ -99,8 +100,16 @@ pub async fn execute(project_dir: &Path, options: BuildOptions) -> Result<()> {
         )?;
     }
 
+    // Determine target architecture from board (default to x86_64 if not set)
+    let target_arch = manifest
+        .board
+        .name
+        .as_ref()
+        .map(|_| "x86_64-linux-musl") // Would load from board definition
+        .unwrap_or("x86_64-linux-musl");
+
     // Handle compression
-    handle_compression(&options, &manifest);
+    handle_compression(project_dir, &options, &manifest, target_arch);
 
     // Create rootfs image
     let image_path = create_rootfs_image(&output_dir, &manifest)?;
@@ -194,21 +203,39 @@ fn build_package(
     Ok(())
 }
 
-/// Handle compression settings
-fn handle_compression(options: &BuildOptions, manifest: &Manifest) {
-    let compress = if options.no_compress {
-        false
-    } else if options.compress {
-        true
-    } else {
-        manifest.build.compress
+/// Handle compression settings and compress binaries
+fn handle_compression(
+    project_dir: &Path,
+    options: &BuildOptions,
+    manifest: &Manifest,
+    target_arch: &str,
+) {
+    let config = CompressionConfig {
+        global_enabled: manifest.build.compress,
+        cli_compress: options.compress,
+        cli_no_compress: options.no_compress,
+        target_arch: target_arch.to_string(),
     };
 
-    if compress {
-        tracing::info!("Compression enabled");
-        // Check if UPX is available
-        if which::which("upx").is_err() {
-            tracing::warn!("UPX not found, skipping compression");
+    if !config.is_enabled() {
+        tracing::info!("Compression disabled");
+        return;
+    }
+
+    let rootfs_dir = project_dir.join("build").join("rootfs");
+    if !rootfs_dir.exists() {
+        tracing::debug!("No rootfs directory found, skipping compression");
+        return;
+    }
+
+    match compress::compress_rootfs(&rootfs_dir, &config) {
+        Ok(stats) => {
+            if stats.files_compressed > 0 || stats.files_failed > 0 {
+                compress::display_stats(&stats);
+            }
+        }
+        Err(e) => {
+            tracing::warn!("Compression failed: {}", e);
         }
     }
 }
