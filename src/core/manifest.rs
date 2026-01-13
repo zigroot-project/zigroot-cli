@@ -1,7 +1,11 @@
 //! Manifest (zigroot.toml) parsing and validation
 //!
 //! The manifest is the main configuration file for a zigroot project.
+//! Supports environment variable substitution using ${VAR} syntax.
+//!
+//! **Validates: Requirements 11.1-11.5**
 
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -182,6 +186,152 @@ pub struct ExternalArtifact {
     pub format: Option<String>,
 }
 
+/// Substitute environment variables in a string using ${VAR} syntax.
+///
+/// **Validates: Requirement 11.2**
+///
+/// # Arguments
+/// * `input` - The string containing ${VAR} patterns to substitute
+///
+/// # Returns
+/// * `Ok(String)` - The string with all ${VAR} patterns replaced with their values
+/// * `Err(String)` - Error message if substitution fails (e.g., malformed syntax)
+///
+/// # Examples
+/// ```
+/// use zigroot::core::manifest::substitute_env_vars;
+///
+/// std::env::set_var("MY_VAR", "hello");
+/// let result = substitute_env_vars("prefix_${MY_VAR}_suffix").unwrap();
+/// assert_eq!(result, "prefix_hello_suffix");
+/// std::env::remove_var("MY_VAR");
+/// ```
+pub fn substitute_env_vars(input: &str) -> Result<String, String> {
+    // Regex to match ${VAR_NAME} pattern
+    let re = Regex::new(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+        .map_err(|e| format!("Invalid regex: {e}"))?;
+
+    let mut last_end = 0;
+    let mut output = String::new();
+
+    for cap in re.captures_iter(input) {
+        let full_match = cap.get(0).unwrap();
+        let var_name = &cap[1];
+
+        // Append text before this match
+        output.push_str(&input[last_end..full_match.start()]);
+
+        // Get environment variable value (empty string if not set)
+        let value = std::env::var(var_name).unwrap_or_default();
+        output.push_str(&value);
+
+        last_end = full_match.end();
+    }
+
+    // Append remaining text after last match
+    output.push_str(&input[last_end..]);
+
+    Ok(output)
+}
+
+/// Substitute environment variables in all string values of a TOML content.
+///
+/// **Validates: Requirement 11.2**
+fn substitute_env_vars_in_toml(content: &str) -> Result<String, String> {
+    // Parse as TOML value first to handle structure
+    let mut value: toml::Value = toml::from_str(content)
+        .map_err(|e| format!("Failed to parse TOML: {e}"))?;
+
+    // Recursively substitute in all string values
+    substitute_in_value(&mut value)?;
+
+    // Serialize back to TOML
+    toml::to_string_pretty(&value)
+        .map_err(|e| format!("Failed to serialize TOML: {e}"))
+}
+
+/// Recursively substitute environment variables in a TOML value
+fn substitute_in_value(value: &mut toml::Value) -> Result<(), String> {
+    match value {
+        toml::Value::String(s) => {
+            *s = substitute_env_vars(s)?;
+        }
+        toml::Value::Array(arr) => {
+            for item in arr.iter_mut() {
+                substitute_in_value(item)?;
+            }
+        }
+        toml::Value::Table(table) => {
+            for (_, v) in table.iter_mut() {
+                substitute_in_value(v)?;
+            }
+        }
+        _ => {} // Other types (integers, booleans, etc.) don't need substitution
+    }
+    Ok(())
+}
+
+/// Merge two TOML tables, with `override_table` values taking precedence.
+/// This performs a deep merge for nested tables.
+fn merge_toml_tables(base: &mut toml::value::Table, override_table: &toml::value::Table) {
+    for (key, override_value) in override_table {
+        match (base.get_mut(key), override_value) {
+            // Both are tables - merge recursively
+            (Some(toml::Value::Table(base_table)), toml::Value::Table(override_table)) => {
+                merge_toml_tables(base_table, override_table);
+            }
+            // Override value takes precedence
+            _ => {
+                base.insert(key.clone(), override_value.clone());
+            }
+        }
+    }
+}
+
+/// Load a TOML file and resolve its `extends` directive recursively.
+///
+/// **Validates: Requirement 11.5**
+fn load_toml_with_inheritance(path: &std::path::Path) -> Result<toml::Value, crate::error::ZigrootError> {
+    let content = std::fs::read_to_string(path).map_err(|e| {
+        crate::error::ZigrootError::Io { source: e }
+    })?;
+
+    let mut value: toml::Value = toml::from_str(&content).map_err(|e| {
+        crate::error::ZigrootError::ManifestParse { source: e }
+    })?;
+
+    // Check for extends directive
+    if let Some(extends) = value.get("extends").and_then(|v| v.as_str()) {
+        let extends_path = extends.to_string();
+
+        // Resolve relative path from the current file's directory
+        let base_dir = path.parent().unwrap_or(std::path::Path::new("."));
+        let base_path = base_dir.join(&extends_path);
+
+        // Load base configuration recursively
+        let base_value = load_toml_with_inheritance(&base_path)?;
+
+        // Merge: base values first, then override with current values
+        if let (toml::Value::Table(base_table), toml::Value::Table(current_table)) =
+            (base_value, &mut value)
+        {
+            let mut merged = base_table;
+            // Remove extends from current before merging
+            let mut current_without_extends = current_table.clone();
+            current_without_extends.remove("extends");
+            merge_toml_tables(&mut merged, &current_without_extends);
+            value = toml::Value::Table(merged);
+        }
+    }
+
+    // Remove extends directive from final result (it's not part of Manifest struct)
+    if let toml::Value::Table(table) = &mut value {
+        table.remove("extends");
+    }
+
+    Ok(value)
+}
+
 impl Manifest {
     /// Load manifest from file path
     pub fn load(path: &std::path::Path) -> Result<Self, crate::error::ZigrootError> {
@@ -189,6 +339,54 @@ impl Manifest {
             crate::error::ZigrootError::Io { source: e }
         })?;
         Self::from_toml(&content).map_err(|e| {
+            crate::error::ZigrootError::ManifestParse { source: e }
+        })
+    }
+
+    /// Load manifest from file path with environment variable substitution.
+    ///
+    /// **Validates: Requirement 11.2**
+    ///
+    /// This method reads the manifest file and substitutes all ${VAR} patterns
+    /// with their corresponding environment variable values before parsing.
+    pub fn load_with_env_substitution(path: &std::path::Path) -> Result<Self, crate::error::ZigrootError> {
+        let content = std::fs::read_to_string(path).map_err(|e| {
+            crate::error::ZigrootError::Io { source: e }
+        })?;
+
+        let substituted = substitute_env_vars_in_toml(&content)
+            .map_err(|e| crate::error::ZigrootError::Manifest(e))?;
+
+        Self::from_toml(&substituted).map_err(|e| {
+            crate::error::ZigrootError::ManifestParse { source: e }
+        })
+    }
+
+    /// Load manifest from file path with configuration inheritance support.
+    ///
+    /// **Validates: Requirement 11.5**
+    ///
+    /// This method supports the `extends = "<base_config>"` directive, which allows
+    /// a manifest to inherit values from a base configuration file. The inheritance
+    /// is resolved recursively, allowing chained inheritance.
+    ///
+    /// Values in the derived configuration override values from the base configuration.
+    /// Nested tables are merged deeply.
+    ///
+    /// # Arguments
+    /// * `path` - Path to the manifest file
+    ///
+    /// # Returns
+    /// * `Ok(Manifest)` - The loaded manifest with inheritance resolved
+    /// * `Err(ZigrootError)` - Error if loading or parsing fails
+    pub fn load_with_inheritance(path: &std::path::Path) -> Result<Self, crate::error::ZigrootError> {
+        let value = load_toml_with_inheritance(path)?;
+
+        // Convert TOML value to Manifest
+        let toml_str = toml::to_string_pretty(&value)
+            .map_err(|e| crate::error::ZigrootError::Manifest(format!("Failed to serialize merged config: {e}")))?;
+
+        Self::from_toml(&toml_str).map_err(|e| {
             crate::error::ZigrootError::ManifestParse { source: e }
         })
     }
@@ -202,6 +400,110 @@ impl Manifest {
     pub fn to_toml(&self) -> Result<String, toml::ser::Error> {
         toml::to_string_pretty(self)
     }
+}
+
+/// Valid image formats for the build configuration
+const VALID_IMAGE_FORMATS: &[&str] = &["ext4", "squashfs", "initramfs"];
+
+/// Validate a manifest file and report all errors.
+///
+/// **Validates: Requirements 11.3, 11.4**
+///
+/// This function validates the manifest schema and reports all errors found,
+/// not just the first one. It checks:
+/// - Required fields are present (project.name)
+/// - Field values are valid (image_format, rootfs_size format)
+/// - TOML syntax is correct
+///
+/// # Arguments
+/// * `path` - Path to the manifest file
+///
+/// # Returns
+/// * `Ok(())` - If the manifest is valid
+/// * `Err(Vec<String>)` - List of all validation errors found
+pub fn validate_manifest(path: &std::path::Path) -> Result<(), Vec<String>> {
+    let mut errors = Vec::new();
+
+    // Read the file
+    let content = match std::fs::read_to_string(path) {
+        Ok(c) => c,
+        Err(e) => {
+            errors.push(format!("Failed to read manifest file: {e}"));
+            return Err(errors);
+        }
+    };
+
+    // Parse as TOML value first to check structure
+    let value: toml::Value = match toml::from_str(&content) {
+        Ok(v) => v,
+        Err(e) => {
+            errors.push(format!("Invalid TOML syntax: {e}"));
+            return Err(errors);
+        }
+    };
+
+    // Check for required [project] section
+    let project = match value.get("project") {
+        Some(p) => p,
+        None => {
+            errors.push("Missing required [project] section".to_string());
+            // Can't continue validation without project section
+            return Err(errors);
+        }
+    };
+
+    // Check for required project.name field
+    if project.get("name").is_none() {
+        errors.push("Missing required field 'project.name'".to_string());
+    } else if let Some(name) = project.get("name").and_then(|v| v.as_str()) {
+        if name.is_empty() {
+            errors.push("Field 'project.name' cannot be empty".to_string());
+        }
+    }
+
+    // Validate build section if present
+    if let Some(build) = value.get("build") {
+        // Validate image_format if present
+        if let Some(format) = build.get("image_format").and_then(|v| v.as_str()) {
+            if !VALID_IMAGE_FORMATS.contains(&format) {
+                errors.push(format!(
+                    "Invalid image_format '{}': must be one of {:?}",
+                    format, VALID_IMAGE_FORMATS
+                ));
+            }
+        }
+
+        // Validate rootfs_size format if present
+        if let Some(size) = build.get("rootfs_size").and_then(|v| v.as_str()) {
+            if !is_valid_size_format(size) {
+                errors.push(format!(
+                    "Invalid rootfs_size '{}': expected format like '256M' or '1G'",
+                    size
+                ));
+            }
+        }
+    }
+
+    // Try to parse as Manifest to catch any other structural issues
+    if let Err(e) = Manifest::from_toml(&content) {
+        // Only add this error if we haven't already caught the specific issue
+        let err_str = e.to_string();
+        if !errors.iter().any(|existing| err_str.contains(&existing[..existing.len().min(20)])) {
+            errors.push(format!("Manifest structure error: {e}"));
+        }
+    }
+
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
+    }
+}
+
+/// Check if a size string is in valid format (e.g., "256M", "1G", "512K")
+fn is_valid_size_format(size: &str) -> bool {
+    let re = Regex::new(r"^\d+[KMG]$").unwrap();
+    re.is_match(size)
 }
 
 #[cfg(test)]

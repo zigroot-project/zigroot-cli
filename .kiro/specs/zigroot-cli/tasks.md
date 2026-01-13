@@ -666,7 +666,7 @@ w    - Test: Creates zigroot.toml in empty directory
     - _Requirements: 14.1, 14.6_
   - [x] 12.9 Checkpoint - Output and diagnostics work
 
-- [-] 13. Phase 13: Local Data Storage (TDD)
+- [x] 13. Phase 13: Local Data Storage (TDD)
   - [x] 13.1 Write failing tests for platform-specific directories
     - Test: Uses XDG on Linux, Library/Caches on macOS
     - Test: Environment variables override defaults
@@ -687,24 +687,24 @@ w    - Test: Creates zigroot.toml in empty directory
     - _Requirements: 32.9, 32.10_
   - [x] 13.7 Checkpoint - Local data storage works
 
-- [ ] 14. Phase 14: Configuration Management (TDD)
-  - [ ] 14.1 Write failing tests for environment variable substitution
+- [x] 14. Phase 14: Configuration Management (TDD)
+  - [x] 14.1 Write failing tests for environment variable substitution
     - Test: ${VAR} syntax substitutes correctly
     - **Validates: Requirements 11.2**
-  - [ ] 14.2 Implement env var substitution to pass tests
+  - [x] 14.2 Implement env var substitution to pass tests
     - _Requirements: 11.2_
-  - [ ] 14.3 Write failing tests for configuration inheritance
+  - [x] 14.3 Write failing tests for configuration inheritance
     - Test: extends directive works
     - **Validates: Requirements 11.5**
-  - [ ] 14.4 Implement config inheritance to pass tests
+  - [x] 14.4 Implement config inheritance to pass tests
     - _Requirements: 11.5_
-  - [ ] 14.5 Write failing tests for manifest validation
+  - [x] 14.5 Write failing tests for manifest validation
     - Test: Validates schema before build
     - Test: Reports all errors
     - **Validates: Requirements 11.3, 11.4**
-  - [ ] 14.6 Implement manifest validation to pass tests
+  - [x] 14.6 Implement manifest validation to pass tests
     - _Requirements: 11.3, 11.4_
-  - [ ] 14.7 Checkpoint - Configuration management works
+  - [x] 14.7 Checkpoint - Configuration management works
 
 
 - [ ] 15. Phase 15: Final Integration and Cleanup
