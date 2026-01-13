@@ -434,20 +434,20 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - _Requirements: 6.1-6.10_
   - [x] 6.3 Checkpoint - Compression works
 
-- [ ] 7. Phase 7: Advanced Commands (TDD)
-  - [ ] 7.1 Write failing integration test for zigroot doctor
+- [-] 7. Phase 7: Advanced Commands (TDD)
+  - [x] 7.1 Write failing integration test for zigroot doctor
     - Test: Checks system dependencies
     - Test: Reports issues with suggestions
     - Test: Detects common misconfigurations
     - **Validates: Requirements 14.5, 14.6**
-  - [ ] 7.2 Implement zigroot doctor to pass tests
+  - [x] 7.2 Implement zigroot doctor to pass tests
     - Implement CLI parsing in cli/commands/doctor.rs
     - Implement doctor logic in core/doctor.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 14.5, 14.6_
-  - [ ] 7.3 Checkpoint - zigroot doctor works
-  - [ ] 7.4 Write failing integration test for zigroot sdk
+  - [x] 7.3 Checkpoint - zigroot doctor works
+  - [x] 7.4 Write failing integration test for zigroot sdk
     - Test: Generates standalone SDK tarball
     - Test: SDK contains Zig toolchain
     - Test: SDK contains built libraries and headers
@@ -455,14 +455,14 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: --output saves to specified path
     - **Property 31: SDK Completeness**
     - **Validates: Requirements 21.1-21.6**
-  - [ ] 7.5 Implement zigroot sdk to pass tests
+  - [x] 7.5 Implement zigroot sdk to pass tests
     - Implement CLI parsing in cli/commands/sdk.rs
     - Implement SDK generation in core/sdk.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 21.1-21.6_
-  - [ ] 7.6 Checkpoint - zigroot sdk works
-  - [ ] 7.7 Write failing integration test for zigroot license
+  - [x] 7.6 Checkpoint - zigroot sdk works
+  - [x] 7.7 Write failing integration test for zigroot license
     - Test: Displays license summary
     - Test: --export generates license report
     - Test: Flags copyleft licenses
@@ -470,14 +470,14 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: --sbom generates SPDX SBOM
     - **Property 32: License Detection Accuracy**
     - **Validates: Requirements 22.1-22.6**
-  - [ ] 7.8 Implement zigroot license to pass tests
+  - [x] 7.8 Implement zigroot license to pass tests
     - Implement CLI parsing in cli/commands/license.rs
     - Implement license logic in core/license.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 22.1-22.6_
-  - [ ] 7.9 Checkpoint - zigroot license works
-  - [ ] 7.10 Write failing integration test for zigroot cache
+  - [x] 7.9 Checkpoint - zigroot license works
+  - [x] 7.10 Write failing integration test for zigroot cache
     - Test: export creates cache tarball
     - Test: import loads cache tarball
     - Test: info shows cache size and location
@@ -485,13 +485,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: Cache keys are deterministic
     - **Property 34: Cache Key Determinism**
     - **Validates: Requirements 24.1-24.8**
-  - [ ] 7.11 Implement zigroot cache to pass tests
+  - [x] 7.11 Implement zigroot cache to pass tests
     - Implement CLI parsing in cli/commands/cache.rs
     - Implement cache logic in core/cache.rs
     - Wire CLI to core
     - Run integration test until GREEN
     - _Requirements: 24.1-24.8_
-  - [ ] 7.12 Checkpoint - zigroot cache works
+  - [x] 7.12 Checkpoint - zigroot cache works
   - [ ] 7.13 Write failing integration test for zigroot config (TUI)
     - Test: Launches TUI interface
     - Test: Board selection works

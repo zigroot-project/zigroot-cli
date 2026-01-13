@@ -106,6 +106,28 @@ impl Default for BuildConfig {
     }
 }
 
+impl Default for ProjectConfig {
+    fn default() -> Self {
+        Self {
+            name: "unnamed".to_string(),
+            version: default_version(),
+            description: None,
+        }
+    }
+}
+
+impl Default for Manifest {
+    fn default() -> Self {
+        Self {
+            project: ProjectConfig::default(),
+            board: BoardConfig::default(),
+            build: BuildConfig::default(),
+            packages: HashMap::new(),
+            external: HashMap::new(),
+        }
+    }
+}
+
 /// Reference to a package in the manifest
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct PackageRef {
@@ -155,6 +177,16 @@ pub struct ExternalArtifact {
 }
 
 impl Manifest {
+    /// Load manifest from file path
+    pub fn load(path: &std::path::Path) -> Result<Self, crate::error::ZigrootError> {
+        let content = std::fs::read_to_string(path).map_err(|e| {
+            crate::error::ZigrootError::Io { source: e }
+        })?;
+        Self::from_toml(&content).map_err(|e| {
+            crate::error::ZigrootError::ManifestParse { source: e }
+        })
+    }
+
     /// Load manifest from TOML string
     pub fn from_toml(content: &str) -> Result<Self, toml::de::Error> {
         toml::from_str(content)

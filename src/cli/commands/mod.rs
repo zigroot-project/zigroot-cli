@@ -5,14 +5,18 @@
 pub mod add;
 pub mod board;
 pub mod build;
+pub mod cache;
 pub mod check;
 pub mod clean;
+pub mod doctor;
 pub mod external;
 pub mod fetch;
 pub mod flash;
 pub mod init;
+pub mod license;
 pub mod package;
 pub mod remove;
+pub mod sdk;
 pub mod search;
 pub mod tree;
 pub mod update;
@@ -444,6 +448,35 @@ impl Commands {
                             url.as_deref(),
                             path.as_deref(),
                         ).await
+                    }
+                }
+            }
+            Self::Doctor => {
+                let current_dir = std::env::current_dir().ok();
+                doctor::execute(current_dir.as_deref()).await
+            }
+            Self::Sdk { output } => {
+                let current_dir = std::env::current_dir()?;
+                sdk::execute(&current_dir, output).await
+            }
+            Self::License { export, sbom } => {
+                let current_dir = std::env::current_dir()?;
+                license::execute(&current_dir, export, sbom).await
+            }
+            Self::Cache { command } => {
+                let current_dir = std::env::current_dir()?;
+                match command {
+                    CacheCommands::Info => {
+                        cache::execute_info(&current_dir).await
+                    }
+                    CacheCommands::Clean => {
+                        cache::execute_clean(&current_dir).await
+                    }
+                    CacheCommands::Export { output } => {
+                        cache::execute_export(&current_dir, &output).await
+                    }
+                    CacheCommands::Import { input } => {
+                        cache::execute_import(&current_dir, &input).await
                     }
                 }
             }
