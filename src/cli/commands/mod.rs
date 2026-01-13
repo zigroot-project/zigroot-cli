@@ -16,6 +16,7 @@ pub mod flash;
 pub mod init;
 pub mod license;
 pub mod package;
+pub mod publish;
 pub mod remove;
 pub mod sdk;
 pub mod search;
@@ -502,6 +503,10 @@ impl Commands {
             Self::Verify { path, fetch } => {
                 let current_dir = std::env::current_dir()?;
                 verify::execute(&current_dir, &path, fetch).await
+            }
+            Self::Publish { path } => {
+                let current_dir = std::env::current_dir()?;
+                publish::execute(&current_dir, &path).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");
