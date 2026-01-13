@@ -437,9 +437,8 @@ impl Commands {
                     BoardCommands::Info { board: board_name } => {
                         board::execute_info(&board_name).await
                     }
-                    _ => {
-                        tracing::info!("Board subcommand not yet implemented");
-                        Ok(())
+                    BoardCommands::New { name } => {
+                        board::execute_new(&current_dir, &name).await
                     }
                 }
             }

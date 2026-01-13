@@ -551,12 +551,12 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
   - [x] 8.14 Implement zigroot package bump to pass tests
     - _Requirements: 28.12_
   - [x] 8.15 Checkpoint - zigroot package bump works
-  - [ ] 8.16 Write failing integration test for zigroot board new
+  - [x] 8.16 Write failing integration test for zigroot board new
     - Test: Creates board template in boards/<name>/
     - **Validates: Requirements 29.1**
-  - [ ] 8.17 Implement zigroot board new to pass tests
+  - [x] 8.17 Implement zigroot board new to pass tests
     - _Requirements: 29.1_
-  - [ ] 8.18 Checkpoint - zigroot board new works
+  - [x] 8.18 Checkpoint - zigroot board new works
 
 - [ ] 9. Phase 9: GCC Toolchain and Kernel Support (TDD)
   - [ ] 9.1 Write failing tests for GCC toolchain

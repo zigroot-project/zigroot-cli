@@ -1,8 +1,8 @@
 //! Board subcommand implementations
 //!
-//! Implements `zigroot board list`, `zigroot board set`, and `zigroot board info`.
+//! Implements `zigroot board list`, `zigroot board set`, `zigroot board info`, and `zigroot board new`.
 //!
-//! **Validates: Requirements 9.1-9.4**
+//! **Validates: Requirements 9.1-9.4, 29.1**
 
 use anyhow::Result;
 use std::path::Path;
@@ -282,4 +282,84 @@ mod tests {
         let result = validate_board_compatibility(&manifest, &board_def);
         assert!(result.is_ok());
     }
+}
+
+/// Execute the board new command
+///
+/// Creates a new board template in boards/<name>/ with board.toml.
+/// **Validates: Requirement 29.1**
+pub async fn execute_new(project_dir: &Path, name: &str) -> Result<()> {
+    let boards_dir = project_dir.join("boards");
+    let board_dir = boards_dir.join(name);
+
+    // Check if board already exists
+    if board_dir.exists() {
+        anyhow::bail!(
+            "Board '{}' already exists at {}",
+            name,
+            board_dir.display()
+        );
+    }
+
+    // Create boards directory if it doesn't exist
+    std::fs::create_dir_all(&boards_dir)?;
+
+    // Create board directory
+    std::fs::create_dir_all(&board_dir)?;
+
+    // Generate board.toml content
+    let board_content = generate_board_template(name);
+    let board_path = board_dir.join("board.toml");
+    std::fs::write(&board_path, board_content)?;
+
+    println!("✓ Created board template for '{}'", name);
+    println!("  Directory: {}", board_dir.display());
+    println!("  Files:");
+    println!("    - board.toml (board definition)");
+    println!();
+    println!("Next steps:");
+    println!("  1. Edit board.toml with your board's target triple and CPU");
+    println!("  2. Configure flash methods if applicable");
+    println!("  3. Run 'zigroot verify boards/{}' to validate", name);
+
+    Ok(())
+}
+
+/// Generate board.toml template content
+fn generate_board_template(name: &str) -> String {
+    format!(
+        r#"# Board definition for {name}
+
+[board]
+name = "{name}"
+description = "TODO: Add board description"
+target = "arm-linux-musleabihf"
+cpu = "cortex-a7"
+# features = ["neon", "vfpv4"]
+# kernel = "linux-luckfox"
+# zigroot_version = ">=0.1.0"
+
+[defaults]
+image_format = "ext4"
+rootfs_size = "256M"
+hostname = "{name}"
+
+# Required packages for this board (optional)
+# requires = ["busybox"]
+
+# Flash methods (optional)
+# [[flash]]
+# name = "sd"
+# description = "Flash to SD card"
+# tool = "dd"
+# script = "flash-sd.sh"
+# requires = ["bootloader", "kernel"]
+
+# Board options (optional)
+# [options.uart_console]
+# type = "bool"
+# default = true
+# description = "Enable UART console"
+"#
+    )
 }
