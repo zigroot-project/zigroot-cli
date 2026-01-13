@@ -637,7 +637,7 @@ w    - Test: Creates zigroot.toml in empty directory
     - _Requirements: 31.3-31.6_
   - [x] 11.9 Checkpoint - Version management works
 
-- [-] 12. Phase 12: Output and Diagnostics (TDD)
+- [x] 12. Phase 12: Output and Diagnostics (TDD)
   - [x] 12.1 Write failing tests for colored output
     - Test: Green for success, red for errors, yellow for warnings
     - Test: --quiet suppresses all output except errors
@@ -654,17 +654,17 @@ w    - Test: Creates zigroot.toml in empty directory
     - **Validates: Requirements 15.1-15.3, 15.5, 15.6**
   - [x] 12.4 Implement progress indicators to pass tests
     - _Requirements: 15.1-15.3, 15.5, 15.6_
-  - [ ] 12.5 Write failing tests for summary banner
+  - [x] 12.5 Write failing tests for summary banner
     - Test: Displays total time, packages built, image size
     - **Validates: Requirements 15.7**
-  - [ ] 12.6 Implement summary banner to pass tests
+  - [x] 12.6 Implement summary banner to pass tests
     - _Requirements: 15.7_
-  - [ ] 12.7 Write failing tests for error suggestions
+  - [x] 12.7 Write failing tests for error suggestions
     - Test: Suggests solutions for common errors
     - **Validates: Requirements 14.1, 14.6**
-  - [ ] 12.8 Implement error suggestions to pass tests
+  - [x] 12.8 Implement error suggestions to pass tests
     - _Requirements: 14.1, 14.6_
-  - [ ] 12.9 Checkpoint - Output and diagnostics work
+  - [x] 12.9 Checkpoint - Output and diagnostics work
 
 - [ ] 13. Phase 13: Local Data Storage (TDD)
   - [ ] 13.1 Write failing tests for platform-specific directories

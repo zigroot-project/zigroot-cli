@@ -434,6 +434,69 @@ fn test_summary_banner_displays_statistics() {
     );
 }
 
+/// Test: BuildSummary struct creation and display
+/// **Validates: Requirement 15.7**
+#[test]
+fn test_build_summary_creation() {
+    use std::time::Instant;
+    use zigroot::cli::output::BuildSummary;
+
+    let start = Instant::now();
+    std::thread::sleep(std::time::Duration::from_millis(10));
+
+    let summary = BuildSummary::new(start, 5, 10);
+
+    assert_eq!(summary.packages_built, 5);
+    assert_eq!(summary.total_packages, 10);
+    assert!(summary.success);
+    assert!(summary.total_time.as_millis() >= 10);
+    assert!(summary.image_size.is_none());
+}
+
+/// Test: BuildSummary with image size
+/// **Validates: Requirement 15.7**
+#[test]
+fn test_build_summary_with_image_size() {
+    use std::time::Instant;
+    use zigroot::cli::output::BuildSummary;
+
+    let start = Instant::now();
+    let summary = BuildSummary::new(start, 10, 10).with_image_size(1024 * 1024 * 50); // 50 MB
+
+    assert_eq!(summary.packages_built, 10);
+    assert_eq!(summary.total_packages, 10);
+    assert!(summary.success);
+    assert_eq!(summary.image_size, Some(1024 * 1024 * 50));
+}
+
+/// Test: BuildSummary failed state
+/// **Validates: Requirement 15.7**
+#[test]
+fn test_build_summary_failed() {
+    use std::time::Instant;
+    use zigroot::cli::output::BuildSummary;
+
+    let start = Instant::now();
+    let summary = BuildSummary::new(start, 3, 10).failed();
+
+    assert_eq!(summary.packages_built, 3);
+    assert_eq!(summary.total_packages, 10);
+    assert!(!summary.success);
+}
+
+/// Test: format_size helper function
+/// **Validates: Requirement 15.7**
+#[test]
+fn test_format_size() {
+    use zigroot::cli::output::format_size;
+
+    assert_eq!(format_size(500), "500 B");
+    assert_eq!(format_size(1024), "1.00 KB");
+    assert_eq!(format_size(1024 * 1024), "1.00 MB");
+    assert_eq!(format_size(1024 * 1024 * 1024), "1.00 GB");
+    assert_eq!(format_size(1536), "1.50 KB");
+}
+
 // ============================================
 // Task 12.7: Error Suggestion Tests
 // ============================================
@@ -587,6 +650,174 @@ invalid_field = true
     assert!(
         has_clear_error || output.status.success(),
         "Should provide clear error message: stdout={stdout}, stderr={stderr}"
+    );
+}
+
+/// Test: Error suggestions module provides suggestions for PackageError
+/// **Validates: Requirement 14.1, 14.6**
+#[test]
+fn test_suggestions_for_package_errors() {
+    use zigroot::cli::output::suggestions::get_suggestion;
+    use zigroot::error::PackageError;
+
+    // Test NotFound error
+    let error = PackageError::NotFound {
+        name: "test-pkg".to_string(),
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(suggestion.is_some(), "Should provide suggestion for NotFound");
+    assert!(
+        suggestion.unwrap().contains("search"),
+        "Should suggest searching"
+    );
+
+    // Test ChecksumMismatch error
+    let error = PackageError::ChecksumMismatch {
+        file: "test.tar.gz".to_string(),
+        expected: "abc123".to_string(),
+        actual: "def456".to_string(),
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for ChecksumMismatch"
+    );
+    assert!(
+        suggestion.unwrap().contains("fetch --force"),
+        "Should suggest re-downloading"
+    );
+
+    // Test MissingField error
+    let error = PackageError::MissingField {
+        package: "test-pkg".to_string(),
+        field: "version".to_string(),
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for MissingField"
+    );
+    assert!(
+        suggestion.unwrap().contains("version"),
+        "Should mention the missing field"
+    );
+}
+
+/// Test: Error suggestions module provides suggestions for InitError
+/// **Validates: Requirement 14.1, 14.6**
+#[test]
+fn test_suggestions_for_init_errors() {
+    use zigroot::cli::output::suggestions::get_suggestion;
+    use zigroot::error::InitError;
+    use std::path::PathBuf;
+
+    // Test DirectoryNotEmpty error
+    let error = InitError::DirectoryNotEmpty {
+        path: PathBuf::from("/test/path"),
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for DirectoryNotEmpty"
+    );
+    assert!(
+        suggestion.unwrap().contains("--force"),
+        "Should suggest using --force"
+    );
+
+    // Test BoardNotFound error
+    let error = InitError::BoardNotFound {
+        name: "unknown-board".to_string(),
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for BoardNotFound"
+    );
+    assert!(
+        suggestion.unwrap().contains("board list"),
+        "Should suggest listing boards"
+    );
+}
+
+/// Test: Error suggestions module provides suggestions for DownloadError
+/// **Validates: Requirement 14.1, 14.6**
+#[test]
+fn test_suggestions_for_download_errors() {
+    use zigroot::cli::output::suggestions::get_suggestion;
+    use zigroot::error::DownloadError;
+
+    // Test NetworkError
+    let error = DownloadError::NetworkError {
+        url: "https://example.com/file.tar.gz".to_string(),
+        error: "connection refused".to_string(),
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for NetworkError"
+    );
+    let suggestion_text = suggestion.unwrap();
+    assert!(
+        suggestion_text.contains("internet") || suggestion_text.contains("connection"),
+        "Should mention checking connection"
+    );
+
+    // Test MaxRetriesExceeded
+    let error = DownloadError::MaxRetriesExceeded {
+        url: "https://example.com/file.tar.gz".to_string(),
+        retries: 3,
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for MaxRetriesExceeded"
+    );
+}
+
+/// Test: Error suggestions module provides suggestions for ResolverError
+/// **Validates: Requirement 14.1, 14.6**
+#[test]
+fn test_suggestions_for_resolver_errors() {
+    use zigroot::cli::output::suggestions::get_suggestion;
+    use zigroot::error::ResolverError;
+
+    // Test CircularDependency
+    let error = ResolverError::CircularDependency {
+        cycle: vec!["a".to_string(), "b".to_string(), "a".to_string()],
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for CircularDependency"
+    );
+    assert!(
+        suggestion.unwrap().contains("tree"),
+        "Should suggest using tree command"
+    );
+
+    // Test MissingDependency
+    let error = ResolverError::MissingDependency {
+        package: "test-pkg".to_string(),
+        dependency: "missing-dep".to_string(),
+    };
+    let anyhow_error = anyhow::Error::new(error);
+    let suggestion = get_suggestion(&anyhow_error);
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for MissingDependency"
+    );
+    assert!(
+        suggestion.unwrap().contains("add"),
+        "Should suggest adding the dependency"
     );
 }
 
