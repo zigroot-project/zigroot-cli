@@ -5,5 +5,6 @@
 
 pub mod download;
 pub mod filesystem;
+pub mod gcc_toolchain;
 pub mod git;
 pub mod toolchain;

@@ -14,6 +14,7 @@ pub mod external;
 pub mod fetch;
 pub mod flash;
 pub mod init;
+pub mod kernel;
 pub mod license;
 pub mod package;
 pub mod publish;
@@ -103,6 +104,10 @@ pub enum Commands {
         /// Disable binary compression
         #[arg(long)]
         no_compress: bool,
+
+        /// Build only kernel and modules
+        #[arg(long)]
+        kernel_only: bool,
     },
 
     /// Remove build artifacts
@@ -378,7 +383,7 @@ impl Commands {
                 let current_dir = std::env::current_dir()?;
                 fetch::execute(&current_dir, parallel, force).await
             }
-            Self::Build { package, jobs, locked, compress, no_compress } => {
+            Self::Build { package, jobs, locked, compress, no_compress, kernel_only } => {
                 let current_dir = std::env::current_dir()?;
                 let options = build::BuildOptions {
                     package,
@@ -386,6 +391,7 @@ impl Commands {
                     locked,
                     compress,
                     no_compress,
+                    kernel_only,
                 };
                 build::execute(&current_dir, options).await
             }
@@ -508,9 +514,13 @@ impl Commands {
                 let current_dir = std::env::current_dir()?;
                 publish::execute(&current_dir, &path).await
             }
-            _ => {
-                tracing::info!("Command not yet implemented");
-                Ok(())
+            Self::Kernel { command } => {
+                let current_dir = std::env::current_dir()?;
+                match command {
+                    KernelCommands::Menuconfig => {
+                        kernel::execute_menuconfig(&current_dir).await
+                    }
+                }
             }
         }
     }

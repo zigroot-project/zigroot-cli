@@ -511,7 +511,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
   - [x] 7.15 Checkpoint - zigroot config works
 
 
-- [-] 8. Phase 8: Package/Board Authoring Commands (TDD)
+- [x] 8. Phase 8: Package/Board Authoring Commands (TDD)
   - [x] 8.1 Write failing integration test for zigroot package new
     - Test: Creates package template in packages/<name>/
     - Test: Creates metadata.toml and version file
@@ -558,36 +558,36 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - _Requirements: 29.1_
   - [x] 8.18 Checkpoint - zigroot board new works
 
-- [ ] 9. Phase 9: GCC Toolchain and Kernel Support (TDD)
-  - [ ] 9.1 Write failing tests for GCC toolchain
+- [x] 9. Phase 9: GCC Toolchain and Kernel Support (TDD)
+  - [x] 9.1 Write failing tests for GCC toolchain
     - Test: Auto-resolves bootlin.com URLs from target
     - Test: Supports explicit URLs per host platform
     - Test: Downloads and caches toolchains
     - **Validates: Requirements 26.2-26.7**
-  - [ ] 9.2 Implement GCC toolchain to pass tests
+  - [x] 9.2 Implement GCC toolchain to pass tests
     - Implement in infra/gcc_toolchain.rs
     - _Requirements: 26.2-26.7_
-  - [ ] 9.3 Write failing tests for kernel build
+  - [x] 9.3 Write failing tests for kernel build
     - Test: Supports defconfig
     - Test: Supports config_fragments
     - Test: Builds kernel modules
     - Test: Installs to /lib/modules/
     - **Validates: Requirements 26.9, 26.10, 26.14, 26.15**
-  - [ ] 9.4 Implement kernel build to pass tests
+  - [x] 9.4 Implement kernel build to pass tests
     - Implement in core/kernel.rs
     - _Requirements: 26.9, 26.10, 26.14, 26.15_
-  - [ ] 9.5 Write failing integration test for zigroot kernel menuconfig
+  - [x] 9.5 Write failing integration test for zigroot kernel menuconfig
     - Test: Launches kernel menuconfig
     - Test: Saves config to kernel/ directory
     - **Validates: Requirements 26.11, 26.12**
-  - [ ] 9.6 Implement zigroot kernel menuconfig to pass tests
+  - [x] 9.6 Implement zigroot kernel menuconfig to pass tests
     - _Requirements: 26.11, 26.12_
-  - [ ] 9.7 Write failing test for --kernel-only flag
+  - [x] 9.7 Write failing test for --kernel-only flag
     - Test: Builds only kernel and modules
     - **Validates: Requirements 26.16**
-  - [ ] 9.8 Implement --kernel-only to pass tests
+  - [x] 9.8 Implement --kernel-only to pass tests
     - _Requirements: 26.16_
-  - [ ] 9.9 Checkpoint - Kernel support works
+  - [x] 9.9 Checkpoint - Kernel support works
 
 - [ ] 10. Phase 10: Build Isolation (TDD)
   - [ ] 10.1 Write failing tests for Docker/Podman sandbox

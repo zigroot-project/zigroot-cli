@@ -23,6 +23,7 @@
 //! - [`flash`] - Device flashing logic
 //! - [`external`] - External artifact management
 //! - [`compress`] - Binary compression using UPX
+//! - [`kernel`] - Linux kernel build support
 
 pub mod add;
 pub mod board;
@@ -38,6 +39,7 @@ pub mod external;
 pub mod fetch;
 pub mod flash;
 pub mod init;
+pub mod kernel;
 pub mod license;
 pub mod lock;
 pub mod manifest;

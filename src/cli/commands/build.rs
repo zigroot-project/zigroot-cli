@@ -24,6 +24,8 @@ pub struct BuildOptions {
     pub compress: bool,
     /// Disable binary compression
     pub no_compress: bool,
+    /// Build only kernel and modules
+    pub kernel_only: bool,
 }
 
 /// Execute the build command
@@ -70,7 +72,16 @@ pub async fn execute(project_dir: &Path, options: BuildOptions) -> Result<()> {
     }
 
     // Determine which packages to build
-    let packages_to_build: Vec<String> = if let Some(ref pkg_name) = options.package {
+    let packages_to_build: Vec<String> = if options.kernel_only {
+        // Build only kernel packages
+        tracing::info!("Building kernel only (--kernel-only)");
+        manifest
+            .packages
+            .keys()
+            .filter(|name| is_kernel_package(project_dir, name))
+            .cloned()
+            .collect()
+    } else if let Some(ref pkg_name) = options.package {
         // Build only specified package
         if !manifest.packages.contains_key(pkg_name) {
             bail!("Package '{pkg_name}' not found in manifest");
@@ -272,4 +283,31 @@ fn chrono_lite_now() -> String {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default();
     format!("{}", duration.as_secs())
+}
+
+
+/// Check if a package is a kernel package
+///
+/// A package is considered a kernel package if:
+/// - Its name contains "kernel" or "linux"
+/// - It has a GCC toolchain specified in its package.toml
+fn is_kernel_package(project_dir: &Path, pkg_name: &str) -> bool {
+    // Check by name
+    let name_lower = pkg_name.to_lowercase();
+    if name_lower.contains("kernel") || name_lower.contains("linux") {
+        return true;
+    }
+
+    // Check local package for GCC toolchain
+    let local_pkg_path = project_dir.join("packages").join(pkg_name).join("package.toml");
+    if local_pkg_path.exists() {
+        if let Ok(content) = fs::read_to_string(&local_pkg_path) {
+            // Simple check for GCC toolchain in package.toml
+            if content.contains("[build.toolchain]") && content.contains("type = \"gcc\"") {
+                return true;
+            }
+        }
+    }
+
+    false
 }
