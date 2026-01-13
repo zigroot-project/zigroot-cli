@@ -191,7 +191,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
 
 - [x] 5. Phase 5: CLI Commands - Vertical Slices (TDD)
   - [x] 5.1 Write failing integration test for zigroot init
-    - Test: Creates zigroot.toml in empty directory
+w    - Test: Creates zigroot.toml in empty directory
     - Test: Creates packages/, boards/, user/files/, user/scripts/ directories
     - Test: Creates .gitignore with zigroot entries
     - Test: Fails in non-empty directory without --force
@@ -589,8 +589,8 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - _Requirements: 26.16_
   - [x] 9.9 Checkpoint - Kernel support works
 
-- [ ] 10. Phase 10: Build Isolation (TDD)
-  - [ ] 10.1 Write failing tests for Docker/Podman sandbox
+- [x] 10. Phase 10: Build Isolation (TDD)
+  - [x] 10.1 Write failing tests for Docker/Podman sandbox
     - Test: Runs builds in container when --sandbox
     - Test: Configures read/write access correctly
     - Test: Blocks network by default
@@ -598,10 +598,10 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: --no-sandbox disables isolation
     - Test: Error when Docker/Podman not available
     - **Validates: Requirements 27.1-27.9**
-  - [ ] 10.2 Implement sandbox to pass tests
+  - [x] 10.2 Implement sandbox to pass tests
     - Implement in infra/sandbox.rs
     - _Requirements: 27.1-27.9_
-  - [ ] 10.3 Checkpoint - Build isolation works
+  - [x] 10.3 Checkpoint - Build isolation works
 
 
 - [ ] 11. Phase 11: Version Management (TDD)

@@ -7,4 +7,5 @@ pub mod download;
 pub mod filesystem;
 pub mod gcc_toolchain;
 pub mod git;
+pub mod sandbox;
 pub mod toolchain;

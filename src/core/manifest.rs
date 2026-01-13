@@ -80,6 +80,11 @@ pub struct BuildConfig {
     /// Number of parallel jobs
     #[serde(default)]
     pub jobs: Option<usize>,
+
+    /// Enable container isolation for builds
+    /// **Validates: Requirement 27.3**
+    #[serde(default)]
+    pub sandbox: Option<bool>,
 }
 
 fn default_image_format() -> String {
@@ -102,6 +107,7 @@ impl Default for BuildConfig {
             rootfs_size: default_rootfs_size(),
             hostname: default_hostname(),
             jobs: None,
+            sandbox: None,
         }
     }
 }
@@ -383,6 +389,7 @@ compress = false
                 rootfs_size: "64M".to_string(),
                 hostname: "mydevice".to_string(),
                 jobs: Some(4),
+                sandbox: None,
             },
             packages,
             external,
@@ -487,6 +494,7 @@ name = "minimal-project"
                             rootfs_size,
                             hostname,
                             jobs,
+                            sandbox: None,
                         },
                         packages: HashMap::new(),
                         external: HashMap::new(),

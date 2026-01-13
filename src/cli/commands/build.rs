@@ -2,7 +2,7 @@
 //!
 //! Implements `zigroot build` to compile packages and create rootfs images.
 //!
-//! **Validates: Requirements 4.1-4.13, 5.1-5.7, 6.1-6.10**
+//! **Validates: Requirements 4.1-4.13, 5.1-5.7, 6.1-6.10, 27.1-27.9**
 
 use anyhow::{bail, Context, Result};
 use std::fs;
@@ -11,6 +11,7 @@ use std::path::Path;
 use crate::core::compress::{self, CompressionConfig};
 use crate::core::lock::{LockFile, LockedPackageBuilder};
 use crate::core::manifest::Manifest;
+use crate::infra::sandbox::{resolve_sandbox_config, Sandbox, SandboxError};
 
 /// Build options
 pub struct BuildOptions {
@@ -26,6 +27,10 @@ pub struct BuildOptions {
     pub no_compress: bool,
     /// Build only kernel and modules
     pub kernel_only: bool,
+    /// Enable container isolation (--sandbox)
+    pub sandbox: bool,
+    /// Disable container isolation (--no-sandbox)
+    pub no_sandbox: bool,
 }
 
 /// Execute the build command
@@ -46,6 +51,32 @@ pub async fn execute(project_dir: &Path, options: BuildOptions) -> Result<()> {
         Manifest::from_toml(&manifest_content).with_context(|| "Failed to parse zigroot.toml")?;
 
     tracing::info!("Building project: {}", manifest.project.name);
+
+    // Resolve sandbox configuration
+    // Priority: CLI flags > manifest settings > default (disabled)
+    let cli_sandbox = if options.sandbox { Some(true) } else { None };
+    let sandbox_config = resolve_sandbox_config(
+        cli_sandbox,
+        options.no_sandbox,
+        manifest.build.sandbox,
+        false, // Package network will be set per-package
+    );
+
+    // Initialize sandbox if enabled
+    let mut sandbox = Sandbox::new(sandbox_config);
+    if let Err(e) = sandbox.init() {
+        match e {
+            SandboxError::RuntimeNotAvailable => {
+                bail!("Container runtime not available. Install Docker or Podman to use --sandbox");
+            }
+            _ => bail!("Sandbox initialization failed: {}", e),
+        }
+    }
+
+    if sandbox.is_enabled() {
+        let runtime = sandbox.runtime().map(|r| r.command()).unwrap_or("unknown");
+        tracing::info!("Build isolation enabled using {}", runtime);
+    }
 
     // Create build directories
     let build_dir = project_dir.join("build");

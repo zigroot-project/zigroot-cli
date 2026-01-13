@@ -108,6 +108,14 @@ pub enum Commands {
         /// Build only kernel and modules
         #[arg(long)]
         kernel_only: bool,
+
+        /// Enable container isolation (Docker/Podman)
+        #[arg(long)]
+        sandbox: bool,
+
+        /// Disable container isolation (overrides manifest setting)
+        #[arg(long)]
+        no_sandbox: bool,
     },
 
     /// Remove build artifacts
@@ -383,7 +391,7 @@ impl Commands {
                 let current_dir = std::env::current_dir()?;
                 fetch::execute(&current_dir, parallel, force).await
             }
-            Self::Build { package, jobs, locked, compress, no_compress, kernel_only } => {
+            Self::Build { package, jobs, locked, compress, no_compress, kernel_only, sandbox, no_sandbox } => {
                 let current_dir = std::env::current_dir()?;
                 let options = build::BuildOptions {
                     package,
@@ -392,6 +400,8 @@ impl Commands {
                     compress,
                     no_compress,
                     kernel_only,
+                    sandbox,
+                    no_sandbox,
                 };
                 build::execute(&current_dir, options).await
             }
