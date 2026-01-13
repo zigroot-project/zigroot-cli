@@ -51,3 +51,4 @@ pub mod sdk;
 pub mod search;
 pub mod tree;
 pub mod update;
+pub mod version;

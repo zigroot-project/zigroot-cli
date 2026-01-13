@@ -383,9 +383,13 @@ impl Commands {
                 let current_dir = std::env::current_dir()?;
                 remove::execute(&current_dir, &package).await
             }
-            Self::Update { package, self_update: _ } => {
-                let current_dir = std::env::current_dir()?;
-                update::execute(&current_dir, package).await
+            Self::Update { package, self_update } => {
+                if self_update {
+                    update::execute_self_update().await
+                } else {
+                    let current_dir = std::env::current_dir()?;
+                    update::execute(&current_dir, package).await
+                }
             }
             Self::Fetch { parallel, force } => {
                 let current_dir = std::env::current_dir()?;

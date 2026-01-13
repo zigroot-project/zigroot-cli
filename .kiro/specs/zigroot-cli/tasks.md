@@ -604,38 +604,38 @@ w    - Test: Creates zigroot.toml in empty directory
   - [x] 10.3 Checkpoint - Build isolation works
 
 
-- [ ] 11. Phase 11: Version Management (TDD)
-  - [ ] 11.1 Write failing tests for minimum version checking
+- [x] 11. Phase 11: Version Management (TDD)
+  - [x] 11.1 Write failing tests for minimum version checking
     - Test: Parses zigroot_version from packages
     - Test: Parses zigroot_version from boards
     - Test: Compares against current version
     - Test: Displays error with update suggestion
     - **Property 15: Minimum Version Enforcement**
     - **Validates: Requirements 30.1-30.7**
-  - [ ] 11.2 Implement minimum version checking to pass tests
+  - [x] 11.2 Implement minimum version checking to pass tests
     - _Requirements: 30.1-30.7_
-  - [ ] 11.3 Write failing tests for semver comparison
+  - [x] 11.3 Write failing tests for semver comparison
     - Test: Follows semver standards
     - **Property 16: Semver Compliance**
     - **Validates: Requirements 30.8, 31.10**
-  - [ ] 11.4 Implement semver comparison to pass tests
+  - [x] 11.4 Implement semver comparison to pass tests
     - _Requirements: 30.8, 31.10_
-  - [ ] 11.5 Write failing integration test for zigroot update --self
+  - [x] 11.5 Write failing integration test for zigroot update --self
     - Test: Checks for newer zigroot versions
     - Test: Displays update instructions
     - Test: Detects installation method
     - Test: --install attempts to update
     - **Validates: Requirements 31.1, 31.2, 31.7-31.9**
-  - [ ] 11.6 Implement zigroot update --self to pass tests
+  - [x] 11.6 Implement zigroot update --self to pass tests
     - _Requirements: 31.1, 31.2, 31.7-31.9_
-  - [ ] 11.7 Write failing tests for background update check
+  - [x] 11.7 Write failing tests for background update check
     - Test: Checks at most once per day
     - Test: Displays non-intrusive notification
     - Test: Caches results
     - **Validates: Requirements 31.3-31.6**
-  - [ ] 11.8 Implement background update check to pass tests
+  - [x] 11.8 Implement background update check to pass tests
     - _Requirements: 31.3-31.6_
-  - [ ] 11.9 Checkpoint - Version management works
+  - [x] 11.9 Checkpoint - Version management works
 
 - [ ] 12. Phase 12: Output and Diagnostics (TDD)
   - [ ] 12.1 Write failing tests for colored output
