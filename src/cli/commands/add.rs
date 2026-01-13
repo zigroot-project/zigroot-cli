@@ -6,6 +6,7 @@ use std::path::Path;
 
 use anyhow::{Context, Result};
 
+use crate::cli::output::{print_detail, print_success};
 use crate::core::add::{add_package, AddOptions};
 
 /// Execute the add command
@@ -31,17 +32,17 @@ pub async fn execute(
         .with_context(|| format!("Failed to add package '{package}'"))?;
 
     // Print success message
-    println!("✓ Added {} v{}", result.package_name, result.version);
+    print_success(&format!("Added {} v{}", result.package_name, result.version));
 
     if !result.dependencies.is_empty() {
-        println!("  Dependencies:");
+        print_detail("Dependencies:");
         for dep in &result.dependencies {
-            println!("    + {dep}");
+            print_detail(&format!("  + {dep}"));
         }
     }
 
     if result.lock_updated {
-        println!("  Updated zigroot.lock");
+        print_detail("Updated zigroot.lock");
     }
 
     Ok(())

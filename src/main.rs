@@ -5,6 +5,7 @@
 use anyhow::Result;
 use clap::Parser;
 
+use zigroot::cli::output::{display_error, OutputConfig};
 use zigroot::cli::Cli;
 
 #[tokio::main]
@@ -18,5 +19,17 @@ async fn main() -> Result<()> {
         .init();
 
     let cli = Cli::parse();
-    cli.run().await
+
+    // Apply output configuration globally
+    let output_config = OutputConfig::new(cli.quiet, cli.json, cli.verbose);
+    output_config.apply_global();
+
+    // Run the command and handle errors
+    match cli.run().await {
+        Ok(()) => Ok(()),
+        Err(e) => {
+            display_error(&e);
+            std::process::exit(1);
+        }
+    }
 }

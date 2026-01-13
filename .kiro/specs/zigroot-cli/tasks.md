@@ -637,22 +637,22 @@ w    - Test: Creates zigroot.toml in empty directory
     - _Requirements: 31.3-31.6_
   - [x] 11.9 Checkpoint - Version management works
 
-- [ ] 12. Phase 12: Output and Diagnostics (TDD)
-  - [ ] 12.1 Write failing tests for colored output
+- [-] 12. Phase 12: Output and Diagnostics (TDD)
+  - [x] 12.1 Write failing tests for colored output
     - Test: Green for success, red for errors, yellow for warnings
     - Test: --quiet suppresses all output except errors
     - Test: --json outputs machine-readable format
     - **Validates: Requirements 14.2, 15.4, 15.8-15.10**
-  - [ ] 12.2 Implement colored output to pass tests
+  - [x] 12.2 Implement colored output to pass tests
     - Implement in cli/output.rs
     - _Requirements: 14.2, 15.4, 15.8-15.10_
-  - [ ] 12.3 Write failing tests for progress indicators
+  - [x] 12.3 Write failing tests for progress indicators
     - Test: Animated spinners for unknown duration
     - Test: Progress bars for downloads and builds
     - Test: Multi-line view for parallel operations
     - Test: Non-interactive fallback when piped
     - **Validates: Requirements 15.1-15.3, 15.5, 15.6**
-  - [ ] 12.4 Implement progress indicators to pass tests
+  - [x] 12.4 Implement progress indicators to pass tests
     - _Requirements: 15.1-15.3, 15.5, 15.6_
   - [ ] 12.5 Write failing tests for summary banner
     - Test: Displays total time, packages built, image size
