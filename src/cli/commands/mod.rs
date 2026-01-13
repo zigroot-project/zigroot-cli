@@ -21,6 +21,7 @@ pub mod sdk;
 pub mod search;
 pub mod tree;
 pub mod update;
+pub mod verify;
 
 use anyhow::Result;
 use clap::Subcommand;
@@ -411,9 +412,14 @@ impl Commands {
                     PackageCommands::Info { package: pkg_name } => {
                         package::execute_info(&current_dir, &pkg_name).await
                     }
-                    _ => {
-                        tracing::info!("Package subcommand not yet implemented");
-                        Ok(())
+                    PackageCommands::New { name } => {
+                        package::execute_new(&current_dir, &name).await
+                    }
+                    PackageCommands::Test { path } => {
+                        package::execute_test(&current_dir, &path).await
+                    }
+                    PackageCommands::Bump { path, version } => {
+                        package::execute_bump(&current_dir, &path, &version).await
                     }
                 }
             }
@@ -492,6 +498,10 @@ impl Commands {
             Self::Config { board, packages } => {
                 let current_dir = std::env::current_dir()?;
                 config::execute(&current_dir, board, packages).await
+            }
+            Self::Verify { path, fetch } => {
+                let current_dir = std::env::current_dir()?;
+                verify::execute(&current_dir, &path, fetch).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

@@ -511,23 +511,23 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
   - [x] 7.15 Checkpoint - zigroot config works
 
 
-- [ ] 8. Phase 8: Package/Board Authoring Commands (TDD)
-  - [ ] 8.1 Write failing integration test for zigroot package new
+- [-] 8. Phase 8: Package/Board Authoring Commands (TDD)
+  - [x] 8.1 Write failing integration test for zigroot package new
     - Test: Creates package template in packages/<name>/
     - Test: Creates metadata.toml and version file
     - **Validates: Requirements 28.1**
-  - [ ] 8.2 Implement zigroot package new to pass tests
+  - [x] 8.2 Implement zigroot package new to pass tests
     - _Requirements: 28.1_
-  - [ ] 8.3 Checkpoint - zigroot package new works
-  - [ ] 8.4 Write failing integration test for zigroot verify
+  - [x] 8.3 Checkpoint - zigroot package new works
+  - [x] 8.4 Write failing integration test for zigroot verify
     - Test: Validates package structure
     - Test: Validates board structure
     - Test: Checks required fields
     - Test: --fetch downloads and verifies checksums
     - **Validates: Requirements 28.2-28.5, 29.2-29.4**
-  - [ ] 8.5 Implement zigroot verify to pass tests
+  - [x] 8.5 Implement zigroot verify to pass tests
     - _Requirements: 28.2-28.5, 29.2-29.4_
-  - [ ] 8.6 Checkpoint - zigroot verify works
+  - [x] 8.6 Checkpoint - zigroot verify works
   - [ ] 8.7 Write failing integration test for zigroot package test
     - Test: Attempts to build package
     - Test: Reports success or failure
