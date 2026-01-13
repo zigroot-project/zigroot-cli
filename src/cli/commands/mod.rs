@@ -265,8 +265,9 @@ pub enum PackageCommands {
         /// Path to package directory
         path: String,
 
-        /// New version
-        version: String,
+        /// New version number
+        #[arg(value_name = "VERSION")]
+        new_version: String,
     },
 }
 
@@ -419,8 +420,8 @@ impl Commands {
                     PackageCommands::Test { path } => {
                         package::execute_test(&current_dir, &path).await
                     }
-                    PackageCommands::Bump { path, version } => {
-                        package::execute_bump(&current_dir, &path, &version).await
+                    PackageCommands::Bump { path, new_version } => {
+                        package::execute_bump(&current_dir, &path, &new_version).await
                     }
                 }
             }

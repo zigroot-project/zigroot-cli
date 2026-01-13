@@ -545,12 +545,12 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
   - [x] 8.11 Implement zigroot publish to pass tests
     - _Requirements: 28.7-28.11, 29.5-29.8_
   - [x] 8.12 Checkpoint - zigroot publish works
-  - [ ] 8.13 Write failing integration test for zigroot package bump
+  - [x] 8.13 Write failing integration test for zigroot package bump
     - Test: Creates new version file from latest
     - **Validates: Requirements 28.12**
-  - [ ] 8.14 Implement zigroot package bump to pass tests
+  - [x] 8.14 Implement zigroot package bump to pass tests
     - _Requirements: 28.12_
-  - [ ] 8.15 Checkpoint - zigroot package bump works
+  - [x] 8.15 Checkpoint - zigroot package bump works
   - [ ] 8.16 Write failing integration test for zigroot board new
     - Test: Creates board template in boards/<name>/
     - **Validates: Requirements 29.1**
