@@ -32,6 +32,7 @@ pub mod cache;
 pub mod check;
 pub mod clean;
 pub mod compress;
+pub mod config;
 pub mod doctor;
 pub mod external;
 pub mod fetch;

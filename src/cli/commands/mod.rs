@@ -8,6 +8,7 @@ pub mod build;
 pub mod cache;
 pub mod check;
 pub mod clean;
+pub mod config;
 pub mod doctor;
 pub mod external;
 pub mod fetch;
@@ -200,7 +201,15 @@ pub enum Commands {
     },
 
     /// Interactive configuration (TUI)
-    Config,
+    Config {
+        /// Show only board selection
+        #[arg(long)]
+        board: bool,
+
+        /// Show only package selection
+        #[arg(long)]
+        packages: bool,
+    },
 
     /// Verify package or board definition
     Verify {
@@ -479,6 +488,10 @@ impl Commands {
                         cache::execute_import(&current_dir, &input).await
                     }
                 }
+            }
+            Self::Config { board, packages } => {
+                let current_dir = std::env::current_dir()?;
+                config::execute(&current_dir, board, packages).await
             }
             _ => {
                 tracing::info!("Command not yet implemented");

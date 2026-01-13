@@ -492,7 +492,7 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Run integration test until GREEN
     - _Requirements: 24.1-24.8_
   - [x] 7.12 Checkpoint - zigroot cache works
-  - [ ] 7.13 Write failing integration test for zigroot config (TUI)
+  - [x] 7.13 Write failing integration test for zigroot config (TUI)
     - Test: Launches TUI interface
     - Test: Board selection works
     - Test: Package selection works
@@ -502,13 +502,13 @@ This implementation plan follows **strict TDD** (Test-Driven Development) with *
     - Test: Shows diff before saving
     - **Property 35: TUI Dependency Auto-Selection**
     - **Validates: Requirements 25.1-25.17**
-  - [ ] 7.14 Implement zigroot config to pass tests
+  - [x] 7.14 Implement zigroot config to pass tests
     - Implement CLI parsing in cli/commands/config.rs
     - Implement TUI in cli/tui/config.rs
     - Wire CLI to TUI
     - Run integration test until GREEN
     - _Requirements: 25.1-25.17_
-  - [ ] 7.15 Checkpoint - zigroot config works
+  - [x] 7.15 Checkpoint - zigroot config works
 
 
 - [ ] 8. Phase 8: Package/Board Authoring Commands (TDD)
