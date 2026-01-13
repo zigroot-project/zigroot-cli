@@ -7,7 +7,9 @@
 use anyhow::Result;
 use std::path::Path;
 
-use crate::cli::output::{is_json, is_quiet, print_detail, print_info, print_success, print_warning, status};
+use crate::cli::output::{
+    is_json, is_quiet, print_detail, print_info, print_success, print_warning, status,
+};
 use crate::core::doctor::run_doctor;
 
 /// Execute the doctor command
@@ -30,7 +32,10 @@ pub async fn execute(project_dir: Option<&Path>) -> Result<()> {
             "passed_count": report.passed_count(),
             "total_count": report.checks.len()
         });
-        println!("{}", serde_json::to_string_pretty(&json_result).unwrap_or_default());
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&json_result).unwrap_or_default()
+        );
 
         if !report.failed_required().is_empty() {
             return Err(anyhow::anyhow!("Missing required dependencies"));
@@ -65,7 +70,11 @@ pub async fn execute(project_dir: Option<&Path>) -> Result<()> {
         let required_str = if check.required { "" } else { " [optional]" };
 
         if check.passed {
-            println!("  {} {}{version_str}{required_str}", status::SUCCESS, check.name);
+            println!(
+                "  {} {}{version_str}{required_str}",
+                status::SUCCESS,
+                check.name
+            );
         } else {
             println!("  {} {}{required_str}", status::ERROR, check.name);
             if let Some(error) = &check.error {

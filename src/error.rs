@@ -218,7 +218,6 @@ pub enum OptionError {
     },
 }
 
-
 /// Top-level zigroot error type
 #[derive(Error, Debug)]
 pub enum ZigrootError {

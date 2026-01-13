@@ -19,7 +19,8 @@ pub async fn execute(path: &Path, package: &str) -> Result<()> {
         );
     }
 
-    let result = remove_package(path, package).with_context(|| format!("Failed to remove package '{package}'"))?;
+    let result = remove_package(path, package)
+        .with_context(|| format!("Failed to remove package '{package}'"))?;
 
     // Print success message
     if let Some(version) = &result.version {

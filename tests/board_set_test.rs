@@ -374,8 +374,7 @@ fn test_board_set_can_change_board() {
 
 /// Strategy for generating valid board names
 fn board_name_strategy() -> impl Strategy<Value = String> {
-    "[a-z][a-z0-9-]{2,20}"
-        .prop_filter("non-empty", |s| !s.is_empty() && s.len() >= 3)
+    "[a-z][a-z0-9-]{2,20}".prop_filter("non-empty", |s| !s.is_empty() && s.len() >= 3)
 }
 
 proptest! {

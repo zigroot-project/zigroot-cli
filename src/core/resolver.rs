@@ -240,7 +240,7 @@ mod tests {
     #[test]
     fn test_dependency_graph_builds_from_package_definitions() {
         let mut graph = DependencyGraph::new();
-        
+
         // Simulate building from package definitions
         graph.add_package("busybox", vec![]);
         graph.add_package("dropbear", vec!["zlib".to_string()]);
@@ -249,7 +249,7 @@ mod tests {
         graph.add_package("openssl", vec![]);
 
         let order = graph.topological_sort().unwrap();
-        
+
         // Verify all packages are in the order
         assert_eq!(order.len(), 5);
         assert!(order.contains(&"busybox".to_string()));
@@ -380,7 +380,7 @@ mod tests {
         graph.add_package("d", vec![]);
 
         let order = graph.topological_sort().unwrap();
-        
+
         let d_pos = order.iter().position(|x| x == "d").unwrap();
         let b_pos = order.iter().position(|x| x == "b").unwrap();
         let c_pos = order.iter().position(|x| x == "c").unwrap();
@@ -432,33 +432,32 @@ mod tests {
         // Generate 2-5 layers with 1-3 packages each
         (2usize..=5, 1usize..=3).prop_flat_map(|(num_layers, pkgs_per_layer)| {
             let mut strategies: Vec<BoxedStrategy<(String, Vec<String>)>> = Vec::new();
-            
+
             for layer in 0..num_layers {
                 for pkg_idx in 0..pkgs_per_layer {
                     let pkg_name = format!("pkg_l{layer}_p{pkg_idx}");
-                    
+
                     if layer == 0 {
                         // First layer has no dependencies
                         strategies.push(Just((pkg_name, vec![])).boxed());
                     } else {
                         // Later layers can depend on any package from previous layers
                         let prev_pkgs: Vec<String> = (0..layer)
-                            .flat_map(|l| (0..pkgs_per_layer).map(move |p| format!("pkg_l{l}_p{p}")))
+                            .flat_map(|l| {
+                                (0..pkgs_per_layer).map(move |p| format!("pkg_l{l}_p{p}"))
+                            })
                             .collect();
-                        
+
                         let pkg_name_clone = pkg_name.clone();
                         strategies.push(
-                            proptest::collection::vec(
-                                proptest::sample::select(prev_pkgs),
-                                0..=2,
-                            )
-                            .prop_map(move |deps| (pkg_name_clone.clone(), deps))
-                            .boxed(),
+                            proptest::collection::vec(proptest::sample::select(prev_pkgs), 0..=2)
+                                .prop_map(move |deps| (pkg_name_clone.clone(), deps))
+                                .boxed(),
                         );
                     }
                 }
             }
-            
+
             strategies.into_iter().collect::<Vec<_>>()
         })
     }
@@ -549,9 +548,13 @@ mod tests {
 
     #[test]
     fn test_find_compatible_version_single_constraint() {
-        let available = vec!["1.0.0".to_string(), "1.1.0".to_string(), "2.0.0".to_string()];
+        let available = vec![
+            "1.0.0".to_string(),
+            "1.1.0".to_string(),
+            "2.0.0".to_string(),
+        ];
         let constraints = vec!["^1.0.0".to_string()];
-        
+
         let result = find_compatible_version(&available, &constraints).unwrap();
         assert_eq!(result, Some("1.1.0".to_string())); // Prefers newer
     }
@@ -565,7 +568,7 @@ mod tests {
             "2.0.0".to_string(),
         ];
         let constraints = vec![">=1.0.0".to_string(), "<1.2.0".to_string()];
-        
+
         let result = find_compatible_version(&available, &constraints).unwrap();
         assert_eq!(result, Some("1.1.0".to_string()));
     }
@@ -574,7 +577,7 @@ mod tests {
     fn test_find_compatible_version_no_match() {
         let available = vec!["1.0.0".to_string(), "1.1.0".to_string()];
         let constraints = vec![">=2.0.0".to_string()];
-        
+
         let result = find_compatible_version(&available, &constraints).unwrap();
         assert_eq!(result, None);
     }
@@ -582,8 +585,12 @@ mod tests {
     #[test]
     fn test_detect_version_conflict_no_conflict() {
         let constraints = vec![">=1.0.0".to_string(), "<2.0.0".to_string()];
-        let available = vec!["1.0.0".to_string(), "1.5.0".to_string(), "2.0.0".to_string()];
-        
+        let available = vec![
+            "1.0.0".to_string(),
+            "1.5.0".to_string(),
+            "2.0.0".to_string(),
+        ];
+
         let result = detect_version_conflict("test-pkg", &constraints, &available);
         assert!(result.is_ok());
     }
@@ -591,16 +598,29 @@ mod tests {
     #[test]
     fn test_detect_version_conflict_with_conflict() {
         let constraints = vec![">=2.0.0".to_string(), "<1.5.0".to_string()];
-        let available = vec!["1.0.0".to_string(), "1.5.0".to_string(), "2.0.0".to_string()];
-        
+        let available = vec![
+            "1.0.0".to_string(),
+            "1.5.0".to_string(),
+            "2.0.0".to_string(),
+        ];
+
         let result = detect_version_conflict("test-pkg", &constraints, &available);
         assert!(result.is_err());
-        
+
         match result.unwrap_err() {
             ResolverError::Conflict { message } => {
-                assert!(message.contains("test-pkg"), "Error should mention package name");
-                assert!(message.contains(">=2.0.0"), "Error should mention constraint");
-                assert!(message.contains("<1.5.0"), "Error should mention constraint");
+                assert!(
+                    message.contains("test-pkg"),
+                    "Error should mention package name"
+                );
+                assert!(
+                    message.contains(">=2.0.0"),
+                    "Error should mention constraint"
+                );
+                assert!(
+                    message.contains("<1.5.0"),
+                    "Error should mention constraint"
+                );
             }
             _ => panic!("Expected Conflict error"),
         }
@@ -625,14 +645,23 @@ mod tests {
     fn test_conflict_error_message_is_clear() {
         let constraints = vec!["^1.0.0".to_string(), "^2.0.0".to_string()];
         let available = vec!["1.0.0".to_string(), "2.0.0".to_string()];
-        
+
         let result = detect_version_conflict("conflicting-pkg", &constraints, &available);
         assert!(result.is_err());
-        
+
         let err_msg = result.unwrap_err().to_string();
-        assert!(err_msg.contains("conflicting-pkg"), "Should mention package: {err_msg}");
-        assert!(err_msg.contains("^1.0.0"), "Should mention first constraint: {err_msg}");
-        assert!(err_msg.contains("^2.0.0"), "Should mention second constraint: {err_msg}");
+        assert!(
+            err_msg.contains("conflicting-pkg"),
+            "Should mention package: {err_msg}"
+        );
+        assert!(
+            err_msg.contains("^1.0.0"),
+            "Should mention first constraint: {err_msg}"
+        );
+        assert!(
+            err_msg.contains("^2.0.0"),
+            "Should mention second constraint: {err_msg}"
+        );
     }
 
     proptest! {
@@ -646,7 +675,7 @@ mod tests {
         fn prop_build_order_respects_dependencies(packages in dag_strategy()) {
             let mut graph = DependencyGraph::new();
             let mut deps_map: HashMap<String, Vec<String>> = HashMap::new();
-            
+
             for (name, deps) in &packages {
                 graph.add_package(name, deps.clone());
                 deps_map.insert(name.clone(), deps.clone());
@@ -678,16 +707,16 @@ mod tests {
         #[test]
         fn prop_detects_circular_dependencies(packages in cyclic_graph_strategy()) {
             let mut graph = DependencyGraph::new();
-            
+
             for (name, deps) in &packages {
                 graph.add_package(name, deps.clone());
             }
 
             prop_assert!(graph.has_cycle(), "Should detect cycle in cyclic graph");
-            
+
             let result = graph.topological_sort();
             prop_assert!(result.is_err(), "Topological sort should fail for cyclic graph");
-            
+
             match result.unwrap_err() {
                 ResolverError::CircularDependency { cycle } => {
                     prop_assert!(!cycle.is_empty(), "Cycle path should not be empty");
@@ -701,7 +730,7 @@ mod tests {
         fn prop_all_packages_in_build_order(packages in dag_strategy()) {
             let mut graph = DependencyGraph::new();
             let mut all_names: HashSet<String> = HashSet::new();
-            
+
             for (name, deps) in &packages {
                 graph.add_package(name, deps.clone());
                 all_names.insert(name.clone());
@@ -714,7 +743,7 @@ mod tests {
                 .expect("DAG should produce valid topological sort");
 
             let order_set: HashSet<String> = order.into_iter().collect();
-            
+
             for name in &all_names {
                 prop_assert!(
                     order_set.contains(name),
@@ -728,7 +757,7 @@ mod tests {
         #[test]
         fn prop_build_order_no_duplicates(packages in dag_strategy()) {
             let mut graph = DependencyGraph::new();
-            
+
             for (name, deps) in &packages {
                 graph.add_package(name, deps.clone());
             }
@@ -757,18 +786,18 @@ mod tests {
             let constraint1 = format!("^{major1}.0.0");
             let constraint2 = format!("^{major2}.0.0");
             let constraints = vec![constraint1.clone(), constraint2.clone()];
-            
+
             // Available versions span multiple majors
             let available: Vec<String> = (1..=5)
                 .map(|m| format!("{m}.0.0"))
                 .collect();
-            
+
             let result = detect_version_conflict("test-pkg", &constraints, &available);
-            
+
             if major1 != major2 {
                 // Different major versions with caret constraints should conflict
                 prop_assert!(result.is_err(), "Different major versions should conflict");
-                
+
                 let err_msg = result.unwrap_err().to_string();
                 prop_assert!(
                     err_msg.contains("test-pkg"),
@@ -790,7 +819,7 @@ mod tests {
             let constraint = format!(">={major}.0.0, <{}.0.0", major + 1);
             let available = vec![version.clone()];
             let constraints = vec![constraint];
-            
+
             let result = find_compatible_version(&available, &constraints);
             prop_assert!(result.is_ok());
             prop_assert_eq!(result.unwrap(), Some(version));

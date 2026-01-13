@@ -60,10 +60,10 @@ pub async fn update_packages(
     let lock_path = project_path.join("zigroot.lock");
 
     // Load existing manifest
-    let manifest_content =
-        std::fs::read_to_string(&manifest_path).map_err(|e| UpdateError::ManifestError(e.to_string()))?;
-    let mut manifest =
-        Manifest::from_toml(&manifest_content).map_err(|e| UpdateError::ManifestError(e.to_string()))?;
+    let manifest_content = std::fs::read_to_string(&manifest_path)
+        .map_err(|e| UpdateError::ManifestError(e.to_string()))?;
+    let mut manifest = Manifest::from_toml(&manifest_content)
+        .map_err(|e| UpdateError::ManifestError(e.to_string()))?;
 
     // Determine which packages to update
     let packages_to_update: Vec<String> = if let Some(name) = package_name {
@@ -110,7 +110,10 @@ pub async fn update_packages(
         result.checked.push(pkg_name.clone());
 
         let pkg_ref = manifest.packages.get(pkg_name).unwrap();
-        let current_version = pkg_ref.version.clone().unwrap_or_else(|| "latest".to_string());
+        let current_version = pkg_ref
+            .version
+            .clone()
+            .unwrap_or_else(|| "latest".to_string());
 
         // Try to find latest version from registry
         let latest_version = if let Some(ref idx) = index {
@@ -133,7 +136,9 @@ pub async fn update_packages(
                 let locked_pkg = LockedPackageBuilder::new(pkg_name, &latest, "pending").build();
                 lock_file.add_package(locked_pkg);
 
-                result.updated.push((pkg_name.clone(), current_version, latest));
+                result
+                    .updated
+                    .push((pkg_name.clone(), current_version, latest));
                 result.lock_updated = true;
             } else {
                 result.up_to_date.push(pkg_name.clone());
@@ -146,8 +151,9 @@ pub async fn update_packages(
 
     // Save manifest if any packages were updated
     if result.lock_updated {
-        let new_manifest_content =
-            manifest.to_toml().map_err(|e| UpdateError::ManifestError(e.to_string()))?;
+        let new_manifest_content = manifest
+            .to_toml()
+            .map_err(|e| UpdateError::ManifestError(e.to_string()))?;
         std::fs::write(&manifest_path, new_manifest_content)
             .map_err(|e| UpdateError::IoError(e.to_string()))?;
 
@@ -169,11 +175,8 @@ fn is_newer_version(new_version: &str, current_version: &str) -> bool {
     }
 
     // Parse versions into components
-    let parse_version = |v: &str| -> Vec<u32> {
-        v.split('.')
-            .filter_map(|s| s.parse::<u32>().ok())
-            .collect()
-    };
+    let parse_version =
+        |v: &str| -> Vec<u32> { v.split('.').filter_map(|s| s.parse::<u32>().ok()).collect() };
 
     let new_parts = parse_version(new_version);
     let current_parts = parse_version(current_version);

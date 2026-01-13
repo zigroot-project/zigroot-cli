@@ -242,7 +242,6 @@ impl PackageDefinition {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -274,23 +273,30 @@ type = "make"
 make_args = ["CROSS_COMPILE=${TARGET}-"]
 "#;
 
-        let pkg = PackageDefinition::from_toml(toml_content).expect("Failed to parse valid package");
+        let pkg =
+            PackageDefinition::from_toml(toml_content).expect("Failed to parse valid package");
 
         assert_eq!(pkg.package.name, "busybox");
         assert_eq!(pkg.package.version, "1.36.1");
-        assert_eq!(pkg.package.description, "Swiss army knife of embedded Linux");
+        assert_eq!(
+            pkg.package.description,
+            "Swiss army knife of embedded Linux"
+        );
         assert_eq!(pkg.package.license, Some("GPL-2.0".to_string()));
         assert_eq!(pkg.package.depends, vec!["zlib"]);
-        
+
         // Verify source is URL type
         match &pkg.source {
             SourceConfig::Url { url, sha256 } => {
                 assert!(url.contains("busybox"));
-                assert_eq!(sha256, "b8cc24c9574d809e7279c3be349795c5d5ceb6fdf19ca709f80cde50e47de314");
+                assert_eq!(
+                    sha256,
+                    "b8cc24c9574d809e7279c3be349795c5d5ceb6fdf19ca709f80cde50e47de314"
+                );
             }
             _ => panic!("Expected URL source type"),
         }
-        
+
         assert_eq!(pkg.build.build_type, Some("make".to_string()));
     }
 
@@ -340,12 +346,10 @@ branch = "main"
         let pkg = PackageDefinition::from_toml(toml_content).expect("Failed to parse");
 
         match &pkg.source {
-            SourceConfig::Git { git_ref, .. } => {
-                match git_ref {
-                    GitRef::Branch(branch) => assert_eq!(branch, "main"),
-                    _ => panic!("Expected branch ref"),
-                }
-            }
+            SourceConfig::Git { git_ref, .. } => match git_ref {
+                GitRef::Branch(branch) => assert_eq!(branch, "main"),
+                _ => panic!("Expected branch ref"),
+            },
             _ => panic!("Expected Git source type"),
         }
     }
@@ -366,12 +370,10 @@ rev = "abc123def456"
         let pkg = PackageDefinition::from_toml(toml_content).expect("Failed to parse");
 
         match &pkg.source {
-            SourceConfig::Git { git_ref, .. } => {
-                match git_ref {
-                    GitRef::Rev(rev) => assert_eq!(rev, "abc123def456"),
-                    _ => panic!("Expected rev ref"),
-                }
-            }
+            SourceConfig::Git { git_ref, .. } => match git_ref {
+                GitRef::Rev(rev) => assert_eq!(rev, "abc123def456"),
+                _ => panic!("Expected rev ref"),
+            },
             _ => panic!("Expected Git source type"),
         }
     }
@@ -399,7 +401,8 @@ rev = "abc123def456"
             },
             source: SourceConfig::Url {
                 url: "https://example.com/test-1.0.0.tar.gz".to_string(),
-                sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855".to_string(),
+                sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                    .to_string(),
             },
             build: PackageBuildConfig::default(),
             options: HashMap::new(),
@@ -541,8 +544,7 @@ git = "https://github.com/example/repo"
 
     /// Strategy for generating valid package names
     fn package_name_strategy() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9-]{0,30}[a-z0-9]?"
-            .prop_filter("Name must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9-]{0,30}[a-z0-9]?".prop_filter("Name must not be empty", |s| !s.is_empty())
     }
 
     /// Strategy for generating valid semver versions
@@ -558,14 +560,8 @@ git = "https://github.com/example/repo"
 
     /// Strategy for generating valid URLs
     fn url_strategy() -> impl Strategy<Value = String> {
-        (
-            "[a-z]{3,10}",
-            "[a-z]{2,5}",
-            "[a-z0-9-]{1,20}",
-        )
-            .prop_map(|(domain, tld, path)| {
-                format!("https://{domain}.{tld}/{path}.tar.gz")
-            })
+        ("[a-z]{3,10}", "[a-z]{2,5}", "[a-z0-9-]{1,20}")
+            .prop_map(|(domain, tld, path)| format!("https://{domain}.{tld}/{path}.tar.gz"))
     }
 
     /// Strategy for generating descriptions
@@ -587,27 +583,25 @@ git = "https://github.com/example/repo"
             description_strategy(),
             url_source_strategy(),
         )
-            .prop_map(|(name, version, description, source)| {
-                PackageDefinition {
-                    package: PackageMetadata {
-                        name,
-                        version,
-                        description,
-                        license: None,
-                        homepage: None,
-                        keywords: vec![],
-                        depends: vec![],
-                        requires: vec![],
-                        arch: vec![],
-                        provides: vec![],
-                        conflicts: vec![],
-                        zigroot_version: None,
-                    },
-                    source,
-                    build: PackageBuildConfig::default(),
-                    options: HashMap::new(),
-                    install: InstallConfig::default(),
-                }
+            .prop_map(|(name, version, description, source)| PackageDefinition {
+                package: PackageMetadata {
+                    name,
+                    version,
+                    description,
+                    license: None,
+                    homepage: None,
+                    keywords: vec![],
+                    depends: vec![],
+                    requires: vec![],
+                    arch: vec![],
+                    provides: vec![],
+                    conflicts: vec![],
+                    zigroot_version: None,
+                },
+                source,
+                build: PackageBuildConfig::default(),
+                options: HashMap::new(),
+                install: InstallConfig::default(),
             })
     }
 
@@ -675,7 +669,7 @@ git = "https://github.com/example/repo"
         #[test]
         fn prop_url_source_has_sha256(url in url_strategy(), sha256 in sha256_strategy()) {
             let source = SourceConfig::Url { url: url.clone(), sha256: sha256.clone() };
-            
+
             match source {
                 SourceConfig::Url { sha256: hash, .. } => {
                     prop_assert!(!hash.is_empty(), "URL source must have non-empty sha256");

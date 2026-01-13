@@ -115,12 +115,7 @@ touch "$DESTDIR/built_marker"
 }
 
 /// Helper to create a local package with dependencies
-fn create_local_package_with_deps(
-    project: &TestProject,
-    name: &str,
-    version: &str,
-    deps: &[&str],
-) {
+fn create_local_package_with_deps(project: &TestProject, name: &str, version: &str, deps: &[&str]) {
     let pkg_dir = format!("packages/{name}");
     project.create_dir(&pkg_dir);
 
@@ -577,7 +572,8 @@ fn package_name_strategy() -> impl Strategy<Value = String> {
 
 /// Strategy for generating valid version strings
 fn version_strategy() -> impl Strategy<Value = String> {
-    (1u32..10, 0u32..10, 0u32..10).prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
+    (1u32..10, 0u32..10, 0u32..10)
+        .prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
 }
 
 proptest! {

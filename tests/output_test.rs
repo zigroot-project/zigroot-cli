@@ -666,7 +666,10 @@ fn test_suggestions_for_package_errors() {
     };
     let anyhow_error = anyhow::Error::new(error);
     let suggestion = get_suggestion(&anyhow_error);
-    assert!(suggestion.is_some(), "Should provide suggestion for NotFound");
+    assert!(
+        suggestion.is_some(),
+        "Should provide suggestion for NotFound"
+    );
     assert!(
         suggestion.unwrap().contains("search"),
         "Should suggest searching"
@@ -710,9 +713,9 @@ fn test_suggestions_for_package_errors() {
 /// **Validates: Requirement 14.1, 14.6**
 #[test]
 fn test_suggestions_for_init_errors() {
+    use std::path::PathBuf;
     use zigroot::cli::output::suggestions::get_suggestion;
     use zigroot::error::InitError;
-    use std::path::PathBuf;
 
     // Test DirectoryNotEmpty error
     let error = InitError::DirectoryNotEmpty {

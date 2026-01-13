@@ -271,8 +271,7 @@ fn test_external_add_url_adds_remote_artifact() {
     // Verify the manifest was updated
     let manifest_content = project.read_file("zigroot.toml");
     assert!(
-        manifest_content.contains("my-bootloader")
-            || manifest_content.contains("bootloader"),
+        manifest_content.contains("my-bootloader") || manifest_content.contains("bootloader"),
         "Manifest should contain the new artifact: {manifest_content}"
     );
     assert!(
@@ -290,7 +289,14 @@ fn test_external_add_url_supports_artifact_types() {
     create_manifest_without_externals(&project);
 
     // Test adding different artifact types
-    let artifact_types = ["bootloader", "kernel", "dtb", "firmware", "partition_table", "other"];
+    let artifact_types = [
+        "bootloader",
+        "kernel",
+        "dtb",
+        "firmware",
+        "partition_table",
+        "other",
+    ];
 
     for (i, artifact_type) in artifact_types.iter().enumerate() {
         let name = format!("artifact-{i}");

@@ -27,9 +27,7 @@ pub struct PackageLicense {
 impl PackageLicense {
     /// Create a new package license entry
     pub fn new(name: &str, version: &str, license: Option<&str>, source_url: Option<&str>) -> Self {
-        let is_copyleft = license
-            .map(|l| is_copyleft_license(l))
-            .unwrap_or(false);
+        let is_copyleft = license.map(|l| is_copyleft_license(l)).unwrap_or(false);
 
         Self {
             name: name.to_string(),
@@ -44,20 +42,8 @@ impl PackageLicense {
 /// Check if a license is copyleft
 pub fn is_copyleft_license(license: &str) -> bool {
     let copyleft_licenses = [
-        "GPL",
-        "GPL-2.0",
-        "GPL-3.0",
-        "LGPL",
-        "LGPL-2.0",
-        "LGPL-2.1",
-        "LGPL-3.0",
-        "AGPL",
-        "AGPL-3.0",
-        "MPL",
-        "MPL-2.0",
-        "CC-BY-SA",
-        "CDDL",
-        "EPL",
+        "GPL", "GPL-2.0", "GPL-3.0", "LGPL", "LGPL-2.0", "LGPL-2.1", "LGPL-3.0", "AGPL",
+        "AGPL-3.0", "MPL", "MPL-2.0", "CC-BY-SA", "CDDL", "EPL",
     ];
 
     let license_upper = license.to_uppercase();
@@ -103,7 +89,10 @@ impl LicenseReport {
     pub fn summary(&self) -> String {
         let mut lines = Vec::new();
 
-        lines.push(format!("License Summary: {} packages\n", self.packages.len()));
+        lines.push(format!(
+            "License Summary: {} packages\n",
+            self.packages.len()
+        ));
 
         // Group by license
         let mut by_license: HashMap<String, Vec<&PackageLicense>> = HashMap::new();
@@ -226,7 +215,10 @@ pub fn collect_licenses(project_dir: &Path, manifest: &Manifest) -> LicenseRepor
 
     // Collect from manifest packages
     for (name, pkg_ref) in &manifest.packages {
-        let version = pkg_ref.version.clone().unwrap_or_else(|| "unknown".to_string());
+        let version = pkg_ref
+            .version
+            .clone()
+            .unwrap_or_else(|| "unknown".to_string());
 
         // Try to load local package definition
         let local_pkg_path = project_dir.join("packages").join(name).join("package.toml");

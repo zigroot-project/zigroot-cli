@@ -282,7 +282,8 @@ async fn generate_suggestions(query: &str, client: &RegistryClient) -> Vec<Strin
     // Add generic suggestions if no specific ones found
     if suggestions.is_empty() {
         suggestions.push("Try a different search term".to_string());
-        suggestions.push("Use 'zigroot search --packages <query>' to search only packages".to_string());
+        suggestions
+            .push("Use 'zigroot search --packages <query>' to search only packages".to_string());
         suggestions.push("Use 'zigroot search --boards <query>' to search only boards".to_string());
     }
 

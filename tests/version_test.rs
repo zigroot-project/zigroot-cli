@@ -29,13 +29,25 @@ use zigroot::core::version::{
 fn test_parse_zigroot_version_from_package() {
     // Valid constraint should parse successfully
     let result = parse_constraint(">=0.2.0");
-    assert!(result.is_ok(), "Should parse valid constraint: {:?}", result);
+    assert!(
+        result.is_ok(),
+        "Should parse valid constraint: {:?}",
+        result
+    );
 
     let result = parse_constraint("^1.0");
-    assert!(result.is_ok(), "Should parse caret constraint: {:?}", result);
+    assert!(
+        result.is_ok(),
+        "Should parse caret constraint: {:?}",
+        result
+    );
 
     let result = parse_constraint("~1.2");
-    assert!(result.is_ok(), "Should parse tilde constraint: {:?}", result);
+    assert!(
+        result.is_ok(),
+        "Should parse tilde constraint: {:?}",
+        result
+    );
 }
 
 /// Test: Parses zigroot_version from boards
@@ -148,10 +160,10 @@ fn test_version_constraint_semver_syntax() {
 #[test]
 fn test_invalid_version_constraints() {
     let invalid_constraints = [
-        "",           // Empty
-        "invalid",    // Not a version
-        ">>1.0.0",    // Invalid operator
-        "1.0.0.0.0",  // Too many components
+        "",            // Empty
+        "invalid",     // Not a version
+        ">>1.0.0",     // Invalid operator
+        "1.0.0.0.0",   // Too many components
         "abc.def.ghi", // Non-numeric
     ];
 
@@ -206,7 +218,10 @@ fn test_semver_comparison_ordering() {
     use std::cmp::Ordering;
 
     assert_eq!(compare_versions("1.0.0", "1.0.0").unwrap(), Ordering::Equal);
-    assert_eq!(compare_versions("2.0.0", "1.0.0").unwrap(), Ordering::Greater);
+    assert_eq!(
+        compare_versions("2.0.0", "1.0.0").unwrap(),
+        Ordering::Greater
+    );
     assert_eq!(compare_versions("1.0.0", "2.0.0").unwrap(), Ordering::Less);
 }
 
@@ -242,13 +257,13 @@ fn test_version_parsing() {
 #[test]
 fn test_invalid_versions() {
     let invalid_versions = [
-        "",          // Empty
-        "1",         // Missing components
-        "1.0",       // Missing patch
-        "v1.0.0",    // Leading 'v'
-        "1.0.0.0",   // Too many components
-        "a.b.c",     // Non-numeric
-        "1.0.0-",    // Trailing hyphen
+        "",        // Empty
+        "1",       // Missing components
+        "1.0",     // Missing patch
+        "v1.0.0",  // Leading 'v'
+        "1.0.0.0", // Too many components
+        "a.b.c",   // Non-numeric
+        "1.0.0-",  // Trailing hyphen
     ];
 
     for version in invalid_versions {
@@ -318,9 +333,8 @@ fn test_constraint_range() {
 
 /// Strategy for generating valid semver versions
 fn version_strategy() -> impl Strategy<Value = String> {
-    (0u32..100, 0u32..100, 0u32..100).prop_map(|(major, minor, patch)| {
-        format!("{major}.{minor}.{patch}")
-    })
+    (0u32..100, 0u32..100, 0u32..100)
+        .prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
 }
 
 /// Strategy for generating valid semver constraints
@@ -491,7 +505,6 @@ proptest! {
         }
     }
 }
-
 
 // ============================================
 // Integration Tests - zigroot update --self
@@ -667,7 +680,6 @@ fn test_update_available_shows_versions() {
     );
 }
 
-
 // ============================================
 // Tests - Background Update Check
 // ============================================
@@ -705,7 +717,10 @@ fn test_background_check_notification() {
     };
 
     let notification = format_update_notification(&result);
-    assert!(notification.is_some(), "Should produce notification for update");
+    assert!(
+        notification.is_some(),
+        "Should produce notification for update"
+    );
 
     let msg = notification.unwrap();
     // Should be concise

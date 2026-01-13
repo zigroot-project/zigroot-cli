@@ -141,7 +141,10 @@ fn test_cache_key_changes_with_inputs() {
 
     assert_ne!(key1, key2, "Different version should produce different key");
     assert_ne!(key1, key3, "Different target should produce different key");
-    assert_ne!(key1, key4, "Different compiler should produce different key");
+    assert_ne!(
+        key1, key4,
+        "Different compiler should produce different key"
+    );
 }
 
 /// Test: Download path is shared across projects

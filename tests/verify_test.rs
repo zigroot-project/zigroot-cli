@@ -265,7 +265,9 @@ fn test_verify_board_missing_board_toml() {
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("board.toml") || stderr.contains("required") || stderr.contains("not found"),
+        stderr.contains("board.toml")
+            || stderr.contains("required")
+            || stderr.contains("not found"),
         "Error should mention missing board.toml: {stderr}"
     );
 }

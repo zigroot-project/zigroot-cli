@@ -16,7 +16,8 @@ fn run_package_test(project: &TestProject, path: &str) -> std::process::Output {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_zigroot"));
     cmd.current_dir(project.path());
     cmd.args(["package", "test", path]);
-    cmd.output().expect("Failed to execute zigroot package test")
+    cmd.output()
+        .expect("Failed to execute zigroot package test")
 }
 
 /// Create a valid package structure for testing

@@ -77,12 +77,7 @@ type = "custom"
 }
 
 /// Helper to create a local package with dependencies
-fn create_local_package_with_deps(
-    project: &TestProject,
-    name: &str,
-    version: &str,
-    deps: &[&str],
-) {
+fn create_local_package_with_deps(project: &TestProject, name: &str, version: &str, deps: &[&str]) {
     let pkg_dir = format!("packages/{name}");
     project.create_dir(&pkg_dir);
 

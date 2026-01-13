@@ -8,7 +8,9 @@ use anyhow::{bail, Context, Result};
 use std::fs;
 use std::path::Path;
 
-use crate::cli::output::{is_json, is_quiet, print_detail, print_info, print_success, print_warning, status};
+use crate::cli::output::{
+    is_json, is_quiet, print_detail, print_info, print_success, print_warning, status,
+};
 use crate::core::check;
 use crate::core::manifest::Manifest;
 
@@ -31,8 +33,8 @@ pub async fn execute(project_dir: &Path) -> Result<()> {
     tracing::info!("Checking project: {}", manifest.project.name);
 
     // Perform check
-    let result = check::check(project_dir, &manifest)
-        .map_err(|e| anyhow::anyhow!("Check failed: {}", e))?;
+    let result =
+        check::check(project_dir, &manifest).map_err(|e| anyhow::anyhow!("Check failed: {}", e))?;
 
     // JSON output mode
     if is_json() {
@@ -53,7 +55,10 @@ pub async fn execute(project_dir: &Path) -> Result<()> {
                 "compress": manifest.build.compress
             }
         });
-        println!("{}", serde_json::to_string_pretty(&json_result).unwrap_or_default());
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&json_result).unwrap_or_default()
+        );
 
         if result.is_valid() {
             return Ok(());
@@ -162,7 +167,10 @@ pub async fn execute(project_dir: &Path) -> Result<()> {
             } else {
                 "undefined"
             };
-            print_detail(&format!("• {name} ({}) - {artifact_status}", artifact.artifact_type));
+            print_detail(&format!(
+                "• {name} ({}) - {artifact_status}",
+                artifact.artifact_type
+            ));
         }
     }
 

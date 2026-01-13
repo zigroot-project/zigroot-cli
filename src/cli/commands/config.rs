@@ -9,8 +9,7 @@ use std::path::Path;
 
 use crate::cli::tui::ConfigTui;
 use crate::core::config::{
-    get_available_packages, is_terminal_interactive, load_manifest_for_config,
-    ConfigState,
+    get_available_packages, is_terminal_interactive, load_manifest_for_config, ConfigState,
 };
 
 /// Execute config command

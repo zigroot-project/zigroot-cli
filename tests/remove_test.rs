@@ -153,7 +153,10 @@ fn test_remove_package_from_manifest() {
     );
 
     // Manifest should remain valid
-    assert!(is_valid_manifest(&project), "Manifest should remain valid after removal");
+    assert!(
+        is_valid_manifest(&project),
+        "Manifest should remain valid after removal"
+    );
 }
 
 /// Test: Updates lock file after removal
@@ -239,7 +242,9 @@ fn test_remove_nonexistent_package() {
 
     // Command should fail or indicate package not found
     assert!(
-        !output.status.success() || stderr.contains("not found") || stderr.contains("not installed"),
+        !output.status.success()
+            || stderr.contains("not found")
+            || stderr.contains("not installed"),
         "Removing non-existent package should fail or indicate not found"
     );
 

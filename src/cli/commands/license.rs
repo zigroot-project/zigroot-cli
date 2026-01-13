@@ -12,11 +12,7 @@ use crate::core::manifest::Manifest;
 use crate::error::ZigrootError;
 
 /// Execute the license command
-pub async fn execute(
-    project_dir: &Path,
-    export: Option<String>,
-    sbom: bool,
-) -> Result<()> {
+pub async fn execute(project_dir: &Path, export: Option<String>, sbom: bool) -> Result<()> {
     // Load manifest
     let manifest_path = project_dir.join("zigroot.toml");
     if !manifest_path.exists() {
@@ -57,7 +53,10 @@ pub async fn execute(
         })?;
 
         println!("✅ SPDX SBOM generated: {}", sbom_path.display());
-        println!("\nSoftware Bill of Materials contains {} packages.", report.packages.len());
+        println!(
+            "\nSoftware Bill of Materials contains {} packages.",
+            report.packages.len()
+        );
         return Ok(());
     }
 

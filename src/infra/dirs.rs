@@ -164,7 +164,12 @@ impl ZigrootDirs {
                 // Fallback to home directory
                 dirs::home_dir()
                     .map(|h| h.join(".local").join("share").join(APP_NAME))
-                    .unwrap_or_else(|| PathBuf::from(".").join(".local").join("share").join(APP_NAME))
+                    .unwrap_or_else(|| {
+                        PathBuf::from(".")
+                            .join(".local")
+                            .join("share")
+                            .join(APP_NAME)
+                    })
             })
     }
 }

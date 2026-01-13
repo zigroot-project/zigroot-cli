@@ -267,7 +267,6 @@ fn validate_number(
     Ok(())
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -392,7 +391,11 @@ mod tests {
         );
         assert!(result.is_err());
         match result.unwrap_err() {
-            OptionError::PatternMismatch { name, value, pattern } => {
+            OptionError::PatternMismatch {
+                name,
+                value,
+                pattern,
+            } => {
                 assert_eq!(name, "hostname");
                 assert_eq!(value, "123invalid");
                 assert_eq!(pattern, "^[a-z][a-z0-9]*$");
@@ -494,7 +497,11 @@ mod tests {
         );
         assert!(result.is_err());
         match result.unwrap_err() {
-            OptionError::InvalidChoice { name, value, choices: c } => {
+            OptionError::InvalidChoice {
+                name,
+                value,
+                choices: c,
+            } => {
                 assert_eq!(name, "boot_mode");
                 assert_eq!(value, "usb");
                 assert_eq!(c, choices);
@@ -567,7 +574,12 @@ mod tests {
         );
         assert!(result.is_err());
         match result.unwrap_err() {
-            OptionError::OutOfRange { name, value, min, max } => {
+            OptionError::OutOfRange {
+                name,
+                value,
+                min,
+                max,
+            } => {
                 assert_eq!(name, "jobs");
                 assert!((value - 0.0).abs() < f64::EPSILON);
                 assert_eq!(min, Some(1.0));
@@ -591,7 +603,12 @@ mod tests {
         );
         assert!(result.is_err());
         match result.unwrap_err() {
-            OptionError::OutOfRange { name, value, min, max } => {
+            OptionError::OutOfRange {
+                name,
+                value,
+                min,
+                max,
+            } => {
                 assert_eq!(name, "jobs");
                 assert!((value - 100.0).abs() < f64::EPSILON);
                 assert_eq!(min, None);
@@ -686,7 +703,11 @@ mod tests {
         );
         assert!(result.is_err());
         match result.unwrap_err() {
-            OptionError::InvalidType { name, expected, got } => {
+            OptionError::InvalidType {
+                name,
+                expected,
+                got,
+            } => {
                 assert_eq!(name, "unknown");
                 assert_eq!(expected, "bool, string, choice, or number");
                 assert_eq!(got, "invalid_type");
@@ -766,8 +787,7 @@ mod tests {
 
     /// Strategy for generating valid option names
     fn option_name_strategy() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9_]{0,20}"
-            .prop_filter("Name must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9_]{0,20}".prop_filter("Name must not be empty", |s| !s.is_empty())
     }
 
     /// Strategy for generating valid string values
@@ -794,7 +814,7 @@ mod tests {
         ) {
             // Test that choice validation rejects values not in the choices list
             let choices = vec!["valid1".to_string(), "valid2".to_string()];
-            
+
             // If value is not in choices, it should be rejected
             if !choices.contains(&value) {
                 let result = validate_option(
@@ -808,7 +828,7 @@ mod tests {
                     None,
                 );
                 prop_assert!(result.is_err(), "Invalid choice should be rejected");
-                
+
                 // Verify error contains the option name
                 let err_msg = result.unwrap_err().to_string();
                 prop_assert!(
@@ -907,7 +927,7 @@ mod tests {
                 None,
             );
             prop_assert!(result.is_err(), "Empty string should be rejected when allow_empty=false");
-            
+
             match result.unwrap_err() {
                 OptionError::EmptyNotAllowed { name: n } => {
                     prop_assert_eq!(n, name);
@@ -941,7 +961,7 @@ mod tests {
             // Use a simple pattern that we know matches "abc123"
             let pattern = "^[a-z]+[0-9]*$";
             let value = "abc123";
-            
+
             let result = validate_option(
                 &name,
                 &toml::Value::String(value.to_string()),
@@ -1086,7 +1106,8 @@ mod tests {
         let mut package_values = HashMap::new();
         package_values.insert("opt2".to_string(), toml::Value::Boolean(true));
 
-        let resolved = resolve_all_options(&definitions, &cli_values, &package_values, &HashMap::new());
+        let resolved =
+            resolve_all_options(&definitions, &cli_values, &package_values, &HashMap::new());
 
         assert_eq!(resolved.len(), 2);
         assert_eq!(

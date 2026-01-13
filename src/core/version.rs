@@ -134,7 +134,6 @@ pub fn is_newer(v1: &str, v2: &str) -> Result<bool, VersionError> {
     Ok(compare_versions(v1, v2)? == std::cmp::Ordering::Greater)
 }
 
-
 /// Information about a zigroot release
 #[derive(Debug, Clone, PartialEq)]
 pub struct ReleaseInfo {
@@ -196,17 +195,17 @@ pub fn detect_install_method() -> InstallMethod {
     // Check if running from cargo install location
     if let Ok(exe_path) = std::env::current_exe() {
         let path_str = exe_path.to_string_lossy();
-        
+
         // Check for cargo install path
         if path_str.contains(".cargo/bin") {
             return InstallMethod::Cargo;
         }
-        
+
         // Check for Homebrew path
         if path_str.contains("/opt/homebrew/") || path_str.contains("/usr/local/Cellar/") {
             return InstallMethod::Homebrew;
         }
-        
+
         // Check for AUR/pacman path
         if path_str.contains("/usr/bin/") && cfg!(target_os = "linux") {
             // Could be AUR or system package
@@ -220,12 +219,13 @@ pub fn detect_install_method() -> InstallMethod {
             }
         }
     }
-    
+
     InstallMethod::Unknown
 }
 
 /// GitHub releases API URL
-pub const GITHUB_RELEASES_API: &str = "https://api.github.com/repos/zigroot-project/zigroot-cli/releases/latest";
+pub const GITHUB_RELEASES_API: &str =
+    "https://api.github.com/repos/zigroot-project/zigroot-cli/releases/latest";
 
 /// Check for updates by querying GitHub releases
 ///
@@ -326,7 +326,6 @@ pub fn format_update_result(result: &UpdateCheckResult, install_method: &Install
         }
     }
 }
-
 
 // ============================================
 // Background Update Check

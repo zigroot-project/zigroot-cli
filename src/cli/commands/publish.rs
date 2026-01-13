@@ -123,19 +123,35 @@ fn validate_package(pkg_path: &Path, pkg_name: &str) -> Result<()> {
 
     // Check required fields
     let package = metadata.get("package").ok_or_else(|| {
-        anyhow::anyhow!("Package '{}' metadata.toml is missing [package] section", pkg_name)
+        anyhow::anyhow!(
+            "Package '{}' metadata.toml is missing [package] section",
+            pkg_name
+        )
     })?;
 
     if package.get("name").and_then(|v| v.as_str()).is_none() {
-        anyhow::bail!("Package '{}' metadata.toml is missing required field: name", pkg_name);
+        anyhow::bail!(
+            "Package '{}' metadata.toml is missing required field: name",
+            pkg_name
+        );
     }
 
-    if package.get("description").and_then(|v| v.as_str()).is_none() {
-        anyhow::bail!("Package '{}' metadata.toml is missing required field: description", pkg_name);
+    if package
+        .get("description")
+        .and_then(|v| v.as_str())
+        .is_none()
+    {
+        anyhow::bail!(
+            "Package '{}' metadata.toml is missing required field: description",
+            pkg_name
+        );
     }
 
     if package.get("license").and_then(|v| v.as_str()).is_none() {
-        anyhow::bail!("Package '{}' metadata.toml is missing required field: license", pkg_name);
+        anyhow::bail!(
+            "Package '{}' metadata.toml is missing required field: license",
+            pkg_name
+        );
     }
 
     // Check for at least one version file
@@ -158,10 +174,7 @@ fn validate_board(board_path: &Path, board_name: &str) -> Result<()> {
     // Check for board.toml
     let board_toml_path = board_path.join("board.toml");
     if !board_toml_path.exists() {
-        anyhow::bail!(
-            "Board '{}' is missing required board.toml file",
-            board_name
-        );
+        anyhow::bail!("Board '{}' is missing required board.toml file", board_name);
     }
 
     // Parse and validate board.toml
@@ -173,23 +186,46 @@ fn validate_board(board_path: &Path, board_name: &str) -> Result<()> {
 
     // Check required fields
     let board_section = board.get("board").ok_or_else(|| {
-        anyhow::anyhow!("Board '{}' board.toml is missing [board] section", board_name)
+        anyhow::anyhow!(
+            "Board '{}' board.toml is missing [board] section",
+            board_name
+        )
     })?;
 
     if board_section.get("name").and_then(|v| v.as_str()).is_none() {
-        anyhow::bail!("Board '{}' board.toml is missing required field: name", board_name);
+        anyhow::bail!(
+            "Board '{}' board.toml is missing required field: name",
+            board_name
+        );
     }
 
-    if board_section.get("description").and_then(|v| v.as_str()).is_none() {
-        anyhow::bail!("Board '{}' board.toml is missing required field: description", board_name);
+    if board_section
+        .get("description")
+        .and_then(|v| v.as_str())
+        .is_none()
+    {
+        anyhow::bail!(
+            "Board '{}' board.toml is missing required field: description",
+            board_name
+        );
     }
 
-    if board_section.get("target").and_then(|v| v.as_str()).is_none() {
-        anyhow::bail!("Board '{}' board.toml is missing required field: target", board_name);
+    if board_section
+        .get("target")
+        .and_then(|v| v.as_str())
+        .is_none()
+    {
+        anyhow::bail!(
+            "Board '{}' board.toml is missing required field: target",
+            board_name
+        );
     }
 
     if board_section.get("cpu").and_then(|v| v.as_str()).is_none() {
-        anyhow::bail!("Board '{}' board.toml is missing required field: cpu", board_name);
+        anyhow::bail!(
+            "Board '{}' board.toml is missing required field: cpu",
+            board_name
+        );
     }
 
     Ok(())

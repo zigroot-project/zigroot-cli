@@ -316,7 +316,6 @@ fn chrono_lite_now() -> String {
     format!("{}", duration.as_secs())
 }
 
-
 /// Check if a package is a kernel package
 ///
 /// A package is considered a kernel package if:
@@ -330,7 +329,10 @@ fn is_kernel_package(project_dir: &Path, pkg_name: &str) -> bool {
     }
 
     // Check local package for GCC toolchain
-    let local_pkg_path = project_dir.join("packages").join(pkg_name).join("package.toml");
+    let local_pkg_path = project_dir
+        .join("packages")
+        .join(pkg_name)
+        .join("package.toml");
     if local_pkg_path.exists() {
         if let Ok(content) = fs::read_to_string(&local_pkg_path) {
             // Simple check for GCC toolchain in package.toml

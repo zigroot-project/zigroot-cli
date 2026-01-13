@@ -355,10 +355,8 @@ mod tests {
 
     #[test]
     fn test_mount_config() {
-        let ro_mount = MountConfig::read_only(
-            PathBuf::from("/host/src"),
-            PathBuf::from("/container/src"),
-        );
+        let ro_mount =
+            MountConfig::read_only(PathBuf::from("/host/src"), PathBuf::from("/container/src"));
         assert!(ro_mount.read_only);
 
         let rw_mount = MountConfig::read_write(

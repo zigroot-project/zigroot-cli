@@ -277,7 +277,10 @@ impl KernelBuildEnv {
         env.insert("CROSS_COMPILE".to_string(), self.cross_compile.clone());
         env.insert("SRCDIR".to_string(), self.srcdir.display().to_string());
         env.insert("DESTDIR".to_string(), self.destdir.display().to_string());
-        env.insert("INSTALL_MOD_PATH".to_string(), self.destdir.display().to_string());
+        env.insert(
+            "INSTALL_MOD_PATH".to_string(),
+            self.destdir.display().to_string(),
+        );
         env.insert("JOBS".to_string(), self.jobs.to_string());
         env
     }

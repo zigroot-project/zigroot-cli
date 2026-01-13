@@ -199,19 +199,21 @@ impl GitOperations {
         };
 
         // Try to find the reference
-        let mut reference = repo
-            .find_reference(&reference_name)
-            .map_err(|_| GitError::RefNotFound {
-                repo: url.to_string(),
-                reference: git_ref.to_string(),
-            })?;
+        let mut reference =
+            repo.find_reference(&reference_name)
+                .map_err(|_| GitError::RefNotFound {
+                    repo: url.to_string(),
+                    reference: git_ref.to_string(),
+                })?;
 
         // Peel to commit to verify it exists
-        reference.peel_to_commit().map_err(|e| GitError::CheckoutFailed {
-            repo: url.to_string(),
-            reference: git_ref.to_string(),
-            error: e.to_string(),
-        })?;
+        reference
+            .peel_to_commit()
+            .map_err(|e| GitError::CheckoutFailed {
+                repo: url.to_string(),
+                reference: git_ref.to_string(),
+                error: e.to_string(),
+            })?;
 
         Ok(())
     }
@@ -219,12 +221,20 @@ impl GitOperations {
     /// Resolve a branch name to its commit SHA
     ///
     /// This is used to record the exact commit in the lock file for reproducibility.
-    pub fn resolve_branch_to_sha(&self, repo_path: &Path, branch: &str) -> Result<String, GitError> {
+    pub fn resolve_branch_to_sha(
+        &self,
+        repo_path: &Path,
+        branch: &str,
+    ) -> Result<String, GitError> {
         self.resolve_ref_to_sha(repo_path, &GitRef::Branch(branch.to_string()))
     }
 
     /// Resolve any ref (tag, branch, or rev) to its commit SHA
-    pub fn resolve_ref_to_sha(&self, repo_path: &Path, git_ref: &GitRef) -> Result<String, GitError> {
+    pub fn resolve_ref_to_sha(
+        &self,
+        repo_path: &Path,
+        git_ref: &GitRef,
+    ) -> Result<String, GitError> {
         let repo = gix::open(repo_path).map_err(|e| GitError::InvalidRepository {
             path: repo_path.to_path_buf(),
             error: e.to_string(),
@@ -248,17 +258,19 @@ impl GitOperations {
             }
             GitRef::Tag(tag) => {
                 let reference_name = format!("refs/tags/{tag}");
-                let mut reference = repo.find_reference(&reference_name).map_err(|_| {
-                    GitError::RefNotFound {
-                        repo: repo_path.display().to_string(),
-                        reference: git_ref.to_string(),
-                    }
-                })?;
+                let mut reference =
+                    repo.find_reference(&reference_name)
+                        .map_err(|_| GitError::RefNotFound {
+                            repo: repo_path.display().to_string(),
+                            reference: git_ref.to_string(),
+                        })?;
 
-                let commit = reference.peel_to_commit().map_err(|e| GitError::ResolveFailed {
-                    reference: git_ref.to_string(),
-                    error: e.to_string(),
-                })?;
+                let commit = reference
+                    .peel_to_commit()
+                    .map_err(|e| GitError::ResolveFailed {
+                        reference: git_ref.to_string(),
+                        error: e.to_string(),
+                    })?;
 
                 Ok(commit.id().to_hex().to_string())
             }
@@ -266,24 +278,26 @@ impl GitOperations {
                 // Try remote branch first (origin/<branch>)
                 let remote_ref = format!("refs/remotes/origin/{branch}");
                 if let Ok(mut reference) = repo.find_reference(&remote_ref) {
-                    let commit = reference.peel_to_commit().map_err(|e| {
-                        GitError::ResolveFailed {
-                            reference: git_ref.to_string(),
-                            error: e.to_string(),
-                        }
-                    })?;
+                    let commit =
+                        reference
+                            .peel_to_commit()
+                            .map_err(|e| GitError::ResolveFailed {
+                                reference: git_ref.to_string(),
+                                error: e.to_string(),
+                            })?;
                     return Ok(commit.id().to_hex().to_string());
                 }
 
                 // Try local branch
                 let local_ref = format!("refs/heads/{branch}");
                 if let Ok(mut reference) = repo.find_reference(&local_ref) {
-                    let commit = reference.peel_to_commit().map_err(|e| {
-                        GitError::ResolveFailed {
-                            reference: git_ref.to_string(),
-                            error: e.to_string(),
-                        }
-                    })?;
+                    let commit =
+                        reference
+                            .peel_to_commit()
+                            .map_err(|e| GitError::ResolveFailed {
+                                reference: git_ref.to_string(),
+                                error: e.to_string(),
+                            })?;
                     return Ok(commit.id().to_hex().to_string());
                 }
 
@@ -295,7 +309,6 @@ impl GitOperations {
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -372,7 +385,10 @@ mod tests {
         let clone_result = result.unwrap();
         assert!(clone_result.path.exists());
         assert!(!clone_result.commit_sha.is_empty());
-        assert_eq!(clone_result.checked_out_ref, GitRef::Tag("v0.1.0".to_string()));
+        assert_eq!(
+            clone_result.checked_out_ref,
+            GitRef::Tag("v0.1.0".to_string())
+        );
     }
 
     #[test]
@@ -387,13 +403,19 @@ mod tests {
             "gitoxide-branch",
         );
 
-        assert!(result.is_ok(), "Clone with branch should succeed: {result:?}");
+        assert!(
+            result.is_ok(),
+            "Clone with branch should succeed: {result:?}"
+        );
 
         let clone_result = result.unwrap();
         assert!(clone_result.path.exists());
         // SHA should be 40 hex characters
         assert_eq!(clone_result.commit_sha.len(), 40);
-        assert!(clone_result.commit_sha.chars().all(|c| c.is_ascii_hexdigit()));
+        assert!(clone_result
+            .commit_sha
+            .chars()
+            .all(|c| c.is_ascii_hexdigit()));
     }
 
     #[test]
@@ -449,7 +471,10 @@ mod tests {
             "gitoxide-resolve",
         );
 
-        assert!(clone_result.is_ok(), "Clone should succeed: {clone_result:?}");
+        assert!(
+            clone_result.is_ok(),
+            "Clone should succeed: {clone_result:?}"
+        );
         let clone_result = clone_result.unwrap();
 
         // Now resolve the branch to SHA
@@ -500,7 +525,10 @@ mod tests {
             "gitoxide-resolve-tag",
         );
 
-        assert!(clone_result.is_ok(), "Clone should succeed: {clone_result:?}");
+        assert!(
+            clone_result.is_ok(),
+            "Clone should succeed: {clone_result:?}"
+        );
         let clone_result = clone_result.unwrap();
 
         // Resolve tag to SHA
@@ -621,20 +649,29 @@ mod tests {
         let clone_result = result.unwrap();
 
         // Verify the commit SHA is recorded
-        assert!(!clone_result.commit_sha.is_empty(), "Commit SHA must be recorded");
+        assert!(
+            !clone_result.commit_sha.is_empty(),
+            "Commit SHA must be recorded"
+        );
         assert_eq!(
             clone_result.commit_sha.len(),
             40,
             "Commit SHA must be 40 hex characters"
         );
         assert!(
-            clone_result.commit_sha.chars().all(|c| c.is_ascii_hexdigit()),
+            clone_result
+                .commit_sha
+                .chars()
+                .all(|c| c.is_ascii_hexdigit()),
             "Commit SHA must be valid hex"
         );
 
         // Verify we can resolve the branch again and get the same SHA
         let resolved_sha = ops.resolve_branch_to_sha(&clone_result.path, "main");
-        assert!(resolved_sha.is_ok(), "Should be able to resolve branch: {resolved_sha:?}");
+        assert!(
+            resolved_sha.is_ok(),
+            "Should be able to resolve branch: {resolved_sha:?}"
+        );
         assert_eq!(
             resolved_sha.unwrap(),
             clone_result.commit_sha,

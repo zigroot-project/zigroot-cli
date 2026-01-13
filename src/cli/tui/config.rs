@@ -67,7 +67,6 @@ pub struct ConfigTui {
     focus: FocusArea,
 }
 
-
 /// View mode for the TUI
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ViewMode {
@@ -138,8 +137,8 @@ pub enum OptionType {
 impl ConfigTui {
     /// Create a new TUI instance
     pub fn new(project_dir: &Path, board_only: bool, packages_only: bool) -> anyhow::Result<Self> {
-        let manifest = load_manifest_for_config(project_dir)
-            .unwrap_or_else(|_| Manifest::default());
+        let manifest =
+            load_manifest_for_config(project_dir).unwrap_or_else(|_| Manifest::default());
 
         // Get available packages
         let package_names = get_available_packages(project_dir);
@@ -235,7 +234,6 @@ impl ConfigTui {
         })
     }
 
-
     /// Run the TUI
     pub fn run(&mut self) -> anyhow::Result<()> {
         // Setup terminal
@@ -260,7 +258,10 @@ impl ConfigTui {
     }
 
     /// Main event loop
-    fn run_loop(&mut self, terminal: &mut Terminal<CrosstermBackend<Stdout>>) -> anyhow::Result<()> {
+    fn run_loop(
+        &mut self,
+        terminal: &mut Terminal<CrosstermBackend<Stdout>>,
+    ) -> anyhow::Result<()> {
         loop {
             terminal.draw(|f| self.draw(f))?;
 
@@ -342,9 +343,9 @@ impl ConfigTui {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(3),  // Title
-                Constraint::Min(10),    // Main content
-                Constraint::Length(3),  // Status bar
+                Constraint::Length(3), // Title
+                Constraint::Min(10),   // Main content
+                Constraint::Length(3), // Status bar
             ])
             .split(f.area());
 
@@ -369,12 +370,15 @@ impl ConfigTui {
             .style(Style::default().fg(Color::Cyan));
 
         let title_text = Paragraph::new(title)
-            .style(Style::default().fg(Color::White).add_modifier(Modifier::BOLD))
+            .style(
+                Style::default()
+                    .fg(Color::White)
+                    .add_modifier(Modifier::BOLD),
+            )
             .block(title_block);
 
         f.render_widget(title_text, area);
     }
-
 
     /// Draw main content area
     fn draw_main_content(&mut self, f: &mut Frame, area: Rect) {
@@ -412,9 +416,7 @@ impl ConfigTui {
 
         // Details panel
         let details = self.get_category_details();
-        let details_block = Block::default()
-            .borders(Borders::ALL)
-            .title("Details");
+        let details_block = Block::default().borders(Borders::ALL).title("Details");
 
         let details_text = Paragraph::new(details)
             .wrap(Wrap { trim: true })
@@ -454,7 +456,11 @@ impl ConfigTui {
                      Rootfs size: {}\n\
                      Hostname: {}\n\n\
                      Press Enter to configure build options.",
-                    if self.manifest.build.compress { "enabled" } else { "disabled" },
+                    if self.manifest.build.compress {
+                        "enabled"
+                    } else {
+                        "disabled"
+                    },
                     self.manifest.build.image_format,
                     self.manifest.build.rootfs_size,
                     self.manifest.build.hostname
@@ -487,9 +493,7 @@ impl ConfigTui {
             .borders(Borders::ALL)
             .title("Board Selection");
 
-        let paragraph = Paragraph::new(text)
-            .wrap(Wrap { trim: true })
-            .block(block);
+        let paragraph = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
 
         f.render_widget(paragraph, area);
     }
@@ -574,12 +578,11 @@ impl ConfigTui {
                 width: area.width - 4,
                 height: 2,
             };
-            let warning_text = Paragraph::new(warning.as_str())
-                .style(Style::default().fg(Color::Yellow));
+            let warning_text =
+                Paragraph::new(warning.as_str()).style(Style::default().fg(Color::Yellow));
             f.render_widget(warning_text, warning_area);
         }
     }
-
 
     /// Draw build options view
     fn draw_build_options(&mut self, f: &mut Frame, area: Rect) {
@@ -596,7 +599,11 @@ impl ConfigTui {
             .map(|(idx, opt)| {
                 let value_display = match &opt.option_type {
                     OptionType::Bool => {
-                        if opt.value == "true" { "[✓]" } else { "[ ]" }
+                        if opt.value == "true" {
+                            "[✓]"
+                        } else {
+                            "[ ]"
+                        }
                     }
                     _ => &opt.value,
                 };
@@ -616,7 +623,11 @@ impl ConfigTui {
             .collect();
 
         let list = List::new(items)
-            .block(Block::default().borders(Borders::ALL).title("Build Options"))
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title("Build Options"),
+            )
             .highlight_style(Style::default().bg(Color::Blue).fg(Color::White))
             .highlight_symbol("▶ ");
 
@@ -669,9 +680,7 @@ impl ConfigTui {
             .borders(Borders::ALL)
             .title("External Artifacts");
 
-        let paragraph = Paragraph::new(text)
-            .wrap(Wrap { trim: true })
-            .block(block);
+        let paragraph = Paragraph::new(text).wrap(Wrap { trim: true }).block(block);
 
         f.render_widget(paragraph, area);
     }
@@ -707,9 +716,7 @@ impl ConfigTui {
             .borders(Borders::ALL)
             .title("Review Changes");
 
-        let paragraph = Paragraph::new(lines)
-            .wrap(Wrap { trim: true })
-            .block(block);
+        let paragraph = Paragraph::new(lines).wrap(Wrap { trim: true }).block(block);
 
         f.render_widget(paragraph, area);
     }
@@ -724,7 +731,9 @@ impl ConfigTui {
 
         let help = match self.view_mode {
             ViewMode::MainMenu => "↑↓/jk: Navigate • Enter: Select • s: Save • q: Quit",
-            ViewMode::PackageSelection => "↑↓/jk: Navigate • Space: Toggle • Enter: Details • Esc: Back",
+            ViewMode::PackageSelection => {
+                "↑↓/jk: Navigate • Space: Toggle • Enter: Details • Esc: Back"
+            }
             ViewMode::BuildOptions => "↑↓/jk: Navigate • Space/Enter: Edit • Esc: Back",
             ViewMode::DiffView => "y/Enter: Save • n/Esc: Discard",
             _ => "↑↓/jk: Navigate • Esc: Back",
@@ -739,7 +748,6 @@ impl ConfigTui {
 
         f.render_widget(paragraph, area);
     }
-
 
     /// Handle main menu input
     fn handle_main_menu_input(&mut self, key: KeyCode) {
@@ -911,10 +919,8 @@ impl ConfigTui {
                                 self.has_changes = true;
                             }
                             OptionType::Choice(choices) => {
-                                let current_idx = choices
-                                    .iter()
-                                    .position(|c| c == &opt.value)
-                                    .unwrap_or(0);
+                                let current_idx =
+                                    choices.iter().position(|c| c == &opt.value).unwrap_or(0);
                                 let next_idx = (current_idx + 1) % choices.len();
                                 opt.value = choices[next_idx].clone();
                                 self.has_changes = true;
@@ -945,7 +951,6 @@ impl ConfigTui {
             _ => {}
         }
     }
-
 
     /// Generate diff of changes
     fn generate_diff(&mut self) {

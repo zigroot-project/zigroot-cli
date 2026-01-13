@@ -111,7 +111,9 @@ hostname = "${ZIGROOT_HOSTNAME}"
 "#;
     project.create_file("zigroot.toml", manifest_content);
 
-    let manifest = zigroot::core::manifest::Manifest::load_with_env_substitution(project.path().join("zigroot.toml").as_path());
+    let manifest = zigroot::core::manifest::Manifest::load_with_env_substitution(
+        project.path().join("zigroot.toml").as_path(),
+    );
 
     match manifest {
         Ok(m) => {
@@ -124,7 +126,6 @@ hostname = "${ZIGROOT_HOSTNAME}"
     std::env::remove_var("ZIGROOT_PROJECT_NAME");
     std::env::remove_var("ZIGROOT_HOSTNAME");
 }
-
 
 // ============================================
 // Configuration Inheritance Tests
@@ -167,7 +168,7 @@ hostname = "derived-host"
     project.create_file("zigroot.toml", derived_config);
 
     let manifest = zigroot::core::manifest::Manifest::load_with_inheritance(
-        project.path().join("zigroot.toml").as_path()
+        project.path().join("zigroot.toml").as_path(),
     );
 
     match manifest {
@@ -213,7 +214,7 @@ name = "derived-project"
     project.create_file("zigroot.toml", derived_config);
 
     let manifest = zigroot::core::manifest::Manifest::load_with_inheritance(
-        project.path().join("zigroot.toml").as_path()
+        project.path().join("zigroot.toml").as_path(),
     );
 
     match manifest {
@@ -241,10 +242,13 @@ name = "derived-project"
     project.create_file("zigroot.toml", derived_config);
 
     let result = zigroot::core::manifest::Manifest::load_with_inheritance(
-        project.path().join("zigroot.toml").as_path()
+        project.path().join("zigroot.toml").as_path(),
     );
 
-    assert!(result.is_err(), "Should fail when base config doesn't exist");
+    assert!(
+        result.is_err(),
+        "Should fail when base config doesn't exist"
+    );
     let err = result.unwrap_err().to_string();
     assert!(
         err.contains("nonexistent") || err.contains("not found") || err.contains("No such file"),
@@ -293,7 +297,7 @@ name = "child"
     project.create_file("zigroot.toml", child_config);
 
     let manifest = zigroot::core::manifest::Manifest::load_with_inheritance(
-        project.path().join("zigroot.toml").as_path()
+        project.path().join("zigroot.toml").as_path(),
     );
 
     match manifest {
@@ -328,7 +332,7 @@ compress = false
     project.create_file("zigroot.toml", config);
 
     let manifest = zigroot::core::manifest::Manifest::load_with_inheritance(
-        project.path().join("zigroot.toml").as_path()
+        project.path().join("zigroot.toml").as_path(),
     );
 
     match manifest {
@@ -340,7 +344,6 @@ compress = false
         Err(e) => panic!("Failed to load manifest without inheritance: {e}"),
     }
 }
-
 
 // ============================================
 // Manifest Validation Tests
@@ -362,11 +365,13 @@ compress = false
 "#;
     project.create_file("zigroot.toml", invalid_config);
 
-    let result = zigroot::core::manifest::validate_manifest(
-        project.path().join("zigroot.toml").as_path()
-    );
+    let result =
+        zigroot::core::manifest::validate_manifest(project.path().join("zigroot.toml").as_path());
 
-    assert!(result.is_err(), "Should fail validation when project name is missing");
+    assert!(
+        result.is_err(),
+        "Should fail validation when project name is missing"
+    );
     let errors = result.unwrap_err();
     assert!(!errors.is_empty(), "Should report at least one error");
     let error_str = errors.join(", ");
@@ -388,11 +393,13 @@ compress = false
 "#;
     project.create_file("zigroot.toml", invalid_config);
 
-    let result = zigroot::core::manifest::validate_manifest(
-        project.path().join("zigroot.toml").as_path()
-    );
+    let result =
+        zigroot::core::manifest::validate_manifest(project.path().join("zigroot.toml").as_path());
 
-    assert!(result.is_err(), "Should fail validation when project section is missing");
+    assert!(
+        result.is_err(),
+        "Should fail validation when project section is missing"
+    );
     let errors = result.unwrap_err();
     assert!(!errors.is_empty(), "Should report at least one error");
     let error_str = errors.join(", ");
@@ -420,11 +427,13 @@ rootfs_size = "not-a-size"
 "#;
     project.create_file("zigroot.toml", invalid_config);
 
-    let result = zigroot::core::manifest::validate_manifest(
-        project.path().join("zigroot.toml").as_path()
-    );
+    let result =
+        zigroot::core::manifest::validate_manifest(project.path().join("zigroot.toml").as_path());
 
-    assert!(result.is_err(), "Should fail validation with multiple errors");
+    assert!(
+        result.is_err(),
+        "Should fail validation with multiple errors"
+    );
     let errors = result.unwrap_err();
     // Should report multiple errors, not just the first one
     assert!(
@@ -457,11 +466,14 @@ hostname = "mydevice"
 "#;
     project.create_file("zigroot.toml", valid_config);
 
-    let result = zigroot::core::manifest::validate_manifest(
-        project.path().join("zigroot.toml").as_path()
-    );
+    let result =
+        zigroot::core::manifest::validate_manifest(project.path().join("zigroot.toml").as_path());
 
-    assert!(result.is_ok(), "Valid manifest should pass validation: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Valid manifest should pass validation: {:?}",
+        result.err()
+    );
 }
 
 /// Test: Validates image format values
@@ -480,9 +492,8 @@ image_format = "invalid_format"
 "#;
     project.create_file("zigroot.toml", invalid_config);
 
-    let result = zigroot::core::manifest::validate_manifest(
-        project.path().join("zigroot.toml").as_path()
-    );
+    let result =
+        zigroot::core::manifest::validate_manifest(project.path().join("zigroot.toml").as_path());
 
     // This may or may not be an error depending on strictness
     // At minimum, the function should not panic
@@ -514,9 +525,8 @@ rootfs_size = "not-a-size"
 "#;
     project.create_file("zigroot.toml", invalid_config);
 
-    let result = zigroot::core::manifest::validate_manifest(
-        project.path().join("zigroot.toml").as_path()
-    );
+    let result =
+        zigroot::core::manifest::validate_manifest(project.path().join("zigroot.toml").as_path());
 
     // This may or may not be an error depending on strictness
     match result {
@@ -543,9 +553,8 @@ version = "1.0.0"
 "#;
     project.create_file("zigroot.toml", invalid_config);
 
-    let result = zigroot::core::manifest::validate_manifest(
-        project.path().join("zigroot.toml").as_path()
-    );
+    let result =
+        zigroot::core::manifest::validate_manifest(project.path().join("zigroot.toml").as_path());
 
     assert!(result.is_err(), "Should fail validation");
     let errors = result.unwrap_err();
@@ -553,7 +562,9 @@ version = "1.0.0"
 
     // Error message should be helpful - mention what's missing and expected format
     assert!(
-        error_str.contains("name") || error_str.contains("required") || error_str.contains("missing"),
+        error_str.contains("name")
+            || error_str.contains("required")
+            || error_str.contains("missing"),
         "Error should be helpful and mention what's wrong: {error_str}"
     );
 }

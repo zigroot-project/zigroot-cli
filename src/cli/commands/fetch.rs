@@ -29,7 +29,10 @@ pub async fn execute(path: &Path, parallel: usize, force: bool) -> Result<()> {
         .with_context(|| "Failed to fetch packages")?;
 
     // Print summary
-    if result.downloaded.is_empty() && result.skipped.is_empty() && result.external_downloaded.is_empty() {
+    if result.downloaded.is_empty()
+        && result.skipped.is_empty()
+        && result.external_downloaded.is_empty()
+    {
         println!("✓ Nothing to fetch");
     } else {
         if !result.downloaded.is_empty() {
@@ -40,18 +43,27 @@ pub async fn execute(path: &Path, parallel: usize, force: bool) -> Result<()> {
         }
 
         if !result.skipped.is_empty() {
-            println!("  Skipped {} package(s) (already downloaded)", result.skipped.len());
+            println!(
+                "  Skipped {} package(s) (already downloaded)",
+                result.skipped.len()
+            );
         }
 
         if !result.external_downloaded.is_empty() {
-            println!("✓ Downloaded {} external artifact(s):", result.external_downloaded.len());
+            println!(
+                "✓ Downloaded {} external artifact(s):",
+                result.external_downloaded.len()
+            );
             for name in &result.external_downloaded {
                 println!("    {name}");
             }
         }
 
         if !result.external_skipped.is_empty() {
-            println!("  Skipped {} external artifact(s) (already downloaded)", result.external_skipped.len());
+            println!(
+                "  Skipped {} external artifact(s) (already downloaded)",
+                result.external_skipped.len()
+            );
         }
 
         if !result.failed.is_empty() {

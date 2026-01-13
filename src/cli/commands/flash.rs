@@ -19,16 +19,14 @@ pub async fn execute(
     // Load manifest
     let manifest_path = project_root.join("zigroot.toml");
     if !manifest_path.exists() {
-        bail!(
-            "No zigroot.toml found. Run 'zigroot init' to create a project."
-        );
+        bail!("No zigroot.toml found. Run 'zigroot init' to create a project.");
     }
 
     let manifest_content = std::fs::read_to_string(&manifest_path)
         .with_context(|| format!("Failed to read manifest: {}", manifest_path.display()))?;
 
-    let manifest = Manifest::from_toml(&manifest_content)
-        .with_context(|| "Failed to parse zigroot.toml")?;
+    let manifest =
+        Manifest::from_toml(&manifest_content).with_context(|| "Failed to parse zigroot.toml")?;
 
     // Load board definition if configured
     let board = if let Some(board_name) = &manifest.board.name {

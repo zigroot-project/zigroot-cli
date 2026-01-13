@@ -33,7 +33,10 @@ pub async fn execute(path: &Path, package: Option<String>) -> Result<()> {
         return Ok(());
     }
 
-    println!("Checking {} package(s) for updates...", result.checked.len());
+    println!(
+        "Checking {} package(s) for updates...",
+        result.checked.len()
+    );
 
     if !result.updated.is_empty() {
         println!("\n✓ Updated packages:");

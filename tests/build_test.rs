@@ -96,7 +96,7 @@ fn setup_project() -> TestProject {
 /// Helper to setup a project with packages
 fn setup_project_with_packages() -> TestProject {
     let project = setup_project();
-    
+
     // Add a package to the project
     let output = run_add(&project, &["busybox"]);
     assert!(
@@ -104,7 +104,7 @@ fn setup_project_with_packages() -> TestProject {
         "Failed to add package: {}",
         String::from_utf8_lossy(&output.stderr)
     );
-    
+
     project
 }
 
@@ -112,7 +112,7 @@ fn setup_project_with_packages() -> TestProject {
 fn create_local_package(project: &TestProject, name: &str, version: &str) {
     let pkg_dir = format!("packages/{name}");
     project.create_dir(&pkg_dir);
-    
+
     let package_toml = format!(
         r#"[package]
 name = "{name}"
@@ -128,7 +128,7 @@ type = "custom"
 "#
     );
     project.create_file(&format!("{pkg_dir}/package.toml"), &package_toml);
-    
+
     // Create a simple build script
     let build_script = r#"#!/bin/sh
 echo "Building package..."
@@ -138,8 +138,15 @@ touch "$DESTDIR/built_marker"
 }
 
 /// Helper to get build timestamp for a package
-fn get_package_build_timestamp(project: &TestProject, package_name: &str) -> Option<std::time::SystemTime> {
-    let stamp_path = project.path().join("build").join("stamps").join(format!("{package_name}.stamp"));
+fn get_package_build_timestamp(
+    project: &TestProject,
+    package_name: &str,
+) -> Option<std::time::SystemTime> {
+    let stamp_path = project
+        .path()
+        .join("build")
+        .join("stamps")
+        .join(format!("{package_name}.stamp"));
     if stamp_path.exists() {
         std::fs::metadata(&stamp_path).ok()?.modified().ok()
     } else {
@@ -180,7 +187,7 @@ fn test_build_compiles_packages_in_dependency_order() {
 #[test]
 fn test_build_uses_zig_cross_compilation() {
     let project = setup_project();
-    
+
     // Create a manifest with a specific board target
     let manifest = r#"
 [project]
@@ -249,7 +256,7 @@ fn test_build_skips_unchanged_packages() {
     let output1 = run_build(&project, &[]);
     let stderr1 = String::from_utf8_lossy(&output1.stderr);
     let stdout1 = String::from_utf8_lossy(&output1.stdout);
-    
+
     assert!(
         output1.status.success(),
         "First build should succeed: stdout={stdout1}, stderr={stderr1}"
@@ -257,7 +264,7 @@ fn test_build_skips_unchanged_packages() {
 
     // Record timestamp of first build
     let first_build_time = std::time::Instant::now();
-    
+
     // Small delay to ensure timestamp difference
     std::thread::sleep(std::time::Duration::from_millis(100));
 
@@ -273,7 +280,7 @@ fn test_build_skips_unchanged_packages() {
 
     // Second build should be faster or indicate packages were skipped
     let second_build_duration = first_build_time.elapsed();
-    
+
     // The output should indicate skipping or the build should be fast
     let indicates_skip = stdout2.contains("skip")
         || stdout2.contains("up to date")
@@ -281,7 +288,7 @@ fn test_build_skips_unchanged_packages() {
         || stderr2.contains("skip")
         || stderr2.contains("up to date")
         || stderr2.contains("unchanged");
-    
+
     // Either indicates skip or completes quickly (incremental)
     assert!(
         indicates_skip || second_build_duration.as_secs() < 5,
@@ -299,7 +306,7 @@ fn test_build_package_flag_rebuilds_only_specified() {
     let output1 = run_build(&project, &[]);
     let stderr1 = String::from_utf8_lossy(&output1.stderr);
     let stdout1 = String::from_utf8_lossy(&output1.stdout);
-    
+
     assert!(
         output1.status.success(),
         "Initial build should succeed: stdout={stdout1}, stderr={stderr1}"
@@ -321,7 +328,7 @@ fn test_build_package_flag_rebuilds_only_specified() {
         || stderr2.contains("busybox")
         || stdout2.contains("package")
         || stderr2.contains("package");
-    
+
     assert!(
         mentions_package || output2.status.success(),
         "Build should focus on specified package"
@@ -357,7 +364,7 @@ fn test_build_locked_fails_on_mismatch() {
     let output1 = run_build(&project, &[]);
     let stderr1 = String::from_utf8_lossy(&output1.stderr);
     let stdout1 = String::from_utf8_lossy(&output1.stdout);
-    
+
     assert!(
         output1.status.success(),
         "Initial build should succeed: stdout={stdout1}, stderr={stderr1}"
@@ -609,7 +616,8 @@ fn package_name_strategy() -> impl Strategy<Value = String> {
 
 /// Strategy for generating valid version strings
 fn version_strategy() -> impl Strategy<Value = String> {
-    (1u32..10, 0u32..10, 0u32..10).prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
+    (1u32..10, 0u32..10, 0u32..10)
+        .prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
 }
 
 proptest! {

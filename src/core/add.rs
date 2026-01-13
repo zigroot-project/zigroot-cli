@@ -105,10 +105,10 @@ pub async fn add_package(
     let lock_path = project_path.join("zigroot.lock");
 
     // Load existing manifest
-    let manifest_content =
-        std::fs::read_to_string(&manifest_path).map_err(|e| AddError::ManifestError(e.to_string()))?;
-    let mut manifest =
-        Manifest::from_toml(&manifest_content).map_err(|e| AddError::ManifestError(e.to_string()))?;
+    let manifest_content = std::fs::read_to_string(&manifest_path)
+        .map_err(|e| AddError::ManifestError(e.to_string()))?;
+    let mut manifest = Manifest::from_toml(&manifest_content)
+        .map_err(|e| AddError::ManifestError(e.to_string()))?;
 
     // Parse package specification
     let (package_name, requested_version) = parse_package_spec(package_spec);
@@ -140,9 +140,13 @@ pub async fn add_package(
     } else {
         // Default registry source - try to fetch, but fall back to offline mode
         let client = RegistryClient::new();
-        if let Ok((version, deps)) =
-            resolve_from_registry(&client, &package_name, requested_version.as_deref(), &manifest)
-                .await
+        if let Ok((version, deps)) = resolve_from_registry(
+            &client,
+            &package_name,
+            requested_version.as_deref(),
+            &manifest,
+        )
+        .await
         {
             let pkg_ref = PackageRef {
                 version: Some(version.clone()),
@@ -170,8 +174,9 @@ pub async fn add_package(
     manifest.packages.insert(package_name.clone(), package_ref);
 
     // Save manifest
-    let new_manifest_content =
-        manifest.to_toml().map_err(|e| AddError::ManifestError(e.to_string()))?;
+    let new_manifest_content = manifest
+        .to_toml()
+        .map_err(|e| AddError::ManifestError(e.to_string()))?;
     std::fs::write(&manifest_path, new_manifest_content)
         .map_err(|e| AddError::IoError(e.to_string()))?;
 
@@ -210,7 +215,6 @@ pub async fn add_package(
         lock_updated: true,
     })
 }
-
 
 /// Resolve package from registry, including transitive dependencies
 async fn resolve_from_registry(
@@ -380,7 +384,11 @@ fn create_locked_package(name: &str, version: &str, options: &AddOptions) -> Loc
 
     if let Some(git_url) = &options.git {
         let (url, git_ref) = parse_git_url(git_url);
-        let source = format!("git:{}#{}", url, git_ref.unwrap_or_else(|| "HEAD".to_string()));
+        let source = format!(
+            "git:{}#{}",
+            url,
+            git_ref.unwrap_or_else(|| "HEAD".to_string())
+        );
         builder = builder.source(&source);
     } else if let Some(registry_url) = &options.registry {
         builder = builder.source(&format!("registry:{registry_url}"));

@@ -14,7 +14,10 @@ use crate::core::init::{
 
 /// Execute the init command
 pub async fn execute(path: &Path, board: Option<String>, force: bool) -> Result<()> {
-    let options = InitOptions { board: board.clone(), force };
+    let options = InitOptions {
+        board: board.clone(),
+        force,
+    };
 
     // Validate we can proceed
     validate_init(path, &options).with_context(|| "Failed to validate initialization")?;
@@ -45,7 +48,10 @@ pub async fn execute(path: &Path, board: Option<String>, force: bool) -> Result<
         .with_context(|| format!("Failed to write {}", gitignore_path.display()))?;
 
     // Print success message using output module
-    print_success(&format!("Initialized zigroot project in {}", path.display()));
+    print_success(&format!(
+        "Initialized zigroot project in {}",
+        path.display()
+    ));
     print_detail("Created zigroot.toml");
     print_detail("Created directories: packages/, boards/, user/files/, user/scripts/");
     if gitignore_existed {

@@ -152,10 +152,7 @@ impl FlashExecutor {
                 message.push_str(&format!("    Script: {}\n", script));
             }
             if !profile.requires.is_empty() {
-                message.push_str(&format!(
-                    "    Requires: {}\n",
-                    profile.requires.join(", ")
-                ));
+                message.push_str(&format!("    Requires: {}\n", profile.requires.join(", ")));
             }
             message.push('\n');
         }
@@ -351,9 +348,9 @@ impl FlashExecutor {
             cmd.env(key, value);
         }
 
-        let output = cmd
-            .output()
-            .with_context(|| format!("Failed to execute flash script: {}", script_path.display()))?;
+        let output = cmd.output().with_context(|| {
+            format!("Failed to execute flash script: {}", script_path.display())
+        })?;
 
         let success = output.status.success();
         let stdout = String::from_utf8_lossy(&output.stdout);
@@ -484,10 +481,18 @@ pub fn load_board_definition(project_root: &Path, board_name: &str) -> Result<Bo
         .join("board.toml");
 
     if local_board_path.exists() {
-        let content = std::fs::read_to_string(&local_board_path)
-            .with_context(|| format!("Failed to read board definition: {}", local_board_path.display()))?;
-        return BoardDefinition::from_toml(&content)
-            .with_context(|| format!("Failed to parse board definition: {}", local_board_path.display()));
+        let content = std::fs::read_to_string(&local_board_path).with_context(|| {
+            format!(
+                "Failed to read board definition: {}",
+                local_board_path.display()
+            )
+        })?;
+        return BoardDefinition::from_toml(&content).with_context(|| {
+            format!(
+                "Failed to parse board definition: {}",
+                local_board_path.display()
+            )
+        });
     }
 
     bail!(

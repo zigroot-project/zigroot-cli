@@ -38,7 +38,8 @@ fn run_package_list(project: &TestProject) -> std::process::Output {
     cmd.current_dir(project.path());
     cmd.arg("package");
     cmd.arg("list");
-    cmd.output().expect("Failed to execute zigroot package list")
+    cmd.output()
+        .expect("Failed to execute zigroot package list")
 }
 
 /// Helper to initialize a project for package list tests
@@ -123,9 +124,8 @@ fn test_package_list_shows_versions() {
 
     // Output should contain version information
     // Version could be displayed as "1.36.1" or "v1.36.1" or similar
-    let has_version = stdout.contains("1.36.1")
-        || stdout.contains("version")
-        || stdout.contains("Version");
+    let has_version =
+        stdout.contains("1.36.1") || stdout.contains("version") || stdout.contains("Version");
 
     assert!(
         has_version,
@@ -153,9 +153,10 @@ fn test_package_list_shows_descriptions() {
     // Output should contain some description text
     // The exact description depends on the package, but there should be more than just the name
     let lines: Vec<&str> = stdout.lines().collect();
-    let has_description = lines.iter().any(|line| {
-        line.contains("busybox") && line.len() > "busybox".len() + 10
-    }) || stdout.contains("description")
+    let has_description = lines
+        .iter()
+        .any(|line| line.contains("busybox") && line.len() > "busybox".len() + 10)
+        || stdout.contains("description")
         || stdout.contains("Description")
         || stdout.contains("-"); // Common separator between name and description
 
@@ -274,7 +275,11 @@ fn test_package_list_git_package() {
     // Add a git package
     let output = run_add(
         &project,
-        &["custom-pkg", "--git", "https://github.com/example/repo#v1.0.0"],
+        &[
+            "custom-pkg",
+            "--git",
+            "https://github.com/example/repo#v1.0.0",
+        ],
     );
     assert!(
         output.status.success(),

@@ -233,11 +233,11 @@ impl RegistryClient {
     }
 
     /// Fetch package metadata
-    pub async fn fetch_package_metadata(
-        &self,
-        name: &str,
-    ) -> Result<toml::Value, RegistryError> {
-        let url = format!("{}/packages/{}/metadata.toml", self.package_registry_url, name);
+    pub async fn fetch_package_metadata(&self, name: &str) -> Result<toml::Value, RegistryError> {
+        let url = format!(
+            "{}/packages/{}/metadata.toml",
+            self.package_registry_url, name
+        );
         let cache_file = format!("packages/{name}/metadata.toml");
         self.fetch_toml_with_cache(&url, &cache_file).await
     }
@@ -291,11 +291,7 @@ impl RegistryClient {
     }
 
     /// Fetch JSON data with caching
-    async fn fetch_with_cache<T>(
-        &self,
-        url: &str,
-        cache_file: &str,
-    ) -> Result<T, RegistryError>
+    async fn fetch_with_cache<T>(&self, url: &str, cache_file: &str) -> Result<T, RegistryError>
     where
         T: serde::de::DeserializeOwned + serde::Serialize + Clone,
     {
@@ -318,17 +314,32 @@ impl RegistryClient {
                 .await?
             {
                 // Got new data
-                self.write_cache(&cache_path, &data.data, data.etag.as_deref(), data.last_modified.as_deref())?;
+                self.write_cache(
+                    &cache_path,
+                    &data.data,
+                    data.etag.as_deref(),
+                    data.last_modified.as_deref(),
+                )?;
                 return Ok(data.data);
             }
             // Not modified, update cache timestamp
-            self.write_cache(&cache_path, &cached.data, cached.etag.as_deref(), cached.last_modified.as_deref())?;
+            self.write_cache(
+                &cache_path,
+                &cached.data,
+                cached.etag.as_deref(),
+                cached.last_modified.as_deref(),
+            )?;
             return Ok(cached.data);
         }
 
         // No cache, fetch fresh
         let data = self.fetch_fresh::<T>(url).await?;
-        self.write_cache(&cache_path, &data.data, data.etag.as_deref(), data.last_modified.as_deref())?;
+        self.write_cache(
+            &cache_path,
+            &data.data,
+            data.etag.as_deref(),
+            data.last_modified.as_deref(),
+        )?;
         Ok(data.data)
     }
 
@@ -353,15 +364,15 @@ impl RegistryClient {
         }
 
         // Fetch fresh TOML
-        let response = self
-            .client
-            .get(url)
-            .send()
-            .await
-            .map_err(|e| RegistryError::NetworkError {
-                url: url.to_string(),
-                error: e.to_string(),
-            })?;
+        let response =
+            self.client
+                .get(url)
+                .send()
+                .await
+                .map_err(|e| RegistryError::NetworkError {
+                    url: url.to_string(),
+                    error: e.to_string(),
+                })?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
             return Err(RegistryError::NetworkError {
@@ -388,18 +399,25 @@ impl RegistryClient {
             .and_then(|v| v.to_str().ok())
             .map(String::from);
 
-        let text = response.text().await.map_err(|e| RegistryError::NetworkError {
-            url: url.to_string(),
-            error: e.to_string(),
-        })?;
-
-        let data: toml::Value =
-            toml::from_str(&text).map_err(|e| RegistryError::ParseError {
+        let text = response
+            .text()
+            .await
+            .map_err(|e| RegistryError::NetworkError {
                 url: url.to_string(),
                 error: e.to_string(),
             })?;
 
-        self.write_cache(&cache_path, &data, etag.as_deref(), last_modified.as_deref())?;
+        let data: toml::Value = toml::from_str(&text).map_err(|e| RegistryError::ParseError {
+            url: url.to_string(),
+            error: e.to_string(),
+        })?;
+
+        self.write_cache(
+            &cache_path,
+            &data,
+            etag.as_deref(),
+            last_modified.as_deref(),
+        )?;
         Ok(data)
     }
 
@@ -408,15 +426,15 @@ impl RegistryClient {
     where
         T: serde::de::DeserializeOwned,
     {
-        let response = self
-            .client
-            .get(url)
-            .send()
-            .await
-            .map_err(|e| RegistryError::NetworkError {
-                url: url.to_string(),
-                error: e.to_string(),
-            })?;
+        let response =
+            self.client
+                .get(url)
+                .send()
+                .await
+                .map_err(|e| RegistryError::NetworkError {
+                    url: url.to_string(),
+                    error: e.to_string(),
+                })?;
 
         if !response.status().is_success() {
             return Err(RegistryError::NetworkError {
@@ -436,10 +454,13 @@ impl RegistryClient {
             .and_then(|v| v.to_str().ok())
             .map(String::from);
 
-        let data: T = response.json().await.map_err(|e| RegistryError::ParseError {
-            url: url.to_string(),
-            error: e.to_string(),
-        })?;
+        let data: T = response
+            .json()
+            .await
+            .map_err(|e| RegistryError::ParseError {
+                url: url.to_string(),
+                error: e.to_string(),
+            })?;
 
         Ok(CachedData {
             data,
@@ -471,10 +492,13 @@ impl RegistryClient {
             request = request.header("If-Modified-Since", last_modified);
         }
 
-        let response = request.send().await.map_err(|e| RegistryError::NetworkError {
-            url: url.to_string(),
-            error: e.to_string(),
-        })?;
+        let response = request
+            .send()
+            .await
+            .map_err(|e| RegistryError::NetworkError {
+                url: url.to_string(),
+                error: e.to_string(),
+            })?;
 
         if response.status() == reqwest::StatusCode::NOT_MODIFIED {
             return Ok(None);
@@ -498,10 +522,13 @@ impl RegistryClient {
             .and_then(|v| v.to_str().ok())
             .map(String::from);
 
-        let data: T = response.json().await.map_err(|e| RegistryError::ParseError {
-            url: url.to_string(),
-            error: e.to_string(),
-        })?;
+        let data: T = response
+            .json()
+            .await
+            .map_err(|e| RegistryError::ParseError {
+                url: url.to_string(),
+                error: e.to_string(),
+            })?;
 
         Ok(Some(CachedData {
             data,
@@ -565,9 +592,10 @@ impl RegistryClient {
             last_modified: last_modified.map(String::from),
         };
 
-        let content = serde_json::to_string_pretty(&cached).map_err(|e| RegistryError::CacheError {
-            error: format!("Failed to serialize cache: {e}"),
-        })?;
+        let content =
+            serde_json::to_string_pretty(&cached).map_err(|e| RegistryError::CacheError {
+                error: format!("Failed to serialize cache: {e}"),
+            })?;
 
         std::fs::write(path, content).map_err(|e| RegistryError::IoError {
             path: path.clone(),
@@ -583,7 +611,6 @@ impl Default for RegistryClient {
         Self::new()
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -613,7 +640,10 @@ mod tests {
             temp.path().to_path_buf(),
             7200,
         );
-        assert_eq!(client.package_registry_url(), "https://example.com/packages");
+        assert_eq!(
+            client.package_registry_url(),
+            "https://example.com/packages"
+        );
         assert_eq!(client.board_registry_url(), "https://example.com/boards");
         assert_eq!(client.cache_ttl(), 7200);
     }
@@ -908,10 +938,7 @@ type = "make"
         assert!(result.is_ok(), "Should fetch package metadata: {result:?}");
 
         let metadata = result.unwrap();
-        assert_eq!(
-            metadata["package"]["name"].as_str(),
-            Some("busybox")
-        );
+        assert_eq!(metadata["package"]["name"].as_str(), Some("busybox"));
     }
 
     #[tokio::test]
@@ -946,10 +973,7 @@ sha256 = "abc123"
         assert!(result.is_ok(), "Should fetch package version: {result:?}");
 
         let version = result.unwrap();
-        assert_eq!(
-            version["release"]["version"].as_str(),
-            Some("1.36.1")
-        );
+        assert_eq!(version["release"]["version"].as_str(), Some("1.36.1"));
     }
 
     // ============================================
@@ -987,10 +1011,7 @@ cpu = "cortex_a7"
         assert!(result.is_ok(), "Should fetch board: {result:?}");
 
         let board = result.unwrap();
-        assert_eq!(
-            board["board"]["name"].as_str(),
-            Some("luckfox-pico")
-        );
+        assert_eq!(board["board"]["name"].as_str(), Some("luckfox-pico"));
     }
 
     // ============================================

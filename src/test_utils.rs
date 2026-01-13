@@ -8,15 +8,13 @@ pub mod generators {
 
     /// Generate a valid package name (lowercase alphanumeric with hyphens)
     pub fn package_name() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9-]{0,30}[a-z0-9]?"
-            .prop_filter("Name must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9-]{0,30}[a-z0-9]?".prop_filter("Name must not be empty", |s| !s.is_empty())
     }
 
     /// Generate a valid semver version string
     pub fn semver_version() -> impl Strategy<Value = String> {
-        (1u32..100, 0u32..100, 0u32..100).prop_map(|(major, minor, patch)| {
-            format!("{major}.{minor}.{patch}")
-        })
+        (1u32..100, 0u32..100, 0u32..100)
+            .prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
     }
 
     /// Generate a valid SHA256 hash (64 hex characters)
@@ -39,8 +37,7 @@ pub mod generators {
 
     /// Generate a valid hostname
     pub fn hostname() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9-]{0,20}[a-z0-9]?"
-            .prop_filter("Hostname must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9-]{0,20}[a-z0-9]?".prop_filter("Hostname must not be empty", |s| !s.is_empty())
     }
 
     /// Generate a valid Zig target triple

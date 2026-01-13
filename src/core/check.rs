@@ -137,14 +137,18 @@ pub fn check(project_dir: &Path, manifest: &Manifest) -> Result<CheckResult, Zig
         }
         Err(e) => {
             result.dependencies_valid = false;
-            result.warnings.push(format!("Dependency resolution failed: {e}"));
+            result
+                .warnings
+                .push(format!("Dependency resolution failed: {e}"));
         }
     }
 
     // Check toolchain availability
     result.toolchains_available = check_toolchain_availability();
     if !result.toolchains_available {
-        result.warnings.push("Zig toolchain not found in PATH".to_string());
+        result
+            .warnings
+            .push("Zig toolchain not found in PATH".to_string());
     }
 
     // Validate external artifacts

@@ -208,8 +208,8 @@ pub struct ExternalArtifact {
 /// ```
 pub fn substitute_env_vars(input: &str) -> Result<String, String> {
     // Regex to match ${VAR_NAME} pattern
-    let re = Regex::new(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
-        .map_err(|e| format!("Invalid regex: {e}"))?;
+    let re =
+        Regex::new(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}").map_err(|e| format!("Invalid regex: {e}"))?;
 
     let mut last_end = 0;
     let mut output = String::new();
@@ -239,15 +239,14 @@ pub fn substitute_env_vars(input: &str) -> Result<String, String> {
 /// **Validates: Requirement 11.2**
 fn substitute_env_vars_in_toml(content: &str) -> Result<String, String> {
     // Parse as TOML value first to handle structure
-    let mut value: toml::Value = toml::from_str(content)
-        .map_err(|e| format!("Failed to parse TOML: {e}"))?;
+    let mut value: toml::Value =
+        toml::from_str(content).map_err(|e| format!("Failed to parse TOML: {e}"))?;
 
     // Recursively substitute in all string values
     substitute_in_value(&mut value)?;
 
     // Serialize back to TOML
-    toml::to_string_pretty(&value)
-        .map_err(|e| format!("Failed to serialize TOML: {e}"))
+    toml::to_string_pretty(&value).map_err(|e| format!("Failed to serialize TOML: {e}"))
 }
 
 /// Recursively substitute environment variables in a TOML value
@@ -291,14 +290,14 @@ fn merge_toml_tables(base: &mut toml::value::Table, override_table: &toml::value
 /// Load a TOML file and resolve its `extends` directive recursively.
 ///
 /// **Validates: Requirement 11.5**
-fn load_toml_with_inheritance(path: &std::path::Path) -> Result<toml::Value, crate::error::ZigrootError> {
-    let content = std::fs::read_to_string(path).map_err(|e| {
-        crate::error::ZigrootError::Io { source: e }
-    })?;
+fn load_toml_with_inheritance(
+    path: &std::path::Path,
+) -> Result<toml::Value, crate::error::ZigrootError> {
+    let content =
+        std::fs::read_to_string(path).map_err(|e| crate::error::ZigrootError::Io { source: e })?;
 
-    let mut value: toml::Value = toml::from_str(&content).map_err(|e| {
-        crate::error::ZigrootError::ManifestParse { source: e }
-    })?;
+    let mut value: toml::Value = toml::from_str(&content)
+        .map_err(|e| crate::error::ZigrootError::ManifestParse { source: e })?;
 
     // Check for extends directive
     if let Some(extends) = value.get("extends").and_then(|v| v.as_str()) {
@@ -335,12 +334,10 @@ fn load_toml_with_inheritance(path: &std::path::Path) -> Result<toml::Value, cra
 impl Manifest {
     /// Load manifest from file path
     pub fn load(path: &std::path::Path) -> Result<Self, crate::error::ZigrootError> {
-        let content = std::fs::read_to_string(path).map_err(|e| {
-            crate::error::ZigrootError::Io { source: e }
-        })?;
-        Self::from_toml(&content).map_err(|e| {
-            crate::error::ZigrootError::ManifestParse { source: e }
-        })
+        let content = std::fs::read_to_string(path)
+            .map_err(|e| crate::error::ZigrootError::Io { source: e })?;
+        Self::from_toml(&content)
+            .map_err(|e| crate::error::ZigrootError::ManifestParse { source: e })
     }
 
     /// Load manifest from file path with environment variable substitution.
@@ -349,17 +346,17 @@ impl Manifest {
     ///
     /// This method reads the manifest file and substitutes all ${VAR} patterns
     /// with their corresponding environment variable values before parsing.
-    pub fn load_with_env_substitution(path: &std::path::Path) -> Result<Self, crate::error::ZigrootError> {
-        let content = std::fs::read_to_string(path).map_err(|e| {
-            crate::error::ZigrootError::Io { source: e }
-        })?;
+    pub fn load_with_env_substitution(
+        path: &std::path::Path,
+    ) -> Result<Self, crate::error::ZigrootError> {
+        let content = std::fs::read_to_string(path)
+            .map_err(|e| crate::error::ZigrootError::Io { source: e })?;
 
         let substituted = substitute_env_vars_in_toml(&content)
             .map_err(|e| crate::error::ZigrootError::Manifest(e))?;
 
-        Self::from_toml(&substituted).map_err(|e| {
-            crate::error::ZigrootError::ManifestParse { source: e }
-        })
+        Self::from_toml(&substituted)
+            .map_err(|e| crate::error::ZigrootError::ManifestParse { source: e })
     }
 
     /// Load manifest from file path with configuration inheritance support.
@@ -379,16 +376,18 @@ impl Manifest {
     /// # Returns
     /// * `Ok(Manifest)` - The loaded manifest with inheritance resolved
     /// * `Err(ZigrootError)` - Error if loading or parsing fails
-    pub fn load_with_inheritance(path: &std::path::Path) -> Result<Self, crate::error::ZigrootError> {
+    pub fn load_with_inheritance(
+        path: &std::path::Path,
+    ) -> Result<Self, crate::error::ZigrootError> {
         let value = load_toml_with_inheritance(path)?;
 
         // Convert TOML value to Manifest
-        let toml_str = toml::to_string_pretty(&value)
-            .map_err(|e| crate::error::ZigrootError::Manifest(format!("Failed to serialize merged config: {e}")))?;
+        let toml_str = toml::to_string_pretty(&value).map_err(|e| {
+            crate::error::ZigrootError::Manifest(format!("Failed to serialize merged config: {e}"))
+        })?;
 
-        Self::from_toml(&toml_str).map_err(|e| {
-            crate::error::ZigrootError::ManifestParse { source: e }
-        })
+        Self::from_toml(&toml_str)
+            .map_err(|e| crate::error::ZigrootError::ManifestParse { source: e })
     }
 
     /// Load manifest from TOML string
@@ -488,7 +487,10 @@ pub fn validate_manifest(path: &std::path::Path) -> Result<(), Vec<String>> {
     if let Err(e) = Manifest::from_toml(&content) {
         // Only add this error if we haven't already caught the specific issue
         let err_str = e.to_string();
-        if !errors.iter().any(|existing| err_str.contains(&existing[..existing.len().min(20)])) {
+        if !errors
+            .iter()
+            .any(|existing| err_str.contains(&existing[..existing.len().min(20)]))
+        {
             errors.push(format!("Manifest structure error: {e}"));
         }
     }
@@ -726,8 +728,7 @@ name = "minimal-project"
 
     /// Strategy for generating valid project names
     fn project_name_strategy() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9_-]{0,30}[a-z0-9]?"
-            .prop_filter("Name must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9_-]{0,30}[a-z0-9]?".prop_filter("Name must not be empty", |s| !s.is_empty())
     }
 
     /// Strategy for generating valid semver versions
@@ -738,8 +739,7 @@ name = "minimal-project"
 
     /// Strategy for generating valid hostnames
     fn hostname_strategy() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9-]{0,20}[a-z0-9]?"
-            .prop_filter("Hostname must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9-]{0,20}[a-z0-9]?".prop_filter("Hostname must not be empty", |s| !s.is_empty())
     }
 
     /// Strategy for generating valid image formats
@@ -759,10 +759,7 @@ name = "minimal-project"
 
     /// Strategy for generating optional descriptions
     fn description_strategy() -> impl Strategy<Value = Option<String>> {
-        prop_oneof![
-            Just(None),
-            "[a-zA-Z0-9 ]{1,100}".prop_map(Some),
-        ]
+        prop_oneof![Just(None), "[a-zA-Z0-9 ]{1,100}".prop_map(Some),]
     }
 
     /// Strategy for generating a complete Manifest
@@ -772,14 +769,24 @@ name = "minimal-project"
             version_strategy(),
             description_strategy(),
             prop::option::of(project_name_strategy()), // board name
-            prop::bool::ANY,                            // compress
+            prop::bool::ANY,                           // compress
             image_format_strategy(),
             rootfs_size_strategy(),
             hostname_strategy(),
-            prop::option::of(1usize..32),              // jobs
+            prop::option::of(1usize..32), // jobs
         )
             .prop_map(
-                |(name, version, description, board_name, compress, image_format, rootfs_size, hostname, jobs)| {
+                |(
+                    name,
+                    version,
+                    description,
+                    board_name,
+                    compress,
+                    image_format,
+                    rootfs_size,
+                    hostname,
+                    jobs,
+                )| {
                     Manifest {
                         project: ProjectConfig {
                             name,

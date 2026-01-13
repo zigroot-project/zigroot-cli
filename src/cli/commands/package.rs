@@ -157,7 +157,9 @@ fn get_source_info(pkg_ref: &crate::core::manifest::PackageRef) -> String {
 fn get_package_description(package_name: &str) -> String {
     // Common package descriptions for well-known packages
     match package_name {
-        "busybox" => "Swiss army knife of embedded Linux - provides many common UNIX utilities".to_string(),
+        "busybox" => {
+            "Swiss army knife of embedded Linux - provides many common UNIX utilities".to_string()
+        }
         "dropbear" => "Lightweight SSH server and client".to_string(),
         "nginx" => "High-performance HTTP server and reverse proxy".to_string(),
         "zlib" => "General-purpose lossless data compression library".to_string(),
@@ -215,11 +217,7 @@ pub async fn execute_new(project_dir: &Path, name: &str) -> Result<()> {
 
     // Check if package already exists
     if pkg_dir.exists() {
-        anyhow::bail!(
-            "Package '{}' already exists at {}",
-            name,
-            pkg_dir.display()
-        );
+        anyhow::bail!("Package '{}' already exists at {}", name, pkg_dir.display());
     }
 
     // Create packages directory if it doesn't exist
@@ -248,7 +246,10 @@ pub async fn execute_new(project_dir: &Path, name: &str) -> Result<()> {
     println!("  1. Edit metadata.toml with your package description and build config");
     println!("  2. Edit 1.0.0.toml with the source URL and SHA256 checksum");
     println!("  3. Run 'zigroot verify packages/{}' to validate", name);
-    println!("  4. Run 'zigroot package test packages/{}' to test build", name);
+    println!(
+        "  4. Run 'zigroot package test packages/{}' to test build",
+        name
+    );
 
     Ok(())
 }
@@ -330,7 +331,10 @@ pub async fn execute_test(project_dir: &Path, path: &str) -> Result<()> {
     println!("✓ Package structure is valid");
     println!();
     println!("Note: Full build testing requires a configured project.");
-    println!("Run 'zigroot build --package {}' in a project to test the build.", path);
+    println!(
+        "Run 'zigroot build --package {}' in a project to test the build.",
+        path
+    );
 
     Ok(())
 }

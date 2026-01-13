@@ -272,7 +272,9 @@ fn test_global_config_save_and_load_roundtrip() {
         },
     };
 
-    config.save_to_path(&config_path).expect("Failed to save config");
+    config
+        .save_to_path(&config_path)
+        .expect("Failed to save config");
     let loaded = GlobalConfig::load_from_path(&config_path).expect("Failed to load config");
 
     assert_eq!(loaded.registry.packages_url, config.registry.packages_url);

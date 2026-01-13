@@ -383,7 +383,10 @@ impl Commands {
                 let current_dir = std::env::current_dir()?;
                 remove::execute(&current_dir, &package).await
             }
-            Self::Update { package, self_update } => {
+            Self::Update {
+                package,
+                self_update,
+            } => {
                 if self_update {
                     update::execute_self_update().await
                 } else {
@@ -395,7 +398,16 @@ impl Commands {
                 let current_dir = std::env::current_dir()?;
                 fetch::execute(&current_dir, parallel, force).await
             }
-            Self::Build { package, jobs, locked, compress, no_compress, kernel_only, sandbox, no_sandbox } => {
+            Self::Build {
+                package,
+                jobs,
+                locked,
+                compress,
+                no_compress,
+                kernel_only,
+                sandbox,
+                no_sandbox,
+            } => {
                 let current_dir = std::env::current_dir()?;
                 let options = build::BuildOptions {
                     package,
@@ -422,15 +434,11 @@ impl Commands {
                 packages,
                 boards,
                 refresh,
-            } => {
-                search::execute(&query, packages, boards, refresh).await
-            }
+            } => search::execute(&query, packages, boards, refresh).await,
             Self::Package { command } => {
                 let current_dir = std::env::current_dir()?;
                 match command {
-                    PackageCommands::List => {
-                        package::execute_list(&current_dir).await
-                    }
+                    PackageCommands::List => package::execute_list(&current_dir).await,
                     PackageCommands::Info { package: pkg_name } => {
                         package::execute_info(&current_dir, &pkg_name).await
                     }
@@ -448,42 +456,47 @@ impl Commands {
             Self::Board { command } => {
                 let current_dir = std::env::current_dir()?;
                 match command {
-                    BoardCommands::List => {
-                        board::execute_list().await
-                    }
+                    BoardCommands::List => board::execute_list().await,
                     BoardCommands::Set { board: board_name } => {
                         board::execute_set(&current_dir, &board_name).await
                     }
                     BoardCommands::Info { board: board_name } => {
                         board::execute_info(&board_name).await
                     }
-                    BoardCommands::New { name } => {
-                        board::execute_new(&current_dir, &name).await
-                    }
+                    BoardCommands::New { name } => board::execute_new(&current_dir, &name).await,
                 }
             }
             Self::Tree { package, graph } => {
                 let current_dir = std::env::current_dir()?;
                 tree::execute(&current_dir, package, graph).await
             }
-            Self::Flash { method, device, yes, list } => {
+            Self::Flash {
+                method,
+                device,
+                yes,
+                list,
+            } => {
                 let current_dir = std::env::current_dir()?;
                 flash::execute(&current_dir, method, device, yes, list).await
             }
             Self::External { command } => {
                 let current_dir = std::env::current_dir()?;
                 match command {
-                    ExternalCommands::List => {
-                        external::execute_list(&current_dir).await
-                    }
-                    ExternalCommands::Add { name, artifact_type, url, path } => {
+                    ExternalCommands::List => external::execute_list(&current_dir).await,
+                    ExternalCommands::Add {
+                        name,
+                        artifact_type,
+                        url,
+                        path,
+                    } => {
                         external::execute_add(
                             &current_dir,
                             &name,
                             &artifact_type,
                             url.as_deref(),
                             path.as_deref(),
-                        ).await
+                        )
+                        .await
                     }
                 }
             }
@@ -502,12 +515,8 @@ impl Commands {
             Self::Cache { command } => {
                 let current_dir = std::env::current_dir()?;
                 match command {
-                    CacheCommands::Info => {
-                        cache::execute_info(&current_dir).await
-                    }
-                    CacheCommands::Clean => {
-                        cache::execute_clean(&current_dir).await
-                    }
+                    CacheCommands::Info => cache::execute_info(&current_dir).await,
+                    CacheCommands::Clean => cache::execute_clean(&current_dir).await,
                     CacheCommands::Export { output } => {
                         cache::execute_export(&current_dir, &output).await
                     }
@@ -531,9 +540,7 @@ impl Commands {
             Self::Kernel { command } => {
                 let current_dir = std::env::current_dir()?;
                 match command {
-                    KernelCommands::Menuconfig => {
-                        kernel::execute_menuconfig(&current_dir).await
-                    }
+                    KernelCommands::Menuconfig => kernel::execute_menuconfig(&current_dir).await,
                 }
             }
         }

@@ -116,10 +116,12 @@ impl DownloadManager {
         // Clean up partial download on failure
         let _ = tokio::fs::remove_file(dest).await;
 
-        Err(last_error.unwrap_or_else(|| DownloadError::MaxRetriesExceeded {
-            url: url.to_string(),
-            retries: self.max_retries,
-        }))
+        Err(
+            last_error.unwrap_or_else(|| DownloadError::MaxRetriesExceeded {
+                url: url.to_string(),
+                retries: self.max_retries,
+            }),
+        )
     }
 
     /// Single download attempt without retry
@@ -129,15 +131,15 @@ impl DownloadManager {
         dest: &Path,
         progress: Option<&ProgressCallback>,
     ) -> Result<DownloadResult, DownloadError> {
-        let response = self
-            .client
-            .get(url)
-            .send()
-            .await
-            .map_err(|e| DownloadError::NetworkError {
-                url: url.to_string(),
-                error: e.to_string(),
-            })?;
+        let response =
+            self.client
+                .get(url)
+                .send()
+                .await
+                .map_err(|e| DownloadError::NetworkError {
+                    url: url.to_string(),
+                    error: e.to_string(),
+                })?;
 
         if !response.status().is_success() {
             return Err(DownloadError::NetworkError {
@@ -324,7 +326,6 @@ pub fn compute_checksum(data: &[u8]) -> String {
     hex::encode(hasher.finalize())
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -378,7 +379,10 @@ mod tests {
         let file_path = temp.path().join("test.txt");
         std::fs::write(&file_path, b"hello world").unwrap();
 
-        let result = verify_checksum(&file_path, "0000000000000000000000000000000000000000000000000000000000000000");
+        let result = verify_checksum(
+            &file_path,
+            "0000000000000000000000000000000000000000000000000000000000000000",
+        );
         assert!(!result.unwrap());
     }
 

@@ -91,10 +91,10 @@ pub async fn fetch_packages(
     let external_dir = project_path.join("external");
 
     // Load manifest
-    let manifest_content =
-        std::fs::read_to_string(&manifest_path).map_err(|e| FetchError::ManifestError(e.to_string()))?;
-    let manifest =
-        Manifest::from_toml(&manifest_content).map_err(|e| FetchError::ManifestError(e.to_string()))?;
+    let manifest_content = std::fs::read_to_string(&manifest_path)
+        .map_err(|e| FetchError::ManifestError(e.to_string()))?;
+    let manifest = Manifest::from_toml(&manifest_content)
+        .map_err(|e| FetchError::ManifestError(e.to_string()))?;
 
     // Load lock file if it exists
     let lock_file = if lock_path.exists() {
@@ -192,7 +192,8 @@ async fn fetch_single_package(
         .unwrap_or_else(|| "latest".to_string());
 
     // Determine download URL and checksum
-    let (url, expected_checksum) = get_package_download_info(package_name, &version, package_ref, lock_file);
+    let (url, expected_checksum) =
+        get_package_download_info(package_name, &version, package_ref, lock_file);
 
     // Determine destination path
     let filename = format!("{package_name}-{version}.tar.gz");
@@ -219,7 +220,9 @@ async fn fetch_single_package(
                 .download_verified(&download_url, &dest_path, checksum, None)
                 .await
         } else {
-            download_manager.download(&download_url, &dest_path, None).await
+            download_manager
+                .download(&download_url, &dest_path, None)
+                .await
         };
 
         match download_result {
@@ -259,7 +262,8 @@ fn get_package_download_info(
             // Check if source is a URL
             if let Some(ref source) = locked_pkg.source {
                 if source.starts_with("http://") || source.starts_with("https://") {
-                    let checksum = if locked_pkg.sha256 != "pending" && locked_pkg.sha256 != "local" {
+                    let checksum = if locked_pkg.sha256 != "pending" && locked_pkg.sha256 != "local"
+                    {
                         Some(locked_pkg.sha256.clone())
                     } else {
                         None
@@ -267,14 +271,14 @@ fn get_package_download_info(
                     return (Some(source.clone()), checksum);
                 }
             }
-            
+
             // Use default registry URL pattern
             let checksum = if locked_pkg.sha256 != "pending" && locked_pkg.sha256 != "local" {
                 Some(locked_pkg.sha256.clone())
             } else {
                 None
             };
-            
+
             // Construct URL from registry pattern
             let url = format!(
                 "https://raw.githubusercontent.com/zigroot-project/zigroot-packages/main/packages/{package_name}/{version}.tar.gz"
@@ -325,10 +329,7 @@ async fn fetch_external_artifact(
             project_path.join(local_path)
         } else {
             // Extract filename from URL or use artifact name
-            let filename = url
-                .rsplit('/')
-                .next()
-                .unwrap_or(artifact_name);
+            let filename = url.rsplit('/').next().unwrap_or(artifact_name);
             external_dir.join(filename)
         };
 

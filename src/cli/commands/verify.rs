@@ -115,8 +115,13 @@ async fn verify_package(pkg_path: &Path, fetch: bool) -> Result<()> {
         let version_content = std::fs::read_to_string(&version_path)
             .map_err(|e| anyhow::anyhow!("Failed to read {}: {}", version_file, e))?;
 
-        let version: toml::Value = toml::from_str(&version_content)
-            .map_err(|e| anyhow::anyhow!("Failed to parse {} - TOML syntax error: {}", version_file, e))?;
+        let version: toml::Value = toml::from_str(&version_content).map_err(|e| {
+            anyhow::anyhow!(
+                "Failed to parse {} - TOML syntax error: {}",
+                version_file,
+                e
+            )
+        })?;
 
         validate_version_file(&version, version_file)?;
         println!("  ✓ {} is valid", version_file);
@@ -160,7 +165,11 @@ fn validate_package_metadata(metadata: &toml::Value, pkg_name: &str) -> Result<(
         );
     }
 
-    if package.get("description").and_then(|v| v.as_str()).is_none() {
+    if package
+        .get("description")
+        .and_then(|v| v.as_str())
+        .is_none()
+    {
         anyhow::bail!(
             "Package '{}' metadata.toml is missing required field: description",
             pkg_name
@@ -249,10 +258,7 @@ async fn verify_board(board_path: &Path) -> Result<()> {
     // Check for board.toml
     let board_toml_path = board_path.join("board.toml");
     if !board_toml_path.exists() {
-        anyhow::bail!(
-            "Board '{}' is missing required board.toml file",
-            board_name
-        );
+        anyhow::bail!("Board '{}' is missing required board.toml file", board_name);
     }
 
     // Parse and validate board.toml
@@ -380,7 +386,15 @@ fn is_valid_zig_target(target: &str) -> bool {
 
         // Valid architectures
         let valid_archs = [
-            "arm", "aarch64", "x86_64", "i386", "riscv64", "mips", "mipsel", "powerpc", "powerpc64",
+            "arm",
+            "aarch64",
+            "x86_64",
+            "i386",
+            "riscv64",
+            "mips",
+            "mipsel",
+            "powerpc",
+            "powerpc64",
         ];
 
         // Valid OS

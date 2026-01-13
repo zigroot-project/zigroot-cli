@@ -142,10 +142,7 @@ fn test_doctor_detects_misconfigurations() {
 
     // Initialize a project
     let init_output = run_init(&project, &[]);
-    assert!(
-        init_output.status.success(),
-        "Failed to initialize project"
-    );
+    assert!(init_output.status.success(), "Failed to initialize project");
 
     // Create an invalid manifest to test misconfiguration detection
     project.create_file(

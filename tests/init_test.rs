@@ -101,8 +101,14 @@ fn test_init_creates_required_directories() {
     );
 
     // Verify each directory individually
-    assert!(project.path().join("packages").is_dir(), "packages/ should exist");
-    assert!(project.path().join("boards").is_dir(), "boards/ should exist");
+    assert!(
+        project.path().join("packages").is_dir(),
+        "packages/ should exist"
+    );
+    assert!(
+        project.path().join("boards").is_dir(),
+        "boards/ should exist"
+    );
     assert!(
         project.path().join("user/files").is_dir(),
         "user/files/ should exist"
@@ -133,12 +139,18 @@ fn test_init_creates_gitignore() {
 
     // Verify specific entries
     let content = project.read_file(".gitignore");
-    assert!(content.contains("build/"), ".gitignore should exclude build/");
+    assert!(
+        content.contains("build/"),
+        ".gitignore should exclude build/"
+    );
     assert!(
         content.contains("downloads/"),
         ".gitignore should exclude downloads/"
     );
-    assert!(content.contains("output/"), ".gitignore should exclude output/");
+    assert!(
+        content.contains("output/"),
+        ".gitignore should exclude output/"
+    );
     assert!(
         content.contains("external/"),
         ".gitignore should exclude external/"

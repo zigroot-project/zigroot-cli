@@ -13,12 +13,11 @@
 mod common;
 
 use common::TestProject;
+use std::path::PathBuf;
 use std::process::Command;
 use zigroot::infra::sandbox::{
-    ContainerRuntime, MountConfig, Sandbox, SandboxConfig, SandboxError,
-    resolve_sandbox_config,
+    resolve_sandbox_config, ContainerRuntime, MountConfig, Sandbox, SandboxConfig, SandboxError,
 };
-use std::path::PathBuf;
 
 /// Helper to run zigroot init command
 fn run_init(project: &TestProject, args: &[&str]) -> std::process::Output {
@@ -190,10 +189,7 @@ fn test_sandbox_can_enable_network() {
 /// **Validates: Requirement 27.6**
 #[test]
 fn test_mount_config_read_only() {
-    let mount = MountConfig::read_only(
-        PathBuf::from("/host/src"),
-        PathBuf::from("/container/src"),
-    );
+    let mount = MountConfig::read_only(PathBuf::from("/host/src"), PathBuf::from("/container/src"));
     assert!(
         mount.read_only,
         "Source directory should be read-only (Requirement 27.6)"
@@ -271,19 +267,13 @@ fn test_package_network_enables_network_access() {
 #[test]
 fn test_sandbox_detect_runtime() {
     let runtime = Sandbox::detect_runtime();
-    
+
     // Runtime may or may not be available depending on the system
     if docker_available() {
-        assert!(
-            runtime.is_some(),
-            "Should detect Docker when available"
-        );
+        assert!(runtime.is_some(), "Should detect Docker when available");
         assert_eq!(runtime, Some(ContainerRuntime::Docker));
     } else if podman_available() {
-        assert!(
-            runtime.is_some(),
-            "Should detect Podman when available"
-        );
+        assert!(runtime.is_some(), "Should detect Podman when available");
         assert_eq!(runtime, Some(ContainerRuntime::Podman));
     } else {
         assert!(
@@ -326,10 +316,7 @@ fn test_sandbox_init_succeeds_when_disabled() {
     let mut sandbox = Sandbox::new(config);
     let result = sandbox.init();
 
-    assert!(
-        result.is_ok(),
-        "Sandbox init should succeed when disabled"
-    );
+    assert!(result.is_ok(), "Sandbox init should succeed when disabled");
 }
 
 // ============================================
@@ -344,13 +331,12 @@ fn test_build_run_args_network_disabled() {
         return; // Skip if no runtime
     }
 
-    let config = SandboxConfig::new()
-        .enable()
-        .without_network();
+    let config = SandboxConfig::new().enable().without_network();
     let mut sandbox = Sandbox::new(config);
     sandbox.init().expect("Init should succeed");
 
-    let args = sandbox.build_run_args(&["echo".to_string(), "hello".to_string()])
+    let args = sandbox
+        .build_run_args(&["echo".to_string(), "hello".to_string()])
         .expect("Should build args");
 
     assert!(
@@ -367,13 +353,12 @@ fn test_build_run_args_network_enabled() {
         return; // Skip if no runtime
     }
 
-    let config = SandboxConfig::new()
-        .enable()
-        .with_network();
+    let config = SandboxConfig::new().enable().with_network();
     let mut sandbox = Sandbox::new(config);
     sandbox.init().expect("Init should succeed");
 
-    let args = sandbox.build_run_args(&["echo".to_string(), "hello".to_string()])
+    let args = sandbox
+        .build_run_args(&["echo".to_string(), "hello".to_string()])
         .expect("Should build args");
 
     assert!(
@@ -399,18 +384,15 @@ fn test_build_run_args_read_only_mount() {
     let mut sandbox = Sandbox::new(config);
     sandbox.init().expect("Init should succeed");
 
-    let args = sandbox.build_run_args(&["echo".to_string()])
+    let args = sandbox
+        .build_run_args(&["echo".to_string()])
         .expect("Should build args");
 
-    let has_ro_mount = args.iter().any(|arg| {
-        arg.contains("/host/src:/container/src:ro")
-    });
+    let has_ro_mount = args
+        .iter()
+        .any(|arg| arg.contains("/host/src:/container/src:ro"));
 
-    assert!(
-        has_ro_mount,
-        "Should include read-only mount: {:?}",
-        args
-    );
+    assert!(has_ro_mount, "Should include read-only mount: {:?}", args);
 }
 
 /// Test: Build run args includes read-write mount for build/output
@@ -430,13 +412,14 @@ fn test_build_run_args_read_write_mount() {
     let mut sandbox = Sandbox::new(config);
     sandbox.init().expect("Init should succeed");
 
-    let args = sandbox.build_run_args(&["echo".to_string()])
+    let args = sandbox
+        .build_run_args(&["echo".to_string()])
         .expect("Should build args");
 
     // Read-write mount should NOT have :ro suffix
-    let has_rw_mount = args.iter().any(|arg| {
-        arg.contains("/host/build:/container/build") && !arg.contains(":ro")
-    });
+    let has_rw_mount = args
+        .iter()
+        .any(|arg| arg.contains("/host/build:/container/build") && !arg.contains(":ro"));
 
     assert!(
         has_rw_mount,
@@ -475,10 +458,8 @@ fn test_build_with_sandbox_flag() {
     } else {
         // With container runtime, should succeed or fail for other reasons
         // (not because of missing runtime)
-        let runtime_error = stderr.contains("Docker")
-            && stderr.contains("not found")
-            || stderr.contains("Podman")
-            && stderr.contains("not found");
+        let runtime_error = stderr.contains("Docker") && stderr.contains("not found")
+            || stderr.contains("Podman") && stderr.contains("not found");
         assert!(
             !runtime_error,
             "Should not fail due to missing runtime when runtime is available: stdout={stdout}, stderr={stderr}"
@@ -498,10 +479,8 @@ fn test_build_with_no_sandbox_flag() {
 
     // Should not fail due to missing container runtime
     // (because sandbox is disabled)
-    let runtime_error = stderr.contains("Docker")
-        && stderr.contains("not found")
-        || stderr.contains("Podman")
-        && stderr.contains("not found")
+    let runtime_error = stderr.contains("Docker") && stderr.contains("not found")
+        || stderr.contains("Podman") && stderr.contains("not found")
         || stderr.contains("Container runtime not available");
 
     assert!(
@@ -596,4 +575,3 @@ fn test_package_network_allows_network_in_sandbox() {
 // 1. Container runtime availability varies by system
 // 2. Actual container execution is slow and has side effects
 // 3. Most sandbox behavior is configuration-based, tested above
-

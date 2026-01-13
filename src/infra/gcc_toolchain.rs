@@ -39,7 +39,9 @@ pub enum GccToolchainError {
     UnsupportedTarget { target: String },
 
     /// No URL available for host platform
-    #[error("No toolchain URL available for host platform '{host}'. Supported platforms: {supported:?}")]
+    #[error(
+        "No toolchain URL available for host platform '{host}'. Supported platforms: {supported:?}"
+    )]
     NoUrlForHost {
         host: String,
         supported: Vec<String>,
@@ -109,9 +111,7 @@ pub enum GccToolchainSpec {
         release: Option<String>,
     },
     /// Explicit URLs per host platform
-    Explicit {
-        urls: HashMap<HostPlatform, String>,
-    },
+    Explicit { urls: HashMap<HostPlatform, String> },
 }
 
 impl GccToolchainSpec {

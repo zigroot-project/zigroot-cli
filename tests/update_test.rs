@@ -137,13 +137,13 @@ fn setup_project() -> TestProject {
 /// Helper to setup a project with a package already added
 fn setup_project_with_package(package_name: &str, version: Option<&str>) -> TestProject {
     let project = setup_project();
-    
+
     let package_spec = if let Some(v) = version {
         format!("{package_name}@{v}")
     } else {
         package_name.to_string()
     };
-    
+
     let output = run_add(&project, &[&package_spec]);
     assert!(
         output.status.success(),
@@ -497,9 +497,7 @@ fn test_update_outside_project() {
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("zigroot.toml")
-            || stderr.contains("not found")
-            || stderr.contains("init"),
+        stderr.contains("zigroot.toml") || stderr.contains("not found") || stderr.contains("init"),
         "Error should mention missing manifest or suggest init"
     );
 }

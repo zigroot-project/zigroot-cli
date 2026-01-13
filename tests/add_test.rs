@@ -138,7 +138,7 @@ fn test_add_package_from_registry() {
         manifest_has_package(&project, "busybox"),
         "Package should be added to manifest"
     );
-    
+
     // Manifest should remain valid
     assert!(is_valid_manifest(&project), "Manifest should remain valid");
 }
@@ -165,7 +165,7 @@ fn test_add_package_with_version() {
         manifest_has_package(&project, "busybox"),
         "Package should be added to manifest"
     );
-    
+
     // Version should be pinned
     let version = get_package_version(&project, "busybox");
     assert_eq!(
@@ -183,7 +183,11 @@ fn test_add_package_from_git() {
 
     let output = run_add(
         &project,
-        &["custom-pkg", "--git", "https://github.com/example/repo#v1.0.0"],
+        &[
+            "custom-pkg",
+            "--git",
+            "https://github.com/example/repo#v1.0.0",
+        ],
     );
 
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -200,7 +204,7 @@ fn test_add_package_from_git() {
         manifest_has_package(&project, "custom-pkg"),
         "Package should be added to manifest"
     );
-    
+
     // Manifest should contain git source
     let manifest_content = project.read_file("zigroot.toml");
     assert!(
@@ -217,11 +221,7 @@ fn test_add_package_from_custom_registry() {
 
     let output = run_add(
         &project,
-        &[
-            "private-pkg",
-            "--registry",
-            "https://packages.example.com",
-        ],
+        &["private-pkg", "--registry", "https://packages.example.com"],
     );
 
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -238,7 +238,7 @@ fn test_add_package_from_custom_registry() {
         manifest_has_package(&project, "private-pkg"),
         "Package should be added to manifest"
     );
-    
+
     // Manifest should contain custom registry
     let manifest_content = project.read_file("zigroot.toml");
     assert!(
@@ -271,13 +271,10 @@ fn test_add_resolves_transitive_dependencies() {
         manifest_has_package(&project, "nginx"),
         "Main package should be in manifest"
     );
-    
+
     // Lock file should be created with transitive dependencies
-    assert!(
-        lock_file_exists(&project),
-        "Lock file should be created"
-    );
-    
+    assert!(lock_file_exists(&project), "Lock file should be created");
+
     let lock_content = project.read_file("zigroot.lock");
     // Check that dependencies are recorded
     assert!(
@@ -308,7 +305,7 @@ fn test_add_updates_lock_file() {
         lock_file_exists(&project),
         "Lock file should be created after adding package"
     );
-    
+
     // Lock file should contain added package
     assert!(
         lock_file_has_package(&project, "busybox"),
@@ -326,12 +323,12 @@ fn test_add_detects_dependency_conflicts() {
     let output1 = run_add(&project, &["zlib@1.2.11"]);
     let stderr1 = String::from_utf8_lossy(&output1.stderr);
     let stdout1 = String::from_utf8_lossy(&output1.stdout);
-    
+
     assert!(
         output1.status.success(),
         "First add should succeed: stdout={stdout1}, stderr={stderr1}"
     );
-    
+
     assert!(
         manifest_has_package(&project, "zlib"),
         "zlib should be in manifest after first add"
@@ -354,7 +351,7 @@ fn test_add_detects_dependency_conflicts() {
                 || stderr2.contains("incompatible"),
             "Failure should be due to version conflict: stdout={stdout2}, stderr={stderr2}"
         );
-        
+
         // Conflict error should mention the conflicting package or version
         assert!(
             stderr2.contains("zlib") || stderr2.contains("version"),
@@ -374,15 +371,15 @@ fn test_add_same_package_twice() {
 
     // Add package first time
     let output1 = run_add(&project, &["busybox"]);
-    
+
     let stderr1 = String::from_utf8_lossy(&output1.stderr);
     let stdout1 = String::from_utf8_lossy(&output1.stdout);
-    
+
     assert!(
         output1.status.success(),
         "First add should succeed: stdout={stdout1}, stderr={stderr1}"
     );
-    
+
     assert!(
         manifest_has_package(&project, "busybox"),
         "Package should be in manifest after first add"
@@ -394,9 +391,7 @@ fn test_add_same_package_twice() {
     // Should either succeed or indicate package already exists
     let stderr2 = String::from_utf8_lossy(&output2.stderr);
     assert!(
-        output2.status.success()
-            || stderr2.contains("already")
-            || stderr2.contains("exists"),
+        output2.status.success() || stderr2.contains("already") || stderr2.contains("exists"),
         "Adding same package twice should be handled gracefully"
     );
 
@@ -454,7 +449,7 @@ version = "1.0.0"
         manifest_content.contains("existing-pkg"),
         "Existing packages should be preserved"
     );
-    
+
     // Manifest should remain valid
     assert!(is_valid_manifest(&project), "Manifest should remain valid");
 }
@@ -470,7 +465,8 @@ fn package_name_strategy() -> impl Strategy<Value = String> {
 
 /// Strategy for generating valid version strings
 fn version_strategy() -> impl Strategy<Value = String> {
-    (1u32..10, 0u32..10, 0u32..10).prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
+    (1u32..10, 0u32..10, 0u32..10)
+        .prop_map(|(major, minor, patch)| format!("{major}.{minor}.{patch}"))
 }
 
 proptest! {

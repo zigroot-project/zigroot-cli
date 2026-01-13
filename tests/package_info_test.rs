@@ -40,7 +40,8 @@ fn run_package_info(project: &TestProject, package: &str) -> std::process::Outpu
     cmd.arg("package");
     cmd.arg("info");
     cmd.arg(package);
-    cmd.output().expect("Failed to execute zigroot package info")
+    cmd.output()
+        .expect("Failed to execute zigroot package info")
 }
 
 /// Helper to initialize a project for package info tests
@@ -124,9 +125,8 @@ fn test_package_info_shows_version() {
     );
 
     // Output should contain version information
-    let has_version = stdout.contains("1.36.1")
-        || stdout.contains("version")
-        || stdout.contains("Version");
+    let has_version =
+        stdout.contains("1.36.1") || stdout.contains("version") || stdout.contains("Version");
 
     assert!(
         has_version,
@@ -153,9 +153,8 @@ fn test_package_info_shows_description() {
 
     // Output should contain description
     // Description could be labeled or just present as text
-    let has_description = stdout.contains("description")
-        || stdout.contains("Description")
-        || stdout.len() > 50; // Should have substantial content
+    let has_description =
+        stdout.contains("description") || stdout.contains("Description") || stdout.len() > 50; // Should have substantial content
 
     assert!(
         has_description,
@@ -270,7 +269,9 @@ fn test_package_info_requires_package_name() {
     cmd.current_dir(project.path());
     cmd.arg("package");
     cmd.arg("info");
-    let output = cmd.output().expect("Failed to execute zigroot package info");
+    let output = cmd
+        .output()
+        .expect("Failed to execute zigroot package info");
 
     let stderr = String::from_utf8_lossy(&output.stderr);
 
@@ -315,7 +316,11 @@ fn test_package_info_git_package() {
     // Add a git package
     let output = run_add(
         &project,
-        &["custom-pkg", "--git", "https://github.com/example/repo#v1.0.0"],
+        &[
+            "custom-pkg",
+            "--git",
+            "https://github.com/example/repo#v1.0.0",
+        ],
     );
     assert!(
         output.status.success(),

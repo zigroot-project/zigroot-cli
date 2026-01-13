@@ -15,7 +15,8 @@ fn run_package_bump(project: &TestProject, path: &str, version: &str) -> std::pr
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_zigroot"));
     cmd.current_dir(project.path());
     cmd.args(["package", "bump", path, version]);
-    cmd.output().expect("Failed to execute zigroot package bump")
+    cmd.output()
+        .expect("Failed to execute zigroot package bump")
 }
 
 /// Create a valid package structure for testing

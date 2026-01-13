@@ -41,23 +41,27 @@ pub struct RemoveResult {
 }
 
 /// Remove a package from the project
-pub fn remove_package(project_path: &Path, package_name: &str) -> Result<RemoveResult, RemoveError> {
+pub fn remove_package(
+    project_path: &Path,
+    package_name: &str,
+) -> Result<RemoveResult, RemoveError> {
     let manifest_path = project_path.join("zigroot.toml");
     let lock_path = project_path.join("zigroot.lock");
 
     // Load existing manifest
-    let manifest_content =
-        std::fs::read_to_string(&manifest_path).map_err(|e| RemoveError::ManifestError(e.to_string()))?;
-    let mut manifest =
-        Manifest::from_toml(&manifest_content).map_err(|e| RemoveError::ManifestError(e.to_string()))?;
+    let manifest_content = std::fs::read_to_string(&manifest_path)
+        .map_err(|e| RemoveError::ManifestError(e.to_string()))?;
+    let mut manifest = Manifest::from_toml(&manifest_content)
+        .map_err(|e| RemoveError::ManifestError(e.to_string()))?;
 
     // Check if package exists in manifest
-    let package_ref = manifest
-        .packages
-        .get(package_name)
-        .ok_or_else(|| RemoveError::PackageNotFound {
-            name: package_name.to_string(),
-        })?;
+    let package_ref =
+        manifest
+            .packages
+            .get(package_name)
+            .ok_or_else(|| RemoveError::PackageNotFound {
+                name: package_name.to_string(),
+            })?;
 
     // Get version before removal (for reporting)
     let version = package_ref.version.clone();
@@ -66,8 +70,9 @@ pub fn remove_package(project_path: &Path, package_name: &str) -> Result<RemoveR
     manifest.packages.remove(package_name);
 
     // Save manifest
-    let new_manifest_content =
-        manifest.to_toml().map_err(|e| RemoveError::ManifestError(e.to_string()))?;
+    let new_manifest_content = manifest
+        .to_toml()
+        .map_err(|e| RemoveError::ManifestError(e.to_string()))?;
     std::fs::write(&manifest_path, new_manifest_content)
         .map_err(|e| RemoveError::IoError(e.to_string()))?;
 

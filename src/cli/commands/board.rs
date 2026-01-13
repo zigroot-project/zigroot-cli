@@ -230,7 +230,11 @@ fn validate_board_compatibility(manifest: &Manifest, board_def: &BoardDefinition
     // For now, we assume all packages are compatible
     // A full implementation would check each package's `arch` field
     for (pkg_name, _pkg_ref) in &manifest.packages {
-        tracing::debug!("Checking package '{}' compatibility with {}", pkg_name, arch);
+        tracing::debug!(
+            "Checking package '{}' compatibility with {}",
+            pkg_name,
+            arch
+        );
         // TODO: Fetch package metadata and check arch compatibility
     }
 
@@ -240,7 +244,7 @@ fn validate_board_compatibility(manifest: &Manifest, board_def: &BoardDefinition
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::core::manifest::{ProjectConfig, BoardConfig, BuildConfig};
+    use crate::core::manifest::{BoardConfig, BuildConfig, ProjectConfig};
     use std::collections::HashMap;
 
     #[test]
@@ -294,11 +298,7 @@ pub async fn execute_new(project_dir: &Path, name: &str) -> Result<()> {
 
     // Check if board already exists
     if board_dir.exists() {
-        anyhow::bail!(
-            "Board '{}' already exists at {}",
-            name,
-            board_dir.display()
-        );
+        anyhow::bail!("Board '{}' already exists at {}", name, board_dir.display());
     }
 
     // Create boards directory if it doesn't exist

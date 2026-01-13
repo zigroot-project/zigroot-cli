@@ -501,4 +501,3 @@ fn test_fetch_invalid_parallel_value() {
         "Fetch with invalid parallel should handle gracefully: stdout={stdout}, stderr={stderr}"
     );
 }
-

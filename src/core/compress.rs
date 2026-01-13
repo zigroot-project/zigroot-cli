@@ -10,15 +10,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 /// Architectures supported by UPX
-const UPX_SUPPORTED_ARCHS: &[&str] = &[
-    "x86_64",
-    "x86",
-    "i386",
-    "i686",
-    "arm",
-    "aarch64",
-    "arm64",
-];
+const UPX_SUPPORTED_ARCHS: &[&str] = &["x86_64", "x86", "i386", "i686", "arm", "aarch64", "arm64"];
 
 /// ELF magic bytes
 const ELF_MAGIC: &[u8] = &[0x7f, b'E', b'L', b'F'];
@@ -95,9 +87,9 @@ impl CompressionConfig {
     /// Check if the target architecture is supported by UPX
     pub fn is_arch_supported(&self) -> bool {
         let arch = self.target_arch.to_lowercase();
-        UPX_SUPPORTED_ARCHS.iter().any(|&supported| {
-            arch.contains(supported) || supported.contains(&arch)
-        })
+        UPX_SUPPORTED_ARCHS
+            .iter()
+            .any(|&supported| arch.contains(supported) || supported.contains(&arch))
     }
 }
 
@@ -167,10 +159,7 @@ pub fn compress_binary(path: &Path) -> Result<(u64, u64)> {
 }
 
 /// Compress all binaries in a rootfs directory
-pub fn compress_rootfs(
-    rootfs_dir: &Path,
-    config: &CompressionConfig,
-) -> Result<CompressionStats> {
+pub fn compress_rootfs(rootfs_dir: &Path, config: &CompressionConfig) -> Result<CompressionStats> {
     let mut stats = CompressionStats::default();
 
     // Check if compression is enabled
@@ -190,7 +179,9 @@ pub fn compress_rootfs(
 
     // Check if UPX is available
     if !is_upx_available() {
-        tracing::warn!("UPX not found, skipping compression. Install UPX to enable binary compression.");
+        tracing::warn!(
+            "UPX not found, skipping compression. Install UPX to enable binary compression."
+        );
         return Ok(stats);
     }
 
@@ -268,19 +259,9 @@ pub fn display_stats(stats: &CompressionStats) {
         let compressed_kb = stats.compressed_size as f64 / 1024.0;
         let saved_kb = stats.bytes_saved() as f64 / 1024.0;
 
-        println!(
-            "  Original size: {:.1} KB",
-            original_kb
-        );
-        println!(
-            "  Compressed size: {:.1} KB",
-            compressed_kb
-        );
-        println!(
-            "  Space saved: {:.1} KB ({:.1}%)",
-            saved_kb,
-            stats.ratio()
-        );
+        println!("  Original size: {:.1} KB", original_kb);
+        println!("  Compressed size: {:.1} KB", compressed_kb);
+        println!("  Space saved: {:.1} KB ({:.1}%)", saved_kb, stats.ratio());
     }
 }
 
@@ -338,7 +319,11 @@ mod tests {
 
     #[test]
     fn test_arch_supported() {
-        let supported = ["x86_64-linux-musl", "arm-linux-musleabihf", "aarch64-linux-musl"];
+        let supported = [
+            "x86_64-linux-musl",
+            "arm-linux-musleabihf",
+            "aarch64-linux-musl",
+        ];
         for arch in supported {
             let config = CompressionConfig {
                 global_enabled: true,
@@ -352,7 +337,11 @@ mod tests {
 
     #[test]
     fn test_arch_not_supported() {
-        let unsupported = ["riscv64-linux-musl", "mips-linux-musl", "powerpc-linux-musl"];
+        let unsupported = [
+            "riscv64-linux-musl",
+            "mips-linux-musl",
+            "powerpc-linux-musl",
+        ];
         for arch in unsupported {
             let config = CompressionConfig {
                 global_enabled: true,

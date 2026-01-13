@@ -76,10 +76,7 @@ impl DoctorReport {
 
     /// Check if all required checks passed
     pub fn all_required_passed(&self) -> bool {
-        self.checks
-            .iter()
-            .filter(|c| c.required)
-            .all(|c| c.passed)
+        self.checks.iter().filter(|c| c.required).all(|c| c.passed)
     }
 
     /// Check if all checks passed (including optional)
@@ -288,7 +285,13 @@ mod tests {
     #[test]
     fn test_extract_version() {
         assert_eq!(extract_version("zig 0.11.0"), Some("0.11.0".to_string()));
-        assert_eq!(extract_version("git version 2.39.0"), Some("2.39.0".to_string()));
-        assert_eq!(extract_version("v1.2.3-beta"), Some("1.2.3-beta".to_string()));
+        assert_eq!(
+            extract_version("git version 2.39.0"),
+            Some("2.39.0".to_string())
+        );
+        assert_eq!(
+            extract_version("v1.2.3-beta"),
+            Some("1.2.3-beta".to_string())
+        );
     }
 }

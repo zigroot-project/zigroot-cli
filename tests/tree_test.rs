@@ -213,9 +213,7 @@ fn test_tree_graph_contains_structure() {
 
     // Command should not crash
     assert!(
-        output.status.success()
-            || stderr.contains("not implemented")
-            || stderr.contains("error"),
+        output.status.success() || stderr.contains("not implemented") || stderr.contains("error"),
         "Tree --graph should complete: stdout={stdout}, stderr={stderr}"
     );
 }
@@ -260,9 +258,7 @@ fn test_tree_distinguishes_depends_vs_requires() {
 
     // Command should not crash
     assert!(
-        output.status.success()
-            || stderr.contains("not implemented")
-            || stderr.contains("error"),
+        output.status.success() || stderr.contains("not implemented") || stderr.contains("error"),
         "Tree should complete: stdout={stdout}, stderr={stderr}"
     );
 }
@@ -348,10 +344,7 @@ fn test_tree_consistent_format() {
 
     // If successful and has multiple packages, they should be formatted consistently
     if output.status.success() && !stdout.is_empty() {
-        let lines: Vec<&str> = stdout
-            .lines()
-            .filter(|l| !l.trim().is_empty())
-            .collect();
+        let lines: Vec<&str> = stdout.lines().filter(|l| !l.trim().is_empty()).collect();
 
         // If we have multiple entries, they should have similar formatting
         if lines.len() > 1 {
@@ -373,9 +366,7 @@ fn test_tree_consistent_format() {
 
     // Command should not crash
     assert!(
-        output.status.success()
-            || stderr.contains("not implemented")
-            || stderr.contains("error"),
+        output.status.success() || stderr.contains("not implemented") || stderr.contains("error"),
         "Tree should complete: stdout={stdout}, stderr={stderr}"
     );
 }
@@ -445,9 +436,7 @@ fn test_tree_for_specific_package() {
 
     // Command should complete
     assert!(
-        output.status.success()
-            || stderr.contains("not implemented")
-            || stderr.contains("error"),
+        output.status.success() || stderr.contains("not implemented") || stderr.contains("error"),
         "Tree should complete: stdout={stdout}, stderr={stderr}"
     );
 }
@@ -472,12 +461,11 @@ fn test_tree_shows_hierarchical_structure() {
             || stdout.contains("│")
             || stdout.contains("  ")  // indentation
             || stdout.contains("->")  // arrow notation
-            || stdout.contains("─");  // horizontal line
+            || stdout.contains("─"); // horizontal line
 
         // Or it might be a flat list if no dependencies
-        let is_valid = has_hierarchy
-            || stdout.lines().count() <= 5
-            || stdout.contains("No dependencies");
+        let is_valid =
+            has_hierarchy || stdout.lines().count() <= 5 || stdout.contains("No dependencies");
 
         assert!(
             is_valid,
@@ -487,9 +475,7 @@ fn test_tree_shows_hierarchical_structure() {
 
     // Command should not crash
     assert!(
-        output.status.success()
-            || stderr.contains("not implemented")
-            || stderr.contains("error"),
+        output.status.success() || stderr.contains("not implemented") || stderr.contains("error"),
         "Tree should complete: stdout={stdout}, stderr={stderr}"
     );
 }
@@ -505,17 +491,18 @@ mod property_tests {
 
     /// Strategy for generating valid package names
     fn package_name_strategy() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9_-]{0,15}[a-z0-9]?"
-            .prop_filter("Name must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9_-]{0,15}[a-z0-9]?".prop_filter("Name must not be empty", |s| !s.is_empty())
     }
 
     /// Strategy for generating a list of package names
     fn package_list_strategy() -> impl Strategy<Value = Vec<String>> {
-        proptest::collection::vec(package_name_strategy(), 1..=5)
-            .prop_filter("Names must be unique", |names| {
+        proptest::collection::vec(package_name_strategy(), 1..=5).prop_filter(
+            "Names must be unique",
+            |names| {
                 let unique: std::collections::HashSet<_> = names.iter().collect();
                 unique.len() == names.len()
-            })
+            },
+        )
     }
 
     proptest! {

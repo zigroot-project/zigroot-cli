@@ -100,9 +100,6 @@ fn format_size(size_bytes: u64) -> String {
     } else if size_bytes < 1024 * 1024 * 1024 {
         format!("{:.1} MB", size_bytes as f64 / (1024.0 * 1024.0))
     } else {
-        format!(
-            "{:.1} GB",
-            size_bytes as f64 / (1024.0 * 1024.0 * 1024.0)
-        )
+        format!("{:.1} GB", size_bytes as f64 / (1024.0 * 1024.0 * 1024.0))
     }
 }

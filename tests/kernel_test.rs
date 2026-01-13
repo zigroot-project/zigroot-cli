@@ -37,7 +37,11 @@ fn run_init(project: &TestProject, args: &[&str]) -> std::process::Output {
 }
 
 /// Helper to create a kernel package in the project
-fn create_kernel_package(project: &TestProject, defconfig: Option<&str>, config_fragments: Option<&[&str]>) {
+fn create_kernel_package(
+    project: &TestProject,
+    defconfig: Option<&str>,
+    config_fragments: Option<&[&str]>,
+) {
     let pkg_dir = "packages/linux-kernel";
     project.create_dir(pkg_dir);
 
@@ -108,11 +112,7 @@ fn test_kernel_package_with_defconfig() {
         config_fragments: vec![],
     };
 
-    let package = KernelPackage::new(
-        "linux-kernel".to_string(),
-        "6.6.0".to_string(),
-        config,
-    );
+    let package = KernelPackage::new("linux-kernel".to_string(), "6.6.0".to_string(), config);
 
     assert_eq!(package.name(), "linux-kernel");
     assert_eq!(package.version(), "6.6.0");
@@ -128,21 +128,18 @@ fn test_kernel_package_with_config_fragments() {
 
     let config = KernelConfig {
         defconfig: Some("multi_v7_defconfig".to_string()),
-        config_fragments: vec![
-            "debug.config".to_string(),
-            "networking.config".to_string(),
-        ],
+        config_fragments: vec!["debug.config".to_string(), "networking.config".to_string()],
     };
 
-    let package = KernelPackage::new(
-        "linux-kernel".to_string(),
-        "6.6.0".to_string(),
-        config,
-    );
+    let package = KernelPackage::new("linux-kernel".to_string(), "6.6.0".to_string(), config);
 
     assert_eq!(package.config_fragments().len(), 2);
-    assert!(package.config_fragments().contains(&"debug.config".to_string()));
-    assert!(package.config_fragments().contains(&"networking.config".to_string()));
+    assert!(package
+        .config_fragments()
+        .contains(&"debug.config".to_string()));
+    assert!(package
+        .config_fragments()
+        .contains(&"networking.config".to_string()));
 }
 
 /// Test: Kernel modules installation path
@@ -196,9 +193,9 @@ fn test_kernel_build_commands_with_defconfig() {
     let commands = KernelBuildCommands::generate(&config, "arm-linux-gnueabihf");
 
     // Should include make defconfig command
-    let has_defconfig_cmd = commands.iter().any(|cmd| {
-        cmd.contains("defconfig") || cmd.contains("multi_v7_defconfig")
-    });
+    let has_defconfig_cmd = commands
+        .iter()
+        .any(|cmd| cmd.contains("defconfig") || cmd.contains("multi_v7_defconfig"));
     assert!(has_defconfig_cmd, "Should generate defconfig command");
 }
 
@@ -216,9 +213,14 @@ fn test_kernel_build_commands_with_fragments() {
 
     // Should include scripts/kconfig/merge_config.sh or similar
     let has_merge_cmd = commands.iter().any(|cmd| {
-        cmd.contains("merge_config") || cmd.contains("config_fragment") || cmd.contains("debug.config")
+        cmd.contains("merge_config")
+            || cmd.contains("config_fragment")
+            || cmd.contains("debug.config")
     });
-    assert!(has_merge_cmd, "Should generate config merge command for fragments");
+    assert!(
+        has_merge_cmd,
+        "Should generate config merge command for fragments"
+    );
 }
 
 /// Test: Kernel modules build command
@@ -231,9 +233,7 @@ fn test_kernel_modules_build_command() {
     let commands = KernelBuildCommands::generate(&config, "arm-linux-gnueabihf");
 
     // Should include modules build command
-    let has_modules_cmd = commands.iter().any(|cmd| {
-        cmd.contains("modules")
-    });
+    let has_modules_cmd = commands.iter().any(|cmd| cmd.contains("modules"));
     assert!(has_modules_cmd, "Should generate modules build command");
 }
 
@@ -247,9 +247,9 @@ fn test_kernel_modules_install_command() {
     let commands = KernelBuildCommands::generate(&config, "arm-linux-gnueabihf");
 
     // Should include modules_install command
-    let has_install_cmd = commands.iter().any(|cmd| {
-        cmd.contains("modules_install") || cmd.contains("INSTALL_MOD_PATH")
-    });
+    let has_install_cmd = commands
+        .iter()
+        .any(|cmd| cmd.contains("modules_install") || cmd.contains("INSTALL_MOD_PATH"));
     assert!(has_install_cmd, "Should generate modules install command");
 }
 
@@ -425,7 +425,6 @@ version = "6.6.0"
     );
 }
 
-
 // ============================================
 // Integration Tests for zigroot kernel menuconfig
 // ============================================
@@ -503,8 +502,8 @@ version = "6.6.0"
 /// **Validates: Requirement 26.12**
 #[test]
 fn test_kernel_menuconfig_saves_to_kernel_dir() {
-    use zigroot::core::kernel::KernelBuildEnv;
     use std::path::PathBuf;
+    use zigroot::core::kernel::KernelBuildEnv;
 
     // Test that the config save path is in the kernel/ directory
     let env = KernelBuildEnv::new(
@@ -558,7 +557,6 @@ fn test_kernel_config_directory_structure() {
         "Config should contain kernel options"
     );
 }
-
 
 // ============================================
 // Integration Tests for --kernel-only flag

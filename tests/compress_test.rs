@@ -183,8 +183,7 @@ fn test_compress_disabled_globally() {
 
     // Should not mention compression when disabled
     // (unless there's a package override)
-    let mentions_compression = stdout.contains("Compressing")
-        || stdout.contains("UPX compression");
+    let mentions_compression = stdout.contains("Compressing") || stdout.contains("UPX compression");
 
     // It's okay if it doesn't mention compression at all
     assert!(
@@ -204,9 +203,7 @@ fn test_package_compress_overrides_global_false() {
 
     // Add package to manifest
     let manifest = project.read_file("zigroot.toml");
-    let updated_manifest = format!(
-        "{manifest}\n[packages.compress-me]\nversion = \"1.0.0\"\n"
-    );
+    let updated_manifest = format!("{manifest}\n[packages.compress-me]\nversion = \"1.0.0\"\n");
     project.create_file("zigroot.toml", &updated_manifest);
 
     let output = run_build(&project, &[]);
@@ -233,9 +230,7 @@ fn test_package_compress_overrides_global_true() {
 
     // Add package to manifest
     let manifest = project.read_file("zigroot.toml");
-    let updated_manifest = format!(
-        "{manifest}\n[packages.no-compress]\nversion = \"1.0.0\"\n"
-    );
+    let updated_manifest = format!("{manifest}\n[packages.no-compress]\nversion = \"1.0.0\"\n");
     project.create_file("zigroot.toml", &updated_manifest);
 
     let output = run_build(&project, &[]);
@@ -291,8 +286,8 @@ fn test_cli_no_compress_overrides_all() {
     let stdout = String::from_utf8_lossy(&output.stdout);
 
     // Should not compress even though manifest says true
-    let compresses = stdout.contains("Compressing binaries")
-        || stdout.contains("UPX compression enabled");
+    let compresses =
+        stdout.contains("Compressing binaries") || stdout.contains("UPX compression enabled");
 
     assert!(
         !compresses || output.status.success(),
@@ -431,10 +426,10 @@ fn test_compression_failure_continues() {
 /// Strategy for generating compression settings
 fn compression_setting_strategy() -> impl Strategy<Value = (bool, Option<bool>, bool, bool)> {
     (
-        prop::bool::ANY,           // global compress setting
+        prop::bool::ANY,                   // global compress setting
         prop::option::of(prop::bool::ANY), // package compress setting
-        prop::bool::ANY,           // --compress flag
-        prop::bool::ANY,           // --no-compress flag
+        prop::bool::ANY,                   // --compress flag
+        prop::bool::ANY,                   // --no-compress flag
     )
 }
 
@@ -466,22 +461,22 @@ proptest! {
 
         // Verify the logic is consistent
         // (This is a unit test of the priority logic, not an integration test)
-        
+
         // If CLI --compress is set (and not --no-compress), always compress
         if cli_compress && !cli_no_compress {
             prop_assert!(effective, "CLI --compress should enable compression");
         }
-        
+
         // If CLI --no-compress is set, never compress
         if cli_no_compress {
             prop_assert!(!effective, "CLI --no-compress should disable compression");
         }
-        
+
         // If no CLI flags and package has setting, use package setting
         if !cli_compress && !cli_no_compress && package.is_some() {
             prop_assert_eq!(effective, package.unwrap(), "Package setting should override global");
         }
-        
+
         // If no CLI flags and no package setting, use global
         if !cli_compress && !cli_no_compress && package.is_none() {
             prop_assert_eq!(effective, global, "Global setting should be used as fallback");

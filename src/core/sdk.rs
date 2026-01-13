@@ -96,8 +96,9 @@ pub fn generate_sdk(
     // Check if build has been run
     if !info.has_build_artifacts {
         return Err(ZigrootError::Build(crate::error::BuildError::ConfigError {
-            message: "No build artifacts found. Run 'zigroot build' first to generate SDK contents."
-                .to_string(),
+            message:
+                "No build artifacts found. Run 'zigroot build' first to generate SDK contents."
+                    .to_string(),
         }));
     }
 
@@ -249,11 +250,7 @@ fn generate_sdk_readme(manifest: &Manifest, components: &[String]) -> String {
         &manifest.project.name
     };
 
-    let target = manifest
-        .board
-        .name
-        .as_deref()
-        .unwrap_or("default target");
+    let target = manifest.board.name.as_deref().unwrap_or("default target");
 
     let components_list = components
         .iter()

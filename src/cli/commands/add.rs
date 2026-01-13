@@ -32,7 +32,10 @@ pub async fn execute(
         .with_context(|| format!("Failed to add package '{package}'"))?;
 
     // Print success message
-    print_success(&format!("Added {} v{}", result.package_name, result.version));
+    print_success(&format!(
+        "Added {} v{}",
+        result.package_name, result.version
+    ));
 
     if !result.dependencies.is_empty() {
         print_detail("Dependencies:");

@@ -35,10 +35,7 @@ fn test_gcc_toolchain_auto_resolves_bootlin_url_arm() {
         url.contains("armv7-eabihf") || url.contains("arm"),
         "URL should contain ARM architecture: {url}"
     );
-    assert!(
-        url.contains("glibc"),
-        "URL should use default glibc: {url}"
-    );
+    assert!(url.contains("glibc"), "URL should use default glibc: {url}");
 }
 
 /// Test: Auto-resolves bootlin.com URLs for aarch64 target
@@ -52,7 +49,10 @@ fn test_gcc_toolchain_auto_resolves_bootlin_url_aarch64() {
 
     let result = resolve_bootlin_url(&host, target, None, None);
 
-    assert!(result.is_ok(), "Should resolve bootlin URL for aarch64 target");
+    assert!(
+        result.is_ok(),
+        "Should resolve bootlin URL for aarch64 target"
+    );
     let url = result.unwrap();
     assert!(
         url.contains("bootlin.com"),
@@ -75,7 +75,10 @@ fn test_gcc_toolchain_auto_resolves_bootlin_url_x86_64() {
 
     let result = resolve_bootlin_url(&host, target, None, None);
 
-    assert!(result.is_ok(), "Should resolve bootlin URL for x86_64 target");
+    assert!(
+        result.is_ok(),
+        "Should resolve bootlin URL for x86_64 target"
+    );
     let url = result.unwrap();
     assert!(
         url.contains("bootlin.com"),
@@ -98,7 +101,10 @@ fn test_gcc_toolchain_auto_resolves_bootlin_url_riscv64() {
 
     let result = resolve_bootlin_url(&host, target, None, None);
 
-    assert!(result.is_ok(), "Should resolve bootlin URL for riscv64 target");
+    assert!(
+        result.is_ok(),
+        "Should resolve bootlin URL for riscv64 target"
+    );
     let url = result.unwrap();
     assert!(
         url.contains("bootlin.com"),
@@ -123,7 +129,10 @@ fn test_gcc_toolchain_custom_libc_and_release() {
 
     let result = resolve_bootlin_url(&host, target, libc, release);
 
-    assert!(result.is_ok(), "Should resolve bootlin URL with custom libc/release");
+    assert!(
+        result.is_ok(),
+        "Should resolve bootlin URL with custom libc/release"
+    );
     let url = result.unwrap();
     assert!(
         url.contains("musl"),
@@ -153,7 +162,9 @@ fn test_gcc_toolchain_bootlin_not_available_for_macos() {
     let err = result.unwrap_err();
     let err_msg = err.to_string();
     assert!(
-        err_msg.contains("not available") || err_msg.contains("Docker") || err_msg.contains("explicit"),
+        err_msg.contains("not available")
+            || err_msg.contains("Docker")
+            || err_msg.contains("explicit"),
         "Error should suggest alternatives: {err_msg}"
     );
 }
@@ -169,10 +180,7 @@ fn test_gcc_toolchain_unsupported_target() {
 
     let result = resolve_bootlin_url(&host, target, None, None);
 
-    assert!(
-        result.is_err(),
-        "Should fail for unsupported target"
-    );
+    assert!(result.is_err(), "Should fail for unsupported target");
 }
 
 // ============================================
@@ -183,8 +191,8 @@ fn test_gcc_toolchain_unsupported_target() {
 /// **Validates: Requirement 26.6**
 #[test]
 fn test_gcc_toolchain_explicit_urls() {
-    use zigroot::infra::gcc_toolchain::{GccToolchainSpec, HostPlatform};
     use std::collections::HashMap;
+    use zigroot::infra::gcc_toolchain::{GccToolchainSpec, HostPlatform};
 
     let mut urls = HashMap::new();
     urls.insert(
@@ -216,7 +224,10 @@ fn test_gcc_toolchain_explicit_urls() {
 
     // Missing platform should return None
     let missing_url = spec.get_url_for_host(&HostPlatform::LinuxAarch64);
-    assert!(missing_url.is_none(), "Should return None for missing platform");
+    assert!(
+        missing_url.is_none(),
+        "Should return None for missing platform"
+    );
 }
 
 // ============================================
@@ -227,8 +238,8 @@ fn test_gcc_toolchain_explicit_urls() {
 /// **Validates: Requirement 26.7**
 #[test]
 fn test_gcc_toolchain_cache_structure() {
-    use zigroot::infra::gcc_toolchain::GccToolchainCache;
     use std::path::PathBuf;
+    use zigroot::infra::gcc_toolchain::GccToolchainCache;
 
     let cache_dir = PathBuf::from("/tmp/test-toolchain-cache");
     let cache = GccToolchainCache::new(cache_dir.clone());
@@ -245,20 +256,23 @@ fn test_gcc_toolchain_cache_structure() {
     // Different URLs should have different keys
     let other_url = "https://example.com/other-toolchain.tar.gz";
     let other_key = cache.compute_cache_key(other_url);
-    assert_ne!(key1, other_key, "Different URLs should have different cache keys");
+    assert_ne!(
+        key1, other_key,
+        "Different URLs should have different cache keys"
+    );
 }
 
 /// Test: Cache key is based on URL hash
 /// **Validates: Requirement 26.7**
 #[test]
 fn test_gcc_toolchain_cache_key_determinism() {
-    use zigroot::infra::gcc_toolchain::GccToolchainCache;
     use std::path::PathBuf;
+    use zigroot::infra::gcc_toolchain::GccToolchainCache;
 
     let cache = GccToolchainCache::new(PathBuf::from("/tmp/cache"));
 
     let url = "https://toolchains.bootlin.com/test.tar.bz2";
-    
+
     // Multiple calls should return the same key
     let keys: Vec<_> = (0..10).map(|_| cache.compute_cache_key(url)).collect();
     assert!(
@@ -312,8 +326,8 @@ fn test_host_platform_to_string() {
 /// Test: GCC toolchain prefix generation
 #[test]
 fn test_gcc_toolchain_prefix() {
-    use zigroot::infra::gcc_toolchain::GccToolchain;
     use std::path::PathBuf;
+    use zigroot::infra::gcc_toolchain::GccToolchain;
 
     let toolchain = GccToolchain::new(
         PathBuf::from("/opt/toolchains/arm-gcc"),
@@ -330,8 +344,8 @@ fn test_gcc_toolchain_prefix() {
 /// Test: GCC toolchain path
 #[test]
 fn test_gcc_toolchain_path() {
-    use zigroot::infra::gcc_toolchain::GccToolchain;
     use std::path::PathBuf;
+    use zigroot::infra::gcc_toolchain::GccToolchain;
 
     let path = PathBuf::from("/opt/toolchains/aarch64-gcc");
     let toolchain = GccToolchain::new(path.clone(), "aarch64-linux-gnu".to_string());

@@ -59,8 +59,8 @@ pub fn list_artifacts(project_dir: &Path) -> Result<Vec<ArtifactInfo>> {
     let manifest_content = std::fs::read_to_string(&manifest_path)
         .with_context(|| format!("Failed to read manifest at {}", manifest_path.display()))?;
 
-    let manifest = Manifest::from_toml(&manifest_content)
-        .with_context(|| "Failed to parse manifest")?;
+    let manifest =
+        Manifest::from_toml(&manifest_content).with_context(|| "Failed to parse manifest")?;
 
     let mut artifacts = Vec::new();
 
@@ -146,8 +146,8 @@ pub fn add_artifact(
     let manifest_content = std::fs::read_to_string(&manifest_path)
         .with_context(|| format!("Failed to read manifest at {}", manifest_path.display()))?;
 
-    let mut manifest = Manifest::from_toml(&manifest_content)
-        .with_context(|| "Failed to parse manifest")?;
+    let mut manifest =
+        Manifest::from_toml(&manifest_content).with_context(|| "Failed to parse manifest")?;
 
     // Create the new artifact
     let artifact = ExternalArtifact {
@@ -162,7 +162,8 @@ pub fn add_artifact(
     manifest.external.insert(name.to_string(), artifact);
 
     // Write back to file
-    let new_content = manifest.to_toml()
+    let new_content = manifest
+        .to_toml()
         .with_context(|| "Failed to serialize manifest")?;
 
     std::fs::write(&manifest_path, new_content)

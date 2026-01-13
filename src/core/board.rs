@@ -116,7 +116,6 @@ impl TryFrom<toml::Value> for BoardDefinition {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -169,7 +168,10 @@ description = "Boot device selection"
         let board = BoardDefinition::from_toml(toml_content).expect("Failed to parse valid board");
 
         assert_eq!(board.board.name, "luckfox-pico");
-        assert_eq!(board.board.description, "Luckfox Pico (RV1103 SoC, Cortex-A7)");
+        assert_eq!(
+            board.board.description,
+            "Luckfox Pico (RV1103 SoC, Cortex-A7)"
+        );
         assert_eq!(board.board.target, "arm-linux-musleabihf");
         assert_eq!(board.board.cpu, "cortex-a7");
         assert_eq!(board.board.features, vec!["neon", "vfpv4"]);
@@ -206,7 +208,8 @@ rootfs_size = "128M"
 hostname = "minimal"
 "#;
 
-        let board = BoardDefinition::from_toml(toml_content).expect("Failed to parse minimal board");
+        let board =
+            BoardDefinition::from_toml(toml_content).expect("Failed to parse minimal board");
 
         assert_eq!(board.board.name, "minimal-board");
         assert_eq!(board.board.target, "aarch64-linux-musl");
@@ -463,11 +466,14 @@ description = "Enable debug mode"
         let board = BoardDefinition::from_toml(toml_content).expect("Failed to parse");
 
         assert_eq!(board.options.len(), 2);
-        
-        let boot_mode = board.options.get("boot_mode").expect("boot_mode option missing");
+
+        let boot_mode = board
+            .options
+            .get("boot_mode")
+            .expect("boot_mode option missing");
         assert_eq!(boot_mode.option_type, "choice");
         assert_eq!(boot_mode.choices, vec!["sd", "emmc"]);
-        
+
         let debug = board.options.get("debug").expect("debug option missing");
         assert_eq!(debug.option_type, "bool");
     }
@@ -478,8 +484,7 @@ description = "Enable debug mode"
 
     /// Strategy for generating valid board names
     fn board_name_strategy() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9-]{0,30}[a-z0-9]?"
-            .prop_filter("Name must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9-]{0,30}[a-z0-9]?".prop_filter("Name must not be empty", |s| !s.is_empty())
     }
 
     /// Strategy for generating valid descriptions
@@ -524,8 +529,7 @@ description = "Enable debug mode"
 
     /// Strategy for generating valid hostnames
     fn hostname_strategy() -> impl Strategy<Value = String> {
-        "[a-z][a-z0-9-]{0,20}[a-z0-9]?"
-            .prop_filter("Hostname must not be empty", |s| !s.is_empty())
+        "[a-z][a-z0-9-]{0,20}[a-z0-9]?".prop_filter("Hostname must not be empty", |s| !s.is_empty())
     }
 
     /// Strategy for generating a complete BoardDefinition
@@ -539,27 +543,29 @@ description = "Enable debug mode"
             rootfs_size_strategy(),
             hostname_strategy(),
         )
-            .prop_map(|(name, description, target, cpu, image_format, rootfs_size, hostname)| {
-                BoardDefinition {
-                    board: BoardMetadata {
-                        name,
-                        description,
-                        target,
-                        cpu,
-                        features: vec![],
-                        kernel: None,
-                        zigroot_version: None,
-                    },
-                    defaults: BoardDefaults {
-                        image_format,
-                        rootfs_size,
-                        hostname,
-                    },
-                    requires: vec![],
-                    flash: vec![],
-                    options: HashMap::new(),
-                }
-            })
+            .prop_map(
+                |(name, description, target, cpu, image_format, rootfs_size, hostname)| {
+                    BoardDefinition {
+                        board: BoardMetadata {
+                            name,
+                            description,
+                            target,
+                            cpu,
+                            features: vec![],
+                            kernel: None,
+                            zigroot_version: None,
+                        },
+                        defaults: BoardDefaults {
+                            image_format,
+                            rootfs_size,
+                            hostname,
+                        },
+                        requires: vec![],
+                        flash: vec![],
+                        options: HashMap::new(),
+                    }
+                },
+            )
     }
 
     proptest! {

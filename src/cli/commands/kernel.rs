@@ -26,17 +26,13 @@ pub async fn execute_menuconfig(project_dir: &Path) -> Result<()> {
     // Check if manifest exists
     let manifest_path = project_dir.join("zigroot.toml");
     if !manifest_path.exists() {
-        anyhow::bail!(
-            "No zigroot.toml found. Run 'zigroot init' to create a project."
-        );
+        anyhow::bail!("No zigroot.toml found. Run 'zigroot init' to create a project.");
     }
 
     // Check if kernel package exists
     let kernel_pkg_dir = project_dir.join("packages/linux-kernel");
     if !kernel_pkg_dir.exists() {
-        anyhow::bail!(
-            "No kernel package found. Create a kernel package in packages/linux-kernel/"
-        );
+        anyhow::bail!("No kernel package found. Create a kernel package in packages/linux-kernel/");
     }
 
     // Ensure kernel config directory exists

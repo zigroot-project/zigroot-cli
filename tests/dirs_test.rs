@@ -8,6 +8,10 @@
 
 use std::env;
 use std::path::PathBuf;
+use std::sync::Mutex;
+
+// Mutex to ensure environment variable tests run serially
+static ENV_MUTEX: Mutex<()> = Mutex::new(());
 
 /// Test: Platform directories module exists and provides cache directory
 /// **Validates: Requirement 32.1**
@@ -19,7 +23,10 @@ fn test_cache_dir_returns_platform_specific_path() {
     let cache_dir = dirs.cache_dir();
 
     // Cache directory should be a valid path
-    assert!(!cache_dir.as_os_str().is_empty(), "Cache dir should not be empty");
+    assert!(
+        !cache_dir.as_os_str().is_empty(),
+        "Cache dir should not be empty"
+    );
 
     // On macOS, should be under Library/Caches
     #[cfg(target_os = "macos")]
@@ -52,7 +59,10 @@ fn test_config_dir_returns_platform_specific_path() {
     let config_dir = dirs.config_dir();
 
     // Config directory should be a valid path
-    assert!(!config_dir.as_os_str().is_empty(), "Config dir should not be empty");
+    assert!(
+        !config_dir.as_os_str().is_empty(),
+        "Config dir should not be empty"
+    );
 
     // On macOS, should be under Library/Application Support or Library/Preferences
     #[cfg(target_os = "macos")]
@@ -85,7 +95,10 @@ fn test_data_dir_returns_platform_specific_path() {
     let data_dir = dirs.data_dir();
 
     // Data directory should be a valid path
-    assert!(!data_dir.as_os_str().is_empty(), "Data dir should not be empty");
+    assert!(
+        !data_dir.as_os_str().is_empty(),
+        "Data dir should not be empty"
+    );
 
     // On macOS, should be under Library/Application Support
     #[cfg(target_os = "macos")]
@@ -114,6 +127,11 @@ fn test_data_dir_returns_platform_specific_path() {
 fn test_cache_dir_env_override() {
     use zigroot::infra::dirs::ZigrootDirs;
 
+    let _guard = ENV_MUTEX.lock().unwrap();
+    
+    // Save original value
+    let original = env::var("ZIGROOT_CACHE_DIR").ok();
+    
     let custom_path = "/tmp/zigroot-test-cache";
 
     // Set environment variable
@@ -122,8 +140,11 @@ fn test_cache_dir_env_override() {
     let dirs = ZigrootDirs::new();
     let cache_dir = dirs.cache_dir();
 
-    // Clean up environment variable
-    env::remove_var("ZIGROOT_CACHE_DIR");
+    // Restore original value
+    match original {
+        Some(val) => env::set_var("ZIGROOT_CACHE_DIR", val),
+        None => env::remove_var("ZIGROOT_CACHE_DIR"),
+    }
 
     assert_eq!(
         cache_dir,
@@ -138,6 +159,11 @@ fn test_cache_dir_env_override() {
 fn test_config_dir_env_override() {
     use zigroot::infra::dirs::ZigrootDirs;
 
+    let _guard = ENV_MUTEX.lock().unwrap();
+    
+    // Save original value
+    let original = env::var("ZIGROOT_CONFIG_DIR").ok();
+    
     let custom_path = "/tmp/zigroot-test-config";
 
     // Set environment variable
@@ -146,8 +172,11 @@ fn test_config_dir_env_override() {
     let dirs = ZigrootDirs::new();
     let config_dir = dirs.config_dir();
 
-    // Clean up environment variable
-    env::remove_var("ZIGROOT_CONFIG_DIR");
+    // Restore original value
+    match original {
+        Some(val) => env::set_var("ZIGROOT_CONFIG_DIR", val),
+        None => env::remove_var("ZIGROOT_CONFIG_DIR"),
+    }
 
     assert_eq!(
         config_dir,
@@ -162,6 +191,11 @@ fn test_config_dir_env_override() {
 fn test_data_dir_env_override() {
     use zigroot::infra::dirs::ZigrootDirs;
 
+    let _guard = ENV_MUTEX.lock().unwrap();
+    
+    // Save original value
+    let original = env::var("ZIGROOT_DATA_DIR").ok();
+    
     let custom_path = "/tmp/zigroot-test-data";
 
     // Set environment variable
@@ -170,8 +204,11 @@ fn test_data_dir_env_override() {
     let dirs = ZigrootDirs::new();
     let data_dir = dirs.data_dir();
 
-    // Clean up environment variable
-    env::remove_var("ZIGROOT_DATA_DIR");
+    // Restore original value
+    match original {
+        Some(val) => env::set_var("ZIGROOT_DATA_DIR", val),
+        None => env::remove_var("ZIGROOT_DATA_DIR"),
+    }
 
     assert_eq!(
         data_dir,
@@ -186,6 +223,13 @@ fn test_data_dir_env_override() {
 fn test_directories_include_zigroot_name() {
     use zigroot::infra::dirs::ZigrootDirs;
 
+    let _guard = ENV_MUTEX.lock().unwrap();
+    
+    // Save original values
+    let orig_cache = env::var("ZIGROOT_CACHE_DIR").ok();
+    let orig_config = env::var("ZIGROOT_CONFIG_DIR").ok();
+    let orig_data = env::var("ZIGROOT_DATA_DIR").ok();
+    
     // Clear any environment overrides
     env::remove_var("ZIGROOT_CACHE_DIR");
     env::remove_var("ZIGROOT_CONFIG_DIR");
@@ -196,6 +240,20 @@ fn test_directories_include_zigroot_name() {
     let cache_str = dirs.cache_dir().to_string_lossy().to_string();
     let config_str = dirs.config_dir().to_string_lossy().to_string();
     let data_str = dirs.data_dir().to_string_lossy().to_string();
+
+    // Restore original values
+    match orig_cache {
+        Some(val) => env::set_var("ZIGROOT_CACHE_DIR", val),
+        None => {}
+    }
+    match orig_config {
+        Some(val) => env::set_var("ZIGROOT_CONFIG_DIR", val),
+        None => {}
+    }
+    match orig_data {
+        Some(val) => env::set_var("ZIGROOT_DATA_DIR", val),
+        None => {}
+    }
 
     assert!(
         cache_str.contains("zigroot"),
@@ -217,12 +275,22 @@ fn test_directories_include_zigroot_name() {
 fn test_downloads_dir_under_data() {
     use zigroot::infra::dirs::ZigrootDirs;
 
+    let _guard = ENV_MUTEX.lock().unwrap();
+    
+    // Save original value
+    let orig_data = env::var("ZIGROOT_DATA_DIR").ok();
+    
     // Clear any environment overrides
     env::remove_var("ZIGROOT_DATA_DIR");
 
     let dirs = ZigrootDirs::new();
     let downloads_dir = dirs.downloads_dir();
     let data_dir = dirs.data_dir();
+
+    // Restore original value
+    if let Some(val) = orig_data {
+        env::set_var("ZIGROOT_DATA_DIR", val);
+    }
 
     assert!(
         downloads_dir.starts_with(&data_dir),
@@ -238,12 +306,22 @@ fn test_downloads_dir_under_data() {
 fn test_build_cache_dir_under_cache() {
     use zigroot::infra::dirs::ZigrootDirs;
 
+    let _guard = ENV_MUTEX.lock().unwrap();
+    
+    // Save original value
+    let orig_cache = env::var("ZIGROOT_CACHE_DIR").ok();
+    
     // Clear any environment overrides
     env::remove_var("ZIGROOT_CACHE_DIR");
 
     let dirs = ZigrootDirs::new();
     let build_cache_dir = dirs.build_cache_dir();
     let cache_dir = dirs.cache_dir();
+
+    // Restore original value
+    if let Some(val) = orig_cache {
+        env::set_var("ZIGROOT_CACHE_DIR", val);
+    }
 
     assert!(
         build_cache_dir.starts_with(&cache_dir),

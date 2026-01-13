@@ -40,7 +40,11 @@ pub struct OutputConfig {
 impl OutputConfig {
     /// Create a new output configuration
     pub fn new(quiet: bool, json: bool, verbose: u8) -> Self {
-        Self { quiet, json, verbose }
+        Self {
+            quiet,
+            json,
+            verbose,
+        }
     }
 
     /// Apply this configuration globally
@@ -287,7 +291,10 @@ impl BuildSummary {
                 message: "Build complete".to_string(),
                 data: Some(serde_json::to_value(self).unwrap_or_default()),
             };
-            println!("{}", serde_json::to_string_pretty(&output).unwrap_or_default());
+            println!(
+                "{}",
+                serde_json::to_string_pretty(&output).unwrap_or_default()
+            );
             return;
         }
 
@@ -339,8 +346,7 @@ pub fn format_size(bytes: u64) -> String {
 /// Error suggestion helper
 pub mod suggestions {
     use crate::error::{
-        BoardError, BuildError, DownloadError, InitError, PackageError, ResolverError,
-        ZigrootError,
+        BoardError, BuildError, DownloadError, InitError, PackageError, ResolverError, ZigrootError,
     };
 
     /// Get a suggestion for a given error
@@ -403,15 +409,15 @@ pub mod suggestions {
 
     fn get_package_suggestion(error: &PackageError) -> Option<String> {
         match error {
-            PackageError::NotFound { name } => {
-                Some(format!("Run 'zigroot search {name}' to find similar packages"))
-            }
+            PackageError::NotFound { name } => Some(format!(
+                "Run 'zigroot search {name}' to find similar packages"
+            )),
             PackageError::ChecksumMismatch { .. } => {
                 Some("Try 'zigroot fetch --force' to re-download".to_string())
             }
-            PackageError::MissingField { field, .. } => {
-                Some(format!("Add the '{field}' field to your package definition"))
-            }
+            PackageError::MissingField { field, .. } => Some(format!(
+                "Add the '{field}' field to your package definition"
+            )),
             PackageError::MultipleSourceTypes { .. } => {
                 Some("Specify only one source type: url, git, or sources".to_string())
             }
@@ -430,9 +436,9 @@ pub mod suggestions {
 
     fn get_board_suggestion(error: &BoardError) -> Option<String> {
         match error {
-            BoardError::NotFound { name } => {
-                Some(format!("Run 'zigroot search --boards {name}' to find similar boards"))
-            }
+            BoardError::NotFound { name } => Some(format!(
+                "Run 'zigroot search --boards {name}' to find similar boards"
+            )),
             BoardError::MissingField { field, .. } => {
                 Some(format!("Add the '{field}' field to your board definition"))
             }
@@ -472,9 +478,9 @@ pub mod suggestions {
 
     fn get_build_suggestion(error: &BuildError) -> Option<String> {
         match error {
-            BuildError::ToolchainNotFound { toolchain } => {
-                Some(format!("Install {toolchain} or run 'zigroot doctor' to check dependencies"))
-            }
+            BuildError::ToolchainNotFound { toolchain } => Some(format!(
+                "Install {toolchain} or run 'zigroot doctor' to check dependencies"
+            )),
             BuildError::ConfigError { .. } => {
                 Some("Check your zigroot.toml configuration".to_string())
             }
@@ -490,9 +496,9 @@ pub mod suggestions {
             ResolverError::Conflict { .. } => {
                 Some("Try updating packages or adjusting version constraints".to_string())
             }
-            ResolverError::MissingDependency { dependency, .. } => {
-                Some(format!("Run 'zigroot add {dependency}' to add the missing package"))
-            }
+            ResolverError::MissingDependency { dependency, .. } => Some(format!(
+                "Run 'zigroot add {dependency}' to add the missing package"
+            )),
         }
     }
 
@@ -501,9 +507,7 @@ pub mod suggestions {
             std::io::ErrorKind::PermissionDenied => {
                 Some("Check file permissions or run with appropriate privileges".to_string())
             }
-            std::io::ErrorKind::NotFound => {
-                Some("Ensure the file or directory exists".to_string())
-            }
+            std::io::ErrorKind::NotFound => Some("Ensure the file or directory exists".to_string()),
             std::io::ErrorKind::AlreadyExists => {
                 Some("The file or directory already exists".to_string())
             }
@@ -523,7 +527,10 @@ pub fn display_error(error: &anyhow::Error) {
                 "causes": error.chain().skip(1).map(|e| e.to_string()).collect::<Vec<_>>()
             }));
         }
-        eprintln!("{}", serde_json::to_string_pretty(&output).unwrap_or_default());
+        eprintln!(
+            "{}",
+            serde_json::to_string_pretty(&output).unwrap_or_default()
+        );
         return;
     }
 

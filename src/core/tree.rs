@@ -111,7 +111,9 @@ impl DependencyTree {
 
         for pkg in &self.packages {
             if !visited.contains(pkg) {
-                if let Some(cycle) = self.detect_cycle_dfs(pkg, &mut visited, &mut rec_stack, &mut path) {
+                if let Some(cycle) =
+                    self.detect_cycle_dfs(pkg, &mut visited, &mut rec_stack, &mut path)
+                {
                     return Some(cycle);
                 }
             }
@@ -134,7 +136,9 @@ impl DependencyTree {
         if let Some(deps) = self.dependencies.get(node) {
             for dep in deps {
                 if !visited.contains(&dep.target) {
-                    if let Some(cycle) = self.detect_cycle_dfs(&dep.target, visited, rec_stack, path) {
+                    if let Some(cycle) =
+                        self.detect_cycle_dfs(&dep.target, visited, rec_stack, path)
+                    {
                         return Some(cycle);
                     }
                 } else if rec_stack.contains(&dep.target) {
@@ -162,7 +166,10 @@ impl DependencyTree {
 
         // Check for cycles first
         if let Some(cycle) = self.detect_cycles() {
-            output.push_str(&format!("\n⚠ Circular dependency detected: {}\n", cycle.join(" -> ")));
+            output.push_str(&format!(
+                "\n⚠ Circular dependency detected: {}\n",
+                cycle.join(" -> ")
+            ));
         }
 
         for (i, root) in self.roots.iter().enumerate() {
@@ -203,7 +210,7 @@ impl DependencyTree {
                     DependencyType::Build => "[build]",
                     DependencyType::Runtime => "[runtime]",
                 };
-                
+
                 let dep_node = format!("{} {}", dep.target, dep_marker);
                 self.format_node(output, &dep_node, &child_prefix, is_last_dep, visited);
             }
@@ -256,7 +263,10 @@ impl DependencyTree {
         // Check for cycles involving this package
         if let Some(cycle) = self.detect_cycles() {
             if cycle.contains(&package.to_string()) {
-                output.push_str(&format!("\n⚠ Circular dependency detected: {}\n", cycle.join(" -> ")));
+                output.push_str(&format!(
+                    "\n⚠ Circular dependency detected: {}\n",
+                    cycle.join(" -> ")
+                ));
             }
         }
 
@@ -324,7 +334,11 @@ impl DependencyTree {
 }
 
 /// Display dependency tree for a project
-pub fn display_tree(project_dir: &Path, package: Option<&str>, graph_format: bool) -> Result<String, ZigrootError> {
+pub fn display_tree(
+    project_dir: &Path,
+    package: Option<&str>,
+    graph_format: bool,
+) -> Result<String, ZigrootError> {
     let manifest_path = project_dir.join("zigroot.toml");
 
     if !manifest_path.exists() {
@@ -333,8 +347,8 @@ pub fn display_tree(project_dir: &Path, package: Option<&str>, graph_format: boo
         });
     }
 
-    let manifest_content = std::fs::read_to_string(&manifest_path)
-        .map_err(|e| ZigrootError::Io { source: e })?;
+    let manifest_content =
+        std::fs::read_to_string(&manifest_path).map_err(|e| ZigrootError::Io { source: e })?;
 
     let manifest = Manifest::from_toml(&manifest_content)
         .map_err(|e| ZigrootError::ManifestParse { source: e })?;
@@ -344,11 +358,13 @@ pub fn display_tree(project_dir: &Path, package: Option<&str>, graph_format: boo
     // If a specific package is requested, filter the tree
     if let Some(pkg_name) = package {
         if !tree.packages().contains(pkg_name) {
-            return Err(ZigrootError::Package(crate::error::PackageError::NotFound {
-                name: pkg_name.to_string(),
-            }));
+            return Err(ZigrootError::Package(
+                crate::error::PackageError::NotFound {
+                    name: pkg_name.to_string(),
+                },
+            ));
         }
-        
+
         if graph_format {
             Ok(tree.format_dot_for_package(pkg_name))
         } else {
@@ -378,12 +394,13 @@ mod tests {
         tree.packages.insert("app".to_string());
         tree.packages.insert("lib".to_string());
         tree.roots.push("app".to_string());
-        tree.dependencies.insert("app".to_string(), vec![
-            DependencyEdge {
+        tree.dependencies.insert(
+            "app".to_string(),
+            vec![DependencyEdge {
                 target: "lib".to_string(),
                 dep_type: DependencyType::Build,
-            }
-        ]);
+            }],
+        );
         tree.dependencies.insert("lib".to_string(), Vec::new());
 
         let output = tree.format_tree();
@@ -398,12 +415,13 @@ mod tests {
         tree.packages.insert("app".to_string());
         tree.packages.insert("lib".to_string());
         tree.roots.push("app".to_string());
-        tree.dependencies.insert("app".to_string(), vec![
-            DependencyEdge {
+        tree.dependencies.insert(
+            "app".to_string(),
+            vec![DependencyEdge {
                 target: "lib".to_string(),
                 dep_type: DependencyType::Build,
-            }
-        ]);
+            }],
+        );
 
         let output = tree.format_dot();
         assert!(output.contains("digraph"));
@@ -418,15 +436,27 @@ mod tests {
         tree.packages.insert("a".to_string());
         tree.packages.insert("b".to_string());
         tree.packages.insert("c".to_string());
-        tree.dependencies.insert("a".to_string(), vec![
-            DependencyEdge { target: "b".to_string(), dep_type: DependencyType::Build }
-        ]);
-        tree.dependencies.insert("b".to_string(), vec![
-            DependencyEdge { target: "c".to_string(), dep_type: DependencyType::Build }
-        ]);
-        tree.dependencies.insert("c".to_string(), vec![
-            DependencyEdge { target: "a".to_string(), dep_type: DependencyType::Build }
-        ]);
+        tree.dependencies.insert(
+            "a".to_string(),
+            vec![DependencyEdge {
+                target: "b".to_string(),
+                dep_type: DependencyType::Build,
+            }],
+        );
+        tree.dependencies.insert(
+            "b".to_string(),
+            vec![DependencyEdge {
+                target: "c".to_string(),
+                dep_type: DependencyType::Build,
+            }],
+        );
+        tree.dependencies.insert(
+            "c".to_string(),
+            vec![DependencyEdge {
+                target: "a".to_string(),
+                dep_type: DependencyType::Build,
+            }],
+        );
 
         let cycle = tree.detect_cycles();
         assert!(cycle.is_some());
@@ -438,12 +468,20 @@ mod tests {
         tree.packages.insert("a".to_string());
         tree.packages.insert("b".to_string());
         tree.packages.insert("c".to_string());
-        tree.dependencies.insert("a".to_string(), vec![
-            DependencyEdge { target: "b".to_string(), dep_type: DependencyType::Build }
-        ]);
-        tree.dependencies.insert("b".to_string(), vec![
-            DependencyEdge { target: "c".to_string(), dep_type: DependencyType::Build }
-        ]);
+        tree.dependencies.insert(
+            "a".to_string(),
+            vec![DependencyEdge {
+                target: "b".to_string(),
+                dep_type: DependencyType::Build,
+            }],
+        );
+        tree.dependencies.insert(
+            "b".to_string(),
+            vec![DependencyEdge {
+                target: "c".to_string(),
+                dep_type: DependencyType::Build,
+            }],
+        );
         tree.dependencies.insert("c".to_string(), Vec::new());
 
         let cycle = tree.detect_cycles();
@@ -457,16 +495,19 @@ mod tests {
         tree.packages.insert("build-lib".to_string());
         tree.packages.insert("runtime-lib".to_string());
         tree.roots.push("app".to_string());
-        tree.dependencies.insert("app".to_string(), vec![
-            DependencyEdge {
-                target: "build-lib".to_string(),
-                dep_type: DependencyType::Build,
-            },
-            DependencyEdge {
-                target: "runtime-lib".to_string(),
-                dep_type: DependencyType::Runtime,
-            },
-        ]);
+        tree.dependencies.insert(
+            "app".to_string(),
+            vec![
+                DependencyEdge {
+                    target: "build-lib".to_string(),
+                    dep_type: DependencyType::Build,
+                },
+                DependencyEdge {
+                    target: "runtime-lib".to_string(),
+                    dep_type: DependencyType::Runtime,
+                },
+            ],
+        );
 
         let output = tree.format_tree();
         assert!(output.contains("[build]"));
@@ -486,12 +527,13 @@ mod tests {
         tree.packages.insert("other".to_string());
         tree.roots.push("app".to_string());
         tree.roots.push("other".to_string());
-        tree.dependencies.insert("app".to_string(), vec![
-            DependencyEdge {
+        tree.dependencies.insert(
+            "app".to_string(),
+            vec![DependencyEdge {
                 target: "lib".to_string(),
                 dep_type: DependencyType::Build,
-            }
-        ]);
+            }],
+        );
         tree.dependencies.insert("lib".to_string(), Vec::new());
         tree.dependencies.insert("other".to_string(), Vec::new());
 
@@ -516,12 +558,13 @@ mod tests {
         tree.packages.insert("other".to_string());
         tree.roots.push("app".to_string());
         tree.roots.push("other".to_string());
-        tree.dependencies.insert("app".to_string(), vec![
-            DependencyEdge {
+        tree.dependencies.insert(
+            "app".to_string(),
+            vec![DependencyEdge {
                 target: "lib".to_string(),
                 dep_type: DependencyType::Build,
-            }
-        ]);
+            }],
+        );
         tree.dependencies.insert("lib".to_string(), Vec::new());
         tree.dependencies.insert("other".to_string(), Vec::new());
 
@@ -547,12 +590,20 @@ mod tests {
         tree.packages.insert("b".to_string());
         tree.packages.insert("c".to_string());
         tree.packages.insert("d".to_string());
-        tree.dependencies.insert("a".to_string(), vec![
-            DependencyEdge { target: "b".to_string(), dep_type: DependencyType::Build }
-        ]);
-        tree.dependencies.insert("b".to_string(), vec![
-            DependencyEdge { target: "c".to_string(), dep_type: DependencyType::Build }
-        ]);
+        tree.dependencies.insert(
+            "a".to_string(),
+            vec![DependencyEdge {
+                target: "b".to_string(),
+                dep_type: DependencyType::Build,
+            }],
+        );
+        tree.dependencies.insert(
+            "b".to_string(),
+            vec![DependencyEdge {
+                target: "c".to_string(),
+                dep_type: DependencyType::Build,
+            }],
+        );
         tree.dependencies.insert("c".to_string(), Vec::new());
         tree.dependencies.insert("d".to_string(), Vec::new());
 

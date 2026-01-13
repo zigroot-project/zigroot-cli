@@ -374,9 +374,8 @@ fn test_flash_yes_skips_confirmation() {
     let stdout = String::from_utf8_lossy(&output.stdout);
 
     // Should not ask for confirmation (might fail for other reasons like missing device)
-    let asks_confirmation = stdout.contains("confirm")
-        || stdout.contains("y/n")
-        || stdout.contains("Are you sure");
+    let asks_confirmation =
+        stdout.contains("confirm") || stdout.contains("y/n") || stdout.contains("Are you sure");
 
     assert!(
         !asks_confirmation,
@@ -431,7 +430,10 @@ fn test_flash_device_uses_specified_path() {
     project.create_file("output/rootfs.img", "dummy image content");
 
     // Try to flash with a specific device path
-    let output = run_flash(&project, &["sd-card", "--device", "/dev/test-device", "--yes"]);
+    let output = run_flash(
+        &project,
+        &["sd-card", "--device", "/dev/test-device", "--yes"],
+    );
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     let stdout = String::from_utf8_lossy(&output.stdout);

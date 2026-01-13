@@ -28,11 +28,7 @@ fn has_valid_board_template(project: &TestProject, name: &str) -> bool {
 
 /// Helper to check if board.toml has required fields
 fn has_valid_board_toml(project: &TestProject, name: &str) -> bool {
-    let board_toml_path = project
-        .path()
-        .join("boards")
-        .join(name)
-        .join("board.toml");
+    let board_toml_path = project.path().join("boards").join(name).join("board.toml");
 
     if !board_toml_path.exists() {
         return false;
