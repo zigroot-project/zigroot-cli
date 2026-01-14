@@ -1,0 +1,242 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+          - os: ubuntu-latest
+            target: armv7-unknown-linux-musleabihf
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+          - os: macos-latest
+            target: aarch64-apple-darwin
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install cross-compilation tools (aarch64)
+        if: contains(matrix.target, 'aarch64-unknown-linux')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+          mkdir -p .cargo
+          cat >> .cargo/config.toml << EOF
+          [target.aarch64-unknown-linux-gnu]
+          linker = "aarch64-linux-gnu-gcc"
+          [target.aarch64-unknown-linux-musl]
+          linker = "aarch64-linux-gnu-gcc"
+          EOF
+
+      - name: Install cross-compilation tools (armv7)
+        if: matrix.target == 'armv7-unknown-linux-musleabihf'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-linux-gnueabihf musl-tools
+          mkdir -p .cargo
+          cat >> .cargo/config.toml << EOF
+          [target.armv7-unknown-linux-musleabihf]
+          linker = "arm-linux-gnueabihf-gcc"
+          EOF
+
+      - name: Install musl tools
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Create archive
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          BIN_NAME=zigroot
+          ARCHIVE="${BIN_NAME}-${VERSION}-${{ matrix.target }}.tar.gz"
+          cp target/${{ matrix.target }}/release/${BIN_NAME} .
+          chmod +x "${BIN_NAME}"
+          tar czf "$ARCHIVE" "${BIN_NAME}" README.md LICENSE
+          echo "ARCHIVE=$ARCHIVE" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ env.ARCHIVE }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          if [[ "$VERSION" =~ (alpha|beta|rc|-) ]]; then
+            IS_PRERELEASE=true
+          else
+            IS_PRERELEASE=false
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${IS_PRERELEASE}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir release-assets
+          find artifacts -name "*.tar.gz" -exec cp {} release-assets/ \;
+
+      - name: Generate changelog
+        run: |
+          cargo install git-cliff
+          git cliff --tag v${{ steps.version.outputs.version }} --output RELEASE_NOTES.md
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          prerelease: ${{ steps.version.outputs.is_prerelease == 'true' }}
+          body_path: RELEASE_NOTES.md
+
+
+  publish-crates:
+    name: Publish to crates.io
+    needs: release
+    if: needs.release.outputs.is_prerelease == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  publish-homebrew:
+    name: Update Homebrew tap
+    needs: release
+    if: needs.release.outputs.is_prerelease == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Calculate checksums
+        id: checksums
+        run: |
+          VERSION=${{ needs.release.outputs.version }}
+          X64_SHA=$(sha256sum artifacts/x86_64-apple-darwin/zigroot-${VERSION}-x86_64-apple-darwin.tar.gz | cut -d' ' -f1)
+          ARM64_SHA=$(sha256sum artifacts/aarch64-apple-darwin/zigroot-${VERSION}-aarch64-apple-darwin.tar.gz | cut -d' ' -f1)
+          LINUX_X64_SHA=$(sha256sum artifacts/x86_64-unknown-linux-gnu/zigroot-${VERSION}-x86_64-unknown-linux-gnu.tar.gz | cut -d' ' -f1)
+          LINUX_ARM64_SHA=$(sha256sum artifacts/aarch64-unknown-linux-gnu/zigroot-${VERSION}-aarch64-unknown-linux-gnu.tar.gz | cut -d' ' -f1)
+          echo "x64_sha=${X64_SHA}" >> "$GITHUB_OUTPUT"
+          echo "arm64_sha=${ARM64_SHA}" >> "$GITHUB_OUTPUT"
+          echo "linux_x64_sha=${LINUX_X64_SHA}" >> "$GITHUB_OUTPUT"
+          echo "linux_arm64_sha=${LINUX_ARM64_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Update Homebrew tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION=${{ needs.release.outputs.version }}
+          X64_SHA=${{ steps.checksums.outputs.x64_sha }}
+          ARM64_SHA=${{ steps.checksums.outputs.arm64_sha }}
+          LINUX_X64_SHA=${{ steps.checksums.outputs.linux_x64_sha }}
+          LINUX_ARM64_SHA=${{ steps.checksums.outputs.linux_arm64_sha }}
+
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/zigroot-project/homebrew-tap.git"
+          cd homebrew-tap
+          mkdir -p Formula
+
+          cat > Formula/zigroot.rb << EOF
+          class Zigroot < Formula
+            desc "Modern embedded Linux rootfs builder - npm for embedded systems"
+            homepage "https://github.com/zigroot-project/zigroot-cli"
+            version "${VERSION}"
+            license "GPL-3.0-or-later"
+
+            on_macos do
+              if Hardware::CPU.intel?
+                url "https://github.com/zigroot-project/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-x86_64-apple-darwin.tar.gz"
+                sha256 "${X64_SHA}"
+              else
+                url "https://github.com/zigroot-project/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-aarch64-apple-darwin.tar.gz"
+                sha256 "${ARM64_SHA}"
+              end
+            end
+
+            on_linux do
+              if Hardware::CPU.intel?
+                url "https://github.com/zigroot-project/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+                sha256 "${LINUX_X64_SHA}"
+              else
+                url "https://github.com/zigroot-project/zigroot-cli/releases/download/v${VERSION}/zigroot-${VERSION}-aarch64-unknown-linux-gnu.tar.gz"
+                sha256 "${LINUX_ARM64_SHA}"
+              end
+            end
+
+            def install
+              bin.install "zigroot"
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/zigroot --version")
+            end
+          end
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/zigroot.rb
+          git commit -m "Update zigroot to ${VERSION}"
+          git push
+
+  publish-aur:
+    name: Publish to AUR
+    needs: release
+    if: needs.release.outputs.is_prerelease == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Update PKGBUILD version
+        run: |
+          sed -i "s/^pkgver=.*/pkgver=${{ needs.release.outputs.version }}/" aur/PKGBUILD
+          sed -i "s/^pkgrel=.*/pkgrel=1/" aur/PKGBUILD
+
+      - name: Publish to AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
+        with:
+          pkgname: zigroot
+          pkgbuild: ./aur/PKGBUILD
+          commit_username: zigroot-project
+          commit_email: aur@zigroot-project.github.io
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: "Update to ${{ needs.release.outputs.version }}"
+          ssh_keyscan_types: rsa,ecdsa,ed25519

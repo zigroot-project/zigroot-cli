@@ -3,10 +3,16 @@ name = "zigroot"
 version = "0.1.0"
 edition = "2021"
 description = "Modern embedded Linux rootfs builder - npm for embedded systems"
-license = "MIT"
+license = "GPL-3.0-or-later"
 repository = "https://github.com/zigroot-project/zigroot-cli"
+homepage = "https://github.com/zigroot-project/zigroot-cli"
 keywords = ["embedded", "linux", "rootfs", "cross-compilation", "zig"]
 categories = ["command-line-utilities", "development-tools"]
+authors = ["Fabian Schmieder"]
+rust-version = "1.75"
+
+[build-dependencies]
+vergen-gitcl = { version = "1", features = ["build", "cargo", "rustc"] }
 
 [dependencies]
 # CLI

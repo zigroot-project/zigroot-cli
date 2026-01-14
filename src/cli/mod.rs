@@ -12,12 +12,24 @@ use clap::Parser;
 
 use commands::Commands;
 
+/// Build version string with git info
+const fn version_string() -> &'static str {
+    concat!(
+        env!("CARGO_PKG_VERSION"),
+        " (",
+        env!("VERGEN_GIT_SHA"),
+        ", ",
+        env!("VERGEN_BUILD_TIMESTAMP"),
+        ")"
+    )
+}
+
 /// Zigroot - Modern embedded Linux rootfs builder
 ///
 /// Build embedded Linux root filesystems using Zig's cross-compilation.
 #[derive(Parser, Debug)]
 #[command(name = "zigroot")]
-#[command(author, version, about, long_about = None)]
+#[command(author, version = version_string(), about, long_about = None)]
 #[command(propagate_version = true)]
 pub struct Cli {
     /// Enable verbose output (-v for info, -vv for debug)
